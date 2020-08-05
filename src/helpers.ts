@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
+import _ from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function errorString(e: any) {
@@ -19,6 +20,14 @@ export function sleep(ms: number) {
 // returns UTC clock time in seconds (similar to unix timestamp / Ethereum block time / RefTime)
 export function getCurrentClockTime() {
   return Math.round(new Date().getTime() / 1000);
+}
+
+export function isStaleTime(referenceTimeSeconds: number | string, differenceSeconds: number): boolean {
+  const currentTime = getCurrentClockTime();
+  if (_.isString(referenceTimeSeconds)) {
+    referenceTimeSeconds = Math.round(new Date(referenceTimeSeconds).valueOf() / 1000);
+  }
+  return currentTime > (referenceTimeSeconds + differenceSeconds);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
