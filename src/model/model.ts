@@ -18,7 +18,7 @@ export interface VirtualChain {
   Name: string;
   IsCertified: boolean;
   IsCanary: boolean;
-  GenesisTimeSeconds: number ;
+  GenesisTimeSeconds: number;
   ExpirationTimeSeconds: number;
   SubscriptionStatus: HealthLevel;
   SubscriptionStatusToolTip: string;
@@ -30,9 +30,9 @@ export interface VirtualChainUrls {
   Subscription: string;
 }
 
-export class Service { 
-  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix: string){}
-  static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/'); 
+export class Service {
+  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix: string) {}
+  static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/');
   static Boyar = new Service('Boyar', 'boyar', 'https://github.com/orbs-network/boyarin/tree/');
   static Signer = new Service('Signer', 'signer', 'https://github.com/orbs-network/signer-service/tree/');
   static EthereumWriter = new Service('EthereumWriter', 'ethereum-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
@@ -41,7 +41,7 @@ export class Service {
 }
 
 export interface Guardians {
-  [key: string]: Guardian
+  [key: string]: Guardian;
 }
 
 export interface Guardian {
@@ -53,7 +53,7 @@ export interface Guardian {
   IsCertified: boolean;
   OrbsAddress: string;
   NodeManagementURL: string;
-  NodeVirtualChains: NodeVirtualChains; 
+  NodeVirtualChains: NodeVirtualChains;
   NodeServices: NodeServices;
   NodeReputation: NodeReputation;
 }
@@ -64,41 +64,79 @@ export interface NodeServiceUrls {
   Version: string;
 }
 
-export interface NodeVirtualChainUrls extends NodeServiceUrls{
+export interface NodeVirtualChainUrls extends NodeServiceUrls {
   Management: string;
 }
 
 export interface NodeVirtualChains {
-  [key: string]: NodeVirtualChain
+  [key: string]: NodeVirtualChain;
 }
 
 export interface NodeVirtualChain {
-  BlockHeight : number;
-  BlockHeightToolTip: string;
-  Version: string;
-  Commit: string;
-  ProtocolVersion : number;
   StatusMsg: string;
-  ErrorMsg: string;
-  Timestamp: string;
   Status: HealthLevel;
   StatusToolTip: string;
+  Timestamp: string;
+  Version: string;
+  BlockHeight: number;
+  BlockHeightToolTip: string;
+  ProtocolVersion: number;
   URLs: NodeVirtualChainUrls;
 }
 
+export function nodeVirtualChainBuilder(
+  urls: NodeVirtualChainUrls,
+  statusMsg: string = '',
+  status: HealthLevel = HealthLevel.Green,
+  statusTooltip: string = '',
+  timestamp: string = '',
+  version: string = '',
+  blockHeight: number = 0,
+  blockHeightToolTip: string = '',
+  protocolVersion: number = 0
+): NodeVirtualChain {
+  return {
+    StatusMsg: statusMsg,
+    Status: status,
+    StatusToolTip: statusTooltip,
+    Timestamp: timestamp,
+    Version: version,
+    BlockHeight: blockHeight,
+    BlockHeightToolTip: blockHeightToolTip,
+    ProtocolVersion: protocolVersion,
+    URLs: urls,
+  };
+}
+
 export interface NodeServices {
-  [key: string]: NodeService
+  [key: string]: NodeService;
 }
 
 export interface NodeService {
-  Version: string;
-  Commit: string;
   StatusMsg: string;
-  ErrorMsg: string;
-  Timestamp: string;
   Status: HealthLevel;
   StatusToolTip: string;
+  Timestamp: string;
+  Version: string;
   URLs: NodeServiceUrls;
+}
+
+export function nodeServiceBuilder(
+  urls: NodeServiceUrls,
+  statusMsg: string = '',
+  status: HealthLevel = HealthLevel.Green,
+  statusTooltip: string = '',
+  timestamp: string = '',
+  version: string = ''
+): NodeService {
+  return {
+    StatusMsg: statusMsg,
+    Status: status,
+    StatusToolTip: statusTooltip,
+    Timestamp: timestamp,
+    Version: version,
+    URLs: urls,
+  };
 }
 
 export interface NodeReputation {
@@ -109,9 +147,9 @@ export interface NodeReputation {
 }
 
 export interface NodeVirtualChainReputations {
-  [key: string]: number
+  [key: string]: number;
 }
 
 export interface NodeVirtualChainBadReputations {
-  [key: string]: number
+  [key: string]: number;
 }
