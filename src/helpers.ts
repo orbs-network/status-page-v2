@@ -27,7 +27,7 @@ export function isStaleTime(referenceTimeSeconds: number | string, differenceSec
   if (_.isString(referenceTimeSeconds)) {
     referenceTimeSeconds = Math.round(new Date(referenceTimeSeconds).valueOf() / 1000);
   }
-  return currentTime > (referenceTimeSeconds + differenceSeconds);
+  return currentTime > referenceTimeSeconds + differenceSeconds;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

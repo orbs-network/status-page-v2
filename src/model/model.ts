@@ -18,7 +18,7 @@ export interface VirtualChain {
   Name: string;
   IsCertified: boolean;
   IsCanary: boolean;
-  GenesisTimeSeconds: number ;
+  GenesisTimeSeconds: number;
   ExpirationTimeSeconds: number;
   SubscriptionStatus: HealthLevel;
   SubscriptionStatusToolTip: string;
@@ -30,18 +30,26 @@ export interface VirtualChainUrls {
   Subscription: string;
 }
 
-export class Service { 
-  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix: string){}
-  static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/'); 
+export class Service {
+  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix: string) {}
+  static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/');
   static Boyar = new Service('Boyar', 'boyar', 'https://github.com/orbs-network/boyarin/tree/');
   static Signer = new Service('Signer', 'signer', 'https://github.com/orbs-network/signer-service/tree/');
-  static EthereumWriter = new Service('EthereumWriter', 'ethereum-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
+  static EthereumWriter = new Service(
+    'EthereumWriter',
+    'ethereum-writer',
+    'https://github.com/orbs-network/ethereum-writer/tree/'
+  );
   static Rewards = new Service('Rewards', 'rewards-service', 'https://github.com/orbs-network/rewards-service/tree/');
-  static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
+  static Management = new Service(
+    'Management',
+    'management-service',
+    'https://github.com/orbs-network/management-service/tree/'
+  );
 }
 
 export interface Guardians {
-  [key: string]: Guardian
+  [key: string]: Guardian;
 }
 
 export interface Guardian {
@@ -53,7 +61,7 @@ export interface Guardian {
   IsCertified: boolean;
   OrbsAddress: string;
   NodeManagementURL: string;
-  NodeVirtualChains: NodeVirtualChains; 
+  NodeVirtualChains: NodeVirtualChains;
   NodeServices: NodeServices;
   NodeReputation: NodeReputation;
 }
@@ -64,20 +72,20 @@ export interface NodeServiceUrls {
   Version: string;
 }
 
-export interface NodeVirtualChainUrls extends NodeServiceUrls{
+export interface NodeVirtualChainUrls extends NodeServiceUrls {
   Management: string;
 }
 
 export interface NodeVirtualChains {
-  [key: string]: NodeVirtualChain
+  [key: string]: NodeVirtualChain;
 }
 
 export interface NodeVirtualChain {
-  BlockHeight : number;
+  BlockHeight: number;
   BlockHeightToolTip: string;
   Version: string;
   Commit: string;
-  ProtocolVersion : number;
+  ProtocolVersion: number;
   StatusMsg: string;
   ErrorMsg: string;
   Timestamp: string;
@@ -87,7 +95,7 @@ export interface NodeVirtualChain {
 }
 
 export interface NodeServices {
-  [key: string]: NodeService
+  [key: string]: NodeService;
 }
 
 export interface NodeService {
@@ -109,9 +117,9 @@ export interface NodeReputation {
 }
 
 export interface NodeVirtualChainReputations {
-  [key: string]: number
+  [key: string]: number;
 }
 
 export interface NodeVirtualChainBadReputations {
-  [key: string]: number
+  [key: string]: number;
 }
