@@ -81,17 +81,39 @@ export interface NodeVirtualChains {
 }
 
 export interface NodeVirtualChain {
-  BlockHeight: number;
-  BlockHeightToolTip: string;
-  Version: string;
-  Commit: string;
-  ProtocolVersion: number;
   StatusMsg: string;
-  ErrorMsg: string;
-  Timestamp: string;
   Status: HealthLevel;
   StatusToolTip: string;
+  Timestamp: string;
+  Version: string;
+  BlockHeight: number;
+  BlockHeightToolTip: string;
+  ProtocolVersion: number;
   URLs: NodeVirtualChainUrls;
+}
+
+export function nodeVirtualChainBuilder(
+  urls: NodeVirtualChainUrls,
+  statusMsg: string = '', 
+  status: HealthLevel = HealthLevel.Green,
+  statusTooltip: string = '',
+  timestamp: string = '', 
+  version: string = '',
+  blockHeight: number = 0,
+  blockHeightToolTip: string = '',
+  protocolVersion: number = 0,
+): NodeVirtualChain {
+  return {
+    StatusMsg: statusMsg,
+    Status: status,
+    StatusToolTip: statusTooltip,
+    Timestamp: timestamp,
+    Version: version,
+    BlockHeight: blockHeight,
+    BlockHeightToolTip: blockHeightToolTip,
+    ProtocolVersion: protocolVersion,
+    URLs: urls,
+  };
 }
 
 export interface NodeServices {
@@ -99,14 +121,30 @@ export interface NodeServices {
 }
 
 export interface NodeService {
-  Version: string;
-  Commit: string;
   StatusMsg: string;
-  ErrorMsg: string;
-  Timestamp: string;
   Status: HealthLevel;
   StatusToolTip: string;
+  Timestamp: string;
+  Version: string;
   URLs: NodeServiceUrls;
+}
+
+export function nodeServiceBuilder(
+  urls: NodeServiceUrls,
+  statusMsg: string = '', 
+  status: HealthLevel = HealthLevel.Green,
+  statusTooltip: string = '',
+  timestamp: string = '', 
+  version: string = ''
+): NodeService {
+  return {
+    StatusMsg: statusMsg,
+    Status: status,
+    StatusToolTip: statusTooltip,
+    Timestamp: timestamp,
+    Version: version,
+    URLs: urls,
+  };
 }
 
 export interface NodeReputation {

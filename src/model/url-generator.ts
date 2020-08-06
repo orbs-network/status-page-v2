@@ -9,7 +9,7 @@ export function generateVirtualChainUrls(vcId: string): VirtualChainUrls {
   };
 }
 
-const StatusSuffix = '/status';
+export const StatusSuffix = '/status';
 const LogsSuffix = '/logs';
 
 export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirtualChainUrls {
