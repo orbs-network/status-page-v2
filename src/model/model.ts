@@ -94,14 +94,14 @@ export interface NodeVirtualChain {
 
 export function nodeVirtualChainBuilder(
   urls: NodeVirtualChainUrls,
-  statusMsg: string = '', 
+  statusMsg: string = '',
   status: HealthLevel = HealthLevel.Green,
   statusTooltip: string = '',
-  timestamp: string = '', 
+  timestamp: string = '',
   version: string = '',
   blockHeight: number = 0,
   blockHeightToolTip: string = '',
-  protocolVersion: number = 0,
+  protocolVersion: number = 0
 ): NodeVirtualChain {
   return {
     StatusMsg: statusMsg,
@@ -131,10 +131,10 @@ export interface NodeService {
 
 export function nodeServiceBuilder(
   urls: NodeServiceUrls,
-  statusMsg: string = '', 
+  statusMsg: string = '',
   status: HealthLevel = HealthLevel.Green,
   statusTooltip: string = '',
-  timestamp: string = '', 
+  timestamp: string = '',
   version: string = ''
 ): NodeService {
   return {

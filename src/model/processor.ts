@@ -5,11 +5,7 @@ import * as Logger from '../logger';
 import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder } from './model';
 import * as Public from './processor-public';
 import * as Private from './processor-private';
-import {
-  generateNodeVirtualChainUrls,
-  generateNodeServiceUrls,
-  updateNodeServiceUrlsWithVersion,
-} from './url-generator';
+import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
 
 export class Processor {
   private model = new Model();

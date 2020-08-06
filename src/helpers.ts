@@ -36,7 +36,7 @@ export type JsonResponse = any;
 export async function fetchJson(url: string) {
   return await retry(
     async () => {
-      const response = await fetch(url, {timeout: 15000});
+      const response = await fetch(url, { timeout: 15000 });
       const body = await response.text();
       try {
         return JSON.parse(body);
@@ -45,5 +45,5 @@ export async function fetchJson(url: string) {
       }
     },
     { retries: 3, delay: 300 }
-  ); 
+  );
 }

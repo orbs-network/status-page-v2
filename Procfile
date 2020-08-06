@@ -1,2 +1,2 @@
 // Procfile
-web:ts-node/src/main.ts
+web: node --async-stack-traces ./dist/main.js
