@@ -110,14 +110,10 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
         if (_.has(committeeMembers, nodeId)) {
           committeeMembers[nodeId].NodeReputation.NodeVirtualChainReputations[vcId] = reputation;
         } else {
-          Logger.error(
-            `While calculating reputations, a node EthAddress ${nodeId} was found, that is not a committee member.`
-          );
+          Logger.error(`While calculating reputations, a node EthAddress ${nodeId} was found, that is not a committee member.`);
         }
       } else {
-        Logger.error(
-          `While calculating reputations, a node OrbsAddress ${orbsAddress} was found, that is not a committee member.`
-        );
+        Logger.error(`While calculating reputations, a node OrbsAddress ${orbsAddress} was found, that is not a committee member.`);
       }
     });
   });
@@ -130,9 +126,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
         vcBadRep[vcId] = badRep;
       });
     } else {
-      Logger.error(
-        `While calculating bad reputations, a node address ${nodeId} was found, that is not a committee member.`
-      );
+      Logger.error(`While calculating bad reputations, a node address ${nodeId} was found, that is not a committee member.`);
     }
   });
 

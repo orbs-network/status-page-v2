@@ -35,17 +35,9 @@ export class Service {
   static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/');
   static Boyar = new Service('Boyar', 'boyar', 'https://github.com/orbs-network/boyarin/tree/');
   static Signer = new Service('Signer', 'signer', 'https://github.com/orbs-network/signer-service/tree/');
-  static EthereumWriter = new Service(
-    'EthereumWriter',
-    'ethereum-writer',
-    'https://github.com/orbs-network/ethereum-writer/tree/'
-  );
+  static EthereumWriter = new Service('EthereumWriter', 'ethereum-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
   static Rewards = new Service('Rewards', 'rewards-service', 'https://github.com/orbs-network/rewards-service/tree/');
-  static Management = new Service(
-    'Management',
-    'management-service',
-    'https://github.com/orbs-network/management-service/tree/'
-  );
+  static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
 }
 
 export interface Guardians {
