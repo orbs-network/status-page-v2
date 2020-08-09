@@ -10,7 +10,7 @@ export interface Configuration {
 export enum NetworkType {
   Public = 'public',
   Private = 'private',
-} 
+}
 
 export const defaultConfiguration = {
   Port: process.env.PORT || 80,
