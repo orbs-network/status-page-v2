@@ -13,7 +13,7 @@ export enum NetworkType {
 }
 
 export const defaultConfiguration = {
-  Port: process.env.PORT || 80,
+  Port: 80,
   ProcessorPollTimeSeconds: 5 * 60,
   NetworkType: NetworkType.Public,
   RootNodeEndpoint: 'http://34.255.138.28',
