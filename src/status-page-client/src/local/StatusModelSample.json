@@ -4,7 +4,7 @@
   "VirtualChains": [
     {
       "Id": "1000000",
-      "Name": "",
+      "Name": "Ahla VC",
       "IsCanary": false,
       "IsCertified": false,
       "GenesisTimeSeconds": 1595878886,
