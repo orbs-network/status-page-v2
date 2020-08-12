@@ -64,23 +64,15 @@ export class Processor {
     try {
       const vcStatusData = await fetchJson(urls.Status);
 
-      const versionTag = vcStatusData.Payload['Version.Semantic'].Value || ''; //vcStatusData.Payload?.Version?.Semantic
+      const versionTag = vcStatusData.Payload?.Version?.Semantic || ''; 
       updateNodeServiceUrlsWithVersion(urls, Service.VC.RepositoryPrefix, versionTag);
 
       const errMsg = vcStatusData?.Error || '';
       const timestamp = vcStatusData.Timestamp || '';
-      let healthLevel = HealthLevel.Green;
-      let healthLevelToolTip = '';
-      if (errMsg !== '') {
-        healthLevel = HealthLevel.Red;
-        healthLevelToolTip = errMsg;
-      } else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
-        healthLevel = HealthLevel.Yellow;
-        healthLevelToolTip = `Information is stale, was update on ${timestamp}`;
-      }
+      let { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
-      const inOrderBlockHeight = vcStatusData.Payload['BlockStorage.BlockHeight'].Value || 0; //vcStatusData.Payload?.BlockStorage?.InOrderBlock?.BlockHeight
-      const topBlockHeight = vcStatusData.Payload['BlockStorage.BlockHeight'].Value || 0; //vcStatusData.Payload?.BlockStorage?.TopBlock?.BlockHeight
+      const inOrderBlockHeight = vcStatusData.Payload?.BlockStorage?.InOrderBlock?.BlockHeight || 0;
+      const topBlockHeight = vcStatusData.Payload?.BlockStorage?.TopBlock?.BlockHeight || 0; //
       const blockToolTip = topBlockHeight === inOrderBlockHeight ? '' : `Synchronizing to reach ${topBlockHeight}`;
 
       return nodeVirtualChainBuilder(
@@ -92,7 +84,7 @@ export class Processor {
         versionTag,
         inOrderBlockHeight,
         blockToolTip,
-        vcStatusData.Payload['Management.Protocol.Current'].Value || 0, //vcStatusData.Payload?.Management?.Protocol?.Current
+        vcStatusData.Payload?.Management?.Protocol?.Current || 0,
       );
     } catch (err) {
       return nodeVirtualChainBuilder(urls, `${err}`, HealthLevel.Red, `${err}`);
@@ -123,15 +115,8 @@ export class Processor {
 
       const errMsg = data?.Error || '';
       const timestamp = data.Timestamp || '';
-      let healthLevel = HealthLevel.Green;
-      let healthLevelToolTip = '';
-      if (errMsg !== '') {
-        healthLevel = HealthLevel.Red;
-        healthLevelToolTip = errMsg;
-      } else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
-        healthLevel = HealthLevel.Yellow;
-        healthLevelToolTip = `Information is stale, was update on ${timestamp}`;
-      }
+      let { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
+
       return nodeServiceBuilder(
         urls,
         data.Status || '',
@@ -143,5 +128,19 @@ export class Processor {
     } catch (err) {
       return nodeServiceBuilder(urls, `${err}`, HealthLevel.Red, `${err}`);
     }
+  }
+
+  private healthLevel(errMsg: string, timestamp: string) {
+    let healthLevel = HealthLevel.Green;
+    let healthLevelToolTip = '';
+    if (errMsg !== '') {
+      healthLevel = HealthLevel.Red;
+      healthLevelToolTip = errMsg;
+    }
+    else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
+      healthLevel = HealthLevel.Yellow;
+      healthLevelToolTip = `Information is stale, was updated on ${timestamp}`;
+    }
+    return { healthLevel, healthLevelToolTip };
   }
 }

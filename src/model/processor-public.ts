@@ -13,6 +13,9 @@ export async function updateModel(model: Model, config: Configuration) {
   const rootNodeData = await fetchJson(`${config.RootNodeEndpoint}${ManagementStatusSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
+  if (_.size(virtualChainList) === 0 ) {
+    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
+  }
 
   const services = [
     // choose the services that exist in a public network
@@ -26,6 +29,9 @@ export async function updateModel(model: Model, config: Configuration) {
   const guardians = readGuardians(rootNodeData);
   const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
   const committeeMembers = _.pick(guardians, committeeMembersAddresses);
+  if (_.size(committeeMembers) === 0 ) {
+    Logger.error(`Could not read a valid Committee, current network seems empty.`);
+  }
   const standbyMembersAddresses = _.map(
     _.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby),
     'EthAddress'
