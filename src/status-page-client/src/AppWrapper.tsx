@@ -4,6 +4,14 @@ import {configureMobx, getStores} from "./store/storesInitialization";
 import {Provider} from "mobx-react";
 import { BrowserRouter as Router } from "react-router-dom";
 
+import { baseTheme } from "./theme/Theme";
+
+import {
+   makeStyles,
+   StylesProvider,
+   ThemeProvider,
+} from "@material-ui/core/styles";
+
 interface IProps {
 
 }
@@ -16,7 +24,11 @@ export const AppWrapper = React.memo<IProps>(props => {
    return (<>
       <Router>
          <Provider {...stores}>
-            <App/>
+            <StylesProvider injectFirst>
+               <ThemeProvider theme={baseTheme}>
+               <App/>
+               </ThemeProvider>
+            </StylesProvider>
          </Provider>
       </Router>
       </>)
