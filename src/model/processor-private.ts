@@ -3,6 +3,7 @@ import { Configuration } from '../config';
 import { fetchJson, getCurrentClockTime } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel } from './model';
 import * as URLs from './url-generator';
+import * as Logger from '../logger';
 
 // Important URLS for private-network - init explore of network from these.
 const NodeManagementSuffix = ':7666/node/management';
@@ -11,6 +12,9 @@ export async function updateModel(model: Model, config: Configuration) {
   const rootNodeData = await fetchJson(`${config.RootNodeEndpoint}${NodeManagementSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData);
+  if (_.size(virtualChainList) === 0 ) {
+    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
+  }
 
   const services = [
     // choose the services that exist in a private network
@@ -46,7 +50,10 @@ function readVirtualChains(rootNodeData: any): VirtualChain[] {
 }
 
 function readGuardians(mgmtData: any): Guardians {
-  const topology = JSON.parse(mgmtData.Payload['Management.Topology.Current'].Value) || {}; //mgmtData.Payload.Management?.Topology?.Current
+  const topology = mgmtData.Payload.Management?.Topology || {};
+  if (_.size(topology) === 0 ) {
+      Logger.error(`Could not read a valid Topology, current network seems empty.`);
+  }
   return _.mapValues(topology, (guardianData) => {
     let ip = _.isString(guardianData.Endpoint) ? guardianData.Endpoint : '';
     return {
