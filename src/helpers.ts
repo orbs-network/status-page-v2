@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { retry } from 'ts-retry-promise';
+import _ from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function errorString(e: any) {
@@ -21,18 +22,26 @@ export function getCurrentClockTime() {
   return Math.round(new Date().getTime() / 1000);
 }
 
+export function isStaleTime(referenceTimeSeconds: number | string, differenceSeconds: number): boolean {
+  const currentTime = getCurrentClockTime();
+  if (_.isString(referenceTimeSeconds)) {
+    referenceTimeSeconds = Math.round(new Date(referenceTimeSeconds).valueOf() / 1000);
+  }
+  return currentTime > referenceTimeSeconds + differenceSeconds;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonResponse = any;
 
 export async function fetchJson(url: string) {
   return await retry(
     async () => {
-      const response = await fetch(url);
+      const response = await fetch(url, { timeout: 15000 });
       const body = await response.text();
       try {
         return JSON.parse(body);
       } catch (e) {
-        throw new Error(`Invalid response:\n${body}.`);
+        throw new Error(`Invalid response for url '${url}': ${body}`);
       }
     },
     { retries: 3, delay: 300 }

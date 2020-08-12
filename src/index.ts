@@ -30,8 +30,9 @@ export function serve(config: Configuration) {
   const processorTask = new TaskLoop(() => processor.run(), config.ProcessorPollTimeSeconds * 1000);
   processorTask.start();
 
-  const server = app.listen(config.Port, '0.0.0.0', () =>
-    Logger.log(`Status service listening on port ${config.Port}!`)
+  const port = process.env.PORT ? parseInt(process.env.PORT) : config.Port
+  const server = app.listen(port, '0.0.0.0', () =>
+    Logger.log(`Status service listening on port ${port}!`)
   );
   server.on('close', () => {
     processorTask.stop();
