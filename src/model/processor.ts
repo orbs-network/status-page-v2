@@ -136,6 +136,9 @@ export class Processor {
     if (errMsg !== '') {
       healthLevel = HealthLevel.Red;
       healthLevelToolTip = errMsg;
+    } else if (timestamp === '') {
+      healthLevel = HealthLevel.Red;
+      healthLevelToolTip = 'Missing timestamp field. Information may be stale information.';
     }
     else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
       healthLevel = HealthLevel.Yellow;
