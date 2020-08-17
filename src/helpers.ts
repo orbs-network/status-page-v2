@@ -37,11 +37,14 @@ export async function fetchJson(url: string) {
   return await retry(
     async () => {
       const response = await fetch(url, { timeout: 15000 });
-      const body = await response.text();
-      try {
-        return JSON.parse(body);
-      } catch (e) {
-        throw new Error(`Invalid response for url '${url}': ${body}`);
+      if (response.ok && response.headers.get('content-type') === 'application/json') {
+        try {
+          return await response.json();
+        } catch (e) {
+          throw new Error(`Invalid response for url '${url}': ${await response.text()}`);
+        }  
+      } else {
+        throw new Error(`Invalid response for url '${url}': Status Code: ${response.status}, Content-Type: ${response.headers.get('content-type')}, Content: ${await response.text()}`);
       }
     },
     { retries: 3, delay: 300 }
