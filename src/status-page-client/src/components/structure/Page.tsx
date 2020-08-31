@@ -1,15 +1,15 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface IProps {}
 
 const useStyles = makeStyles((theme) => ({
   page: {
-    height: "100%",
-    width: "fit-content",
-    maxWidth: "100%",
-    boxSizing: "border-box",
-    paddingBottom: "2em",
+    height: '100%',
+    width: 'fit-content',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    paddingBottom: '2em',
   },
 }));
 

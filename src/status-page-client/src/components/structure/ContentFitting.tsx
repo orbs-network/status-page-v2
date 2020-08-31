@@ -1,19 +1,16 @@
-import React, { DetailedHTMLProps } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React, { DetailedHTMLProps } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface IProps {}
 const useStyles = makeStyles((theme) => ({
   contentFitter: {
-    height: "100%",
-    width: "fit-content",
-    maxWidth: "100%",
+    height: '100%',
+    width: 'fit-content',
+    maxWidth: '100%',
   },
 }));
 
-export const ContentFitting = React.memo<
-  IProps &
-    DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
->((props) => {
+export const ContentFitting = React.memo<IProps & DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>>((props) => {
   const classes = useStyles();
   const { children, ...others } = props;
   return (

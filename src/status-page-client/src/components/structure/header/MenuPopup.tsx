@@ -1,19 +1,12 @@
-import React, { createRef, useCallback, useMemo, useRef } from "react";
-import {
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Popover,
-  Typography,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import { makeStyles } from "@material-ui/core/styles";
-import Link from "@material-ui/core/Link";
-import { NavLink } from "react-router-dom";
-import { HOVER_COLOR } from "./Header";
-import { useLinkDescriptors } from "./links";
-import { useBoolean } from "react-hanger";
+import React, { createRef, useCallback, useMemo, useRef } from 'react';
+import { Button, IconButton, Menu, MenuItem, Popover, Typography } from '@material-ui/core';
+import MenuIcon from '@material-ui/icons/Menu';
+import { makeStyles } from '@material-ui/core/styles';
+import Link from '@material-ui/core/Link';
+import { NavLink } from 'react-router-dom';
+import { HOVER_COLOR } from './Header';
+import { useLinkDescriptors } from './links';
+import { useBoolean } from 'react-hanger';
 
 const useStyles = makeStyles((theme) => ({
   menuButton: {
@@ -23,11 +16,11 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
   },
   link: {
-    width: "100%",
-    color: "#ffffffb3",
+    width: '100%',
+    color: '#ffffffb3',
     // marginLeft: 30,
-    transition: "color 0.4s ease-in-out",
-    "&:hover": {
+    transition: 'color 0.4s ease-in-out',
+    '&:hover': {
       color: HOVER_COLOR,
     },
   },
@@ -36,13 +29,11 @@ const useStyles = makeStyles((theme) => ({
 export const MenuPopup = React.memo((props) => {
   const classes = useStyles();
   const linkDescriptors = useLinkDescriptors();
-  console.log("Render menu");
+  console.log('Render menu');
 
   const { setFalse, setTrue, value } = useBoolean(false);
 
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null
-  );
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -79,16 +70,11 @@ export const MenuPopup = React.memo((props) => {
     ));
   }, [classes.link, linkDescriptors, setFalse]);
 
-  const id = value ? "links-popover-menu" : undefined;
+  const id = value ? 'links-popover-menu' : undefined;
 
   return (
     <div>
-      <IconButton
-        onClick={handleClick}
-        className={classes.menuButton}
-        color="inherit"
-        aria-label="menu"
-      >
+      <IconButton onClick={handleClick} className={classes.menuButton} color="inherit" aria-label="menu">
         <MenuIcon />
       </IconButton>
       {/* TODO : O.L : Think about using 'Menu' instead of 'Popover' */}
@@ -98,12 +84,12 @@ export const MenuPopup = React.memo((props) => {
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: 'bottom',
+          horizontal: 'left',
         }}
         transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: 'top',
+          horizontal: 'center',
         }}
       >
         {menuItemLinks}
