@@ -1,14 +1,13 @@
-import { blue } from '@material-ui/core/colors';
 import responsiveFontSizes from '@material-ui/core/styles/responsiveFontSizes';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-const COLOR1 = '#0D0D0D'; // dark gray
-const COLOR2 = '#6ec6d8'; // bluish
-const COLOR3 = '#03FCF5'; // bright bluish- Tetra
+// const COLOR1 = '#0D0D0D'; // dark gray
+// const COLOR2 = '#6ec6d8'; // bluish
+// const COLOR3 = '#03FCF5'; // bright bluish- Tetra
 
 // const PRIMARY_TEXT = '#dbdbdb';
-const PRIMARY_TEXT = '#dbdbdb';
-const SECONDARY_TEXT = '#7B7B7B';
+// const PRIMARY_TEXT = '#dbdbdb';
+// const SECONDARY_TEXT = '#7B7B7B';
 
 export const HEADER_HEIGHT_REM = 6;
 

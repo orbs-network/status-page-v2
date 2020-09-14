@@ -7,15 +7,11 @@
  */
 
 import AppBar from '@material-ui/core/AppBar';
-import Link from '@material-ui/core/Link';
-import { makeStyles, useTheme, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import logo from './logo-white.svg';
-import { Button, IconButton, Typography, useMediaQuery } from '@material-ui/core';
-import { MenuPopup } from './MenuPopup';
-import { useLinkDescriptors } from './links';
 import { HEADER_HEIGHT_REM } from '../../../theme/Theme';
 
 export const HOVER_COLOR = '#16faff';

@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { HEADER_HEIGHT_REM } from './theme/Theme';
-import { Route, RouteProps, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Header } from './components/structure/header/Header';
 import { StatusPage } from './pages/StatusPage';
