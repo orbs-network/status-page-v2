@@ -43,7 +43,7 @@ export const StatusTable = React.memo<IProps>((props) => {
     );
 
     return topRow;
-  }, [vcs]);
+  }, [services, vcs]);
 
   // return <MaterialTable icons={TABLE_ICONS} columns={columns} data={validatorStatusGists}/>
   return (
