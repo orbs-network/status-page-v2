@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button, Table, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../model/model';
 
@@ -29,19 +29,19 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
     if (!showServices) {
       return null;
     } else {
-      return services.map((service) => <TableCell />);
+      return services.map(() => <TableCell />);
     }
   }, [services, showServices]);
 
   // Build the top row (services and vcs)
   const topRow = useMemo(() => {
-    const servicesCells = services.map((service) => <TableCell></TableCell>);
+    const servicesCells = services.map((service) => <TableCell />);
 
     const onClick = showServices ? () => setShowServices(false) : () => setShowServices(true);
 
     const topRow = (
       <TableRow>
-        <TableCell></TableCell>
+        <TableCell />
         <TableCell>
           <Button onClick={onClick}>{showServices ? 'Hide' : 'Show'}</Button>
         </TableCell>
