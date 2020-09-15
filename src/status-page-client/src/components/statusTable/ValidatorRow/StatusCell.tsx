@@ -42,7 +42,7 @@ export const StatusCell = React.memo<IProps>((props) => {
   }, [title]);
 
   const titleComponent = useMemo(() => {
-    let baseComponent = <Typography variant={'caption'}>{truncatedTitle}</Typography>;
+    let baseComponent = <Typography variant={'caption'}>{title}</Typography>;
     let finalComponent;
 
     if (titleLink) {
@@ -56,7 +56,7 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
 
     return finalComponent;
-  }, [classes.link, titleLink, truncatedTitle]);
+  }, [classes.link, title, titleLink]);
 
   const subTitleComponent = useMemo(() => {
     let baseComponent = <Typography variant={'caption'}>{subTitle}</Typography>;
@@ -103,9 +103,10 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
   }, [classes.link, logsLink]);
 
+  // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (
     <Tooltip title={tooltip || title} placement={'right'}>
-      <TableCell className={classes.cell} style={{ backgroundColor }}>
+      <TableCell className={classes.cell} style={{ backgroundColor, overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '0px' }}>
         {titleComponent}
         <br />
         {subTitleComponent}

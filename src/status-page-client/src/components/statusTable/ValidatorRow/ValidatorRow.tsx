@@ -3,15 +3,17 @@ import { TableCell, TableRow } from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';
+import { NodeVcStatusCell } from './NodeVcStatusCell';
 
 interface IProps {
   validator: Guardian;
   expandServices: boolean;
   servicesNames: string[];
+  vcsIds: string[];
 }
 
 export const ValidatorRow = React.memo<IProps>((props) => {
-  const { validator, expandServices, servicesNames } = props;
+  const { validator, expandServices, servicesNames, vcsIds } = props;
 
   const expandedServicesCells = useMemo(() => {
     return servicesNames.map((serviceName) => {
@@ -20,6 +22,14 @@ export const ValidatorRow = React.memo<IProps>((props) => {
       return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
     });
   }, [servicesNames, validator.NodeServices]);
+
+  const vcCells = useMemo(() => {
+    return vcsIds.map((vcId) => {
+      const nodeVc = validator.NodeVirtualChains[vcId];
+
+      return <NodeVcStatusCell nodeVc={nodeVc} />;
+    });
+  }, [validator.NodeVirtualChains, vcsIds]);
 
   const orderedServices = useMemo(() => {
     return servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
@@ -35,6 +45,9 @@ export const ValidatorRow = React.memo<IProps>((props) => {
 
       {/* Expanded services */}
       {expandServices ? expandedServicesCells : null}
+
+      {/* Vcs status */}
+      {vcCells}
     </TableRow>
   );
 });

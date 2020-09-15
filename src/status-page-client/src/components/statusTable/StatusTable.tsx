@@ -36,19 +36,23 @@ export const StatusTable = React.memo<IProps>((props) => {
     return services.map((service) => service.Name);
   }, [services]);
 
+  const vcsIds = useMemo(() => {
+    return vcs.map((vc) => vc.Id);
+  }, [vcs]);
+
   const allValidators = useMemo(() => {
     return [...committeeValidators, ...standByValidators];
   }, [committeeValidators, standByValidators]);
 
   const validatorRows = useMemo(() => {
     return allValidators.map((validator) => (
-      <ValidatorRow key={validator.OrbsAddress} validator={validator} expandServices={showServices} servicesNames={servicesNames} />
+      <ValidatorRow key={validator.OrbsAddress} validator={validator} expandServices={showServices} servicesNames={servicesNames} vcsIds={vcsIds} />
     ));
-  }, [allValidators, servicesNames, showServices]);
+  }, [allValidators, servicesNames, showServices, vcsIds]);
 
   return (
     <TableContainer component={Paper}>
-      <Table>
+      <Table size={'small'}>
         <StatusTableHeader services={services} vcs={vcs} setShowServices={setShowServices} showServices={showServices} />
         <TableBody>{validatorRows}</TableBody>
       </Table>
