@@ -18,7 +18,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
       return null;
     } else {
       return services.map((service) => (
-        <TableCell>
+        <TableCell key={service.Name}>
           <Typography>{service.Name}</Typography>
         </TableCell>
       ));
@@ -29,14 +29,12 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
     if (!showServices) {
       return null;
     } else {
-      return services.map(() => <TableCell />);
+      return services.map((service) => <TableCell key={service.Name} />);
     }
   }, [services, showServices]);
 
   // Build the top row (services and vcs)
   const topRow = useMemo(() => {
-    const servicesCells = services.map((service) => <TableCell />);
-
     const onClick = showServices ? () => setShowServices(false) : () => setShowServices(true);
 
     const topRow = (

@@ -16,8 +16,11 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     if (!expandServices) {
       return null;
     } else {
-      const nodeServices = servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
-      return nodeServices.map((nodeService) => <NodeServiceStatusCell nodeService={nodeService} />);
+      return servicesNames.map((serviceName) => {
+        const nodeService = validator.NodeServices[serviceName];
+
+        return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
+      });
     }
   }, [expandServices, servicesNames, validator.NodeServices]);
 
