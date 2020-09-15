@@ -9,5 +9,14 @@ interface IProps {
 export const NodeServiceStatusCell = React.memo<IProps>((props) => {
   const { nodeService } = props;
 
-  return <StatusCell healthLevel={nodeService.Status} title={nodeService.StatusMsg} subTitle={nodeService.Version} />;
+  return (
+    <StatusCell
+      healthLevel={nodeService.Status}
+      title={nodeService.StatusMsg}
+      titleLink={nodeService.URLs.Status}
+      subTitle={nodeService.Version}
+      subTitleLink={nodeService.URLs.Version}
+      tooltip={nodeService.StatusToolTip}
+    />
+  );
 });

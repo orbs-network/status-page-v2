@@ -28,7 +28,7 @@ export const StatusTable = React.memo<IProps>((props) => {
   console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
   console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
 
-  const [showServices, setShowServices] = useState(false);
+  const [showServices, setShowServices] = useState(true);
 
   console.log({ showServices });
 
@@ -41,11 +41,10 @@ export const StatusTable = React.memo<IProps>((props) => {
   }, [committeeValidators, standByValidators]);
 
   const validatorRows = useMemo(() => {
-    const rows = allValidators.map((validator) => (
+    return allValidators.map((validator) => (
       <ValidatorRow key={validator.OrbsAddress} validator={validator} expandServices={showServices} servicesNames={servicesNames} />
     ));
-    return rows;
-  }, [allValidators, showServices]);
+  }, [allValidators, servicesNames, showServices]);
 
   return (
     <TableContainer component={Paper}>
