@@ -17,6 +17,8 @@ export const NodeServiceStatusCell = React.memo<IProps>((props) => {
       subTitle={nodeService.Version}
       subTitleLink={nodeService.URLs.Version}
       tooltip={nodeService.StatusToolTip}
+      statusLink={nodeService.URLs.Status}
+      logsLink={nodeService.URLs.Logs}
     />
   );
 });
