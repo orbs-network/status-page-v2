@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TableCell, Tooltip, Typography } from '@material-ui/core';
 import { HealthLevel } from '../../../shared/HealthLevel';
 import { makeStyles } from '@material-ui/core/styles';
@@ -78,21 +78,25 @@ export const StatusCell = React.memo<IProps>((props) => {
   const statusIcon = useMemo(() => {
     if (statusLink) {
       return (
+        // <Tooltip title={'Status'}>
         <a className={classes.link} href={statusLink} target={'_blank'} rel={'noopener noreferrer'}>
-          <WorkIcon />{' '}
+          <WorkIcon />
         </a>
+        // </Tooltip>
       );
     } else {
       return null;
     }
-  }, [statusLink]);
+  }, [classes.link, statusLink]);
 
   const logsIcon = useMemo(() => {
     if (logsLink) {
       return (
+        // <Tooltip title={'Logs'}>
         <a className={classes.link} href={logsLink} target={'_blank'} rel={'noopener noreferrer'}>
           <AssignmentIcon />
         </a>
+        // </Tooltip>
       );
     } else {
       return null;
@@ -100,7 +104,7 @@ export const StatusCell = React.memo<IProps>((props) => {
   }, [classes.link, logsLink]);
 
   return (
-    <Tooltip title={tooltip || title}>
+    <Tooltip title={tooltip || title} placement={'right'}>
       <TableCell className={classes.cell} style={{ backgroundColor }}>
         {titleComponent}
         <br />

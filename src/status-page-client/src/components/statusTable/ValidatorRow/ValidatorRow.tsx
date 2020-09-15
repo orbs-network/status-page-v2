@@ -14,16 +14,12 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   const { validator, expandServices, servicesNames } = props;
 
   const expandedServicesCells = useMemo(() => {
-    if (!expandServices) {
-      return null;
-    } else {
-      return servicesNames.map((serviceName) => {
-        const nodeService = validator.NodeServices[serviceName];
+    return servicesNames.map((serviceName) => {
+      const nodeService = validator.NodeServices[serviceName];
 
-        return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
-      });
-    }
-  }, [expandServices, servicesNames, validator.NodeServices]);
+      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
+    });
+  }, [servicesNames, validator.NodeServices]);
 
   const orderedServices = useMemo(() => {
     return servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
@@ -38,7 +34,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
       <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
 
       {/* Expanded services */}
-      {expandedServicesCells}
+      {expandServices ? expandedServicesCells : null}
     </TableRow>
   );
 });
