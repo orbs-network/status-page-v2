@@ -28,7 +28,7 @@ export const StatusTable = React.memo<IProps>((props) => {
   console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
   console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
 
-  const [showServices, setShowServices] = useState(true);
+  const [showServices, setShowServices] = useState(false);
 
   console.log({ showServices });
 

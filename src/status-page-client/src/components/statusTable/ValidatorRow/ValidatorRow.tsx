@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { TableCell, TableRow } from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import { NodeServiceStatusCell } from './NodeServiceStatusCell';
+import { ServicesGistCell } from './ServicesGistCell';
 
 interface IProps {
   validator: Guardian;
@@ -24,13 +25,17 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     }
   }, [expandServices, servicesNames, validator.NodeServices]);
 
+  const orderedServices = useMemo(() => {
+    return servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
+  }, [servicesNames, validator.NodeServices]);
+
   return (
     <TableRow>
       {/* Gist */}
       <TableCell>{validator.Name}</TableCell>
 
       {/* Services summary  */}
-      <TableCell>Services summary</TableCell>
+      <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
 
       {/* Expanded services */}
       {expandedServicesCells}

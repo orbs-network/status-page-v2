@@ -7,6 +7,7 @@ import AssignmentIcon from '@material-ui/icons/Assignment';
 import green from '@material-ui/core/colors/green';
 import yellow from '@material-ui/core/colors/yellow';
 import red from '@material-ui/core/colors/red';
+import { backgroundColorFromHealthLevel } from './statusTableUtils';
 
 interface IProps {
   title: string;
@@ -114,20 +115,3 @@ export const StatusCell = React.memo<IProps>((props) => {
 
 const TITLE_LENGTH = 10;
 const truncate = (input: string) => (input.length > TITLE_LENGTH ? `${input.substring(0, TITLE_LENGTH)}...` : input);
-
-function backgroundColorFromHealthLevel(healthLevel: HealthLevel) {
-  switch (healthLevel) {
-    case HealthLevel.Green: {
-      return green['500'];
-    }
-    case HealthLevel.Yellow: {
-      return yellow['500'];
-    }
-    case HealthLevel.Red: {
-      return red['500'];
-    }
-    default: {
-      throw new Error(`Unsupported health level of ${healthLevel}`);
-    }
-  }
-}
