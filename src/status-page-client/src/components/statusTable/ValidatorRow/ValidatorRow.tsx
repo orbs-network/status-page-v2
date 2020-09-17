@@ -27,7 +27,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     return vcsIds.map((vcId) => {
       const nodeVc = validator.NodeVirtualChains[vcId];
 
-      return <NodeVcStatusCell nodeVc={nodeVc} />;
+      return <NodeVcStatusCell nodeVc={nodeVc} key={vcId} />;
     });
   }, [validator.NodeVirtualChains, vcsIds]);
 

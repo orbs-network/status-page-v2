@@ -3,7 +3,25 @@ import { Model } from '../../../model/model';
 import StatusModelSampleJSON from '../local/StatusModelSample.json';
 
 export class StatusStore {
-  @observable public statusModel: Model | undefined = StatusModelSampleJSON as Model;
+  // @observable public statusModel: Model | undefined = StatusModelSampleJSON as Model;
+  @observable public statusModel: Model | undefined;
+
+  constructor() {
+    this.fetchAndSetStatus();
+  }
+
+  private async fetchAndSetStatus() {
+    // TODO : O.L : Organise it and add error handling
+    const model = await this.fetchStatusObject();
+    this.setStatusModel(model);
+  }
+
+  private async fetchStatusObject(): Promise<Model> {
+    const res = await fetch('/json');
+    const statusJson = (await res.json()) as Model;
+
+    return statusJson;
+  }
 
   @action('setStatusModel')
   private setStatusModel(model: Model) {
