@@ -4,6 +4,7 @@ import { VirtualChain, Guardian, Service } from '../../../../model/model';
 import { StatusTableHeader } from './StatusTableHeader';
 import { toJS } from 'mobx';
 import { ValidatorRow } from './ValidatorRow/ValidatorRow';
+import { StatusTableBody } from './StatusTableBody';
 
 export interface ValidatorStatusGist {
   name: string;
@@ -24,37 +25,25 @@ interface IProps {
 
 export const StatusTable = React.memo<IProps>((props) => {
   const { vcs, committeeValidators, standByValidators, services } = props;
-  console.log({ vcs });
-  console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
-  console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
+  // console.log({ vcs });
+  // console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
+  // console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
 
   const [showServices, setShowServices] = useState(false);
 
-  console.log({ showServices });
-
-  const servicesNames = useMemo(() => {
-    return services.map((service) => service.Name);
-  }, [services]);
-
-  const vcsIds = useMemo(() => {
-    return vcs.map((vc) => vc.Id);
-  }, [vcs]);
-
-  const allValidators = useMemo(() => {
-    return [...committeeValidators, ...standByValidators];
-  }, [committeeValidators, standByValidators]);
-
-  const validatorRows = useMemo(() => {
-    return allValidators.map((validator) => (
-      <ValidatorRow key={validator.OrbsAddress} validator={validator} expandServices={showServices} servicesNames={servicesNames} vcsIds={vcsIds} />
-    ));
-  }, [allValidators, servicesNames, showServices, vcsIds]);
+  // console.log({ showServices });
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} style={{ width: '90rem', maxWidth: '100%' }}>
       <Table size={'small'}>
         <StatusTableHeader services={services} vcs={vcs} setShowServices={setShowServices} showServices={showServices} />
-        <TableBody>{validatorRows}</TableBody>
+        <StatusTableBody
+          services={services}
+          vcs={vcs}
+          committeeValidators={committeeValidators}
+          standByValidators={standByValidators}
+          showServices={showServices}
+        />
       </Table>
     </TableContainer>
   );

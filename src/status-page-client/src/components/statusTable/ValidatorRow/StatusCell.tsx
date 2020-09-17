@@ -25,6 +25,7 @@ interface IProps {
 const useStyles = makeStyles((theme) => ({
   cell: {
     border: '1px solid black',
+    boxSizing: 'border-box',
     width: 'fit-content',
   },
   link: {
