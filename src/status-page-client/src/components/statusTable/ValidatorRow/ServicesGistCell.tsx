@@ -54,5 +54,5 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
     });
   }, [classes.link, nodeServices, serviceNames]);
 
-  return <TableCell style={{ backgroundColor }}>{servicesIcons}</TableCell>;
+  return <TableCell style={{ backgroundColor, textAlign: 'center' }}>{servicesIcons}</TableCell>;
 });

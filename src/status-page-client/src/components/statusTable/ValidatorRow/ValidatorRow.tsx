@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { TableCell, TableRow } from '@material-ui/core';
+import { Fade, TableCell, TableRow, Typography } from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';
@@ -38,12 +38,15 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   return (
     <TableRow>
       {/* Gist */}
-      <TableCell>{validator.Name}</TableCell>
+      <TableCell style={{ textAlign: 'center' }}>{validator.Name}</TableCell>
 
       {/* Services summary  */}
       <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
 
       {/* Expanded services */}
+      {/*<Fade in={expandServices}>*/}
+      {/*  <React.Fragment>{expandedServicesCells}</React.Fragment>*/}
+      {/*</Fade>*/}
       {expandServices ? expandedServicesCells : null}
 
       {/* Vcs status */}

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../model/model';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface IProps {
   vcs: VirtualChain[];
@@ -10,28 +11,36 @@ interface IProps {
   setShowServices: (val: boolean) => void;
 }
 
+const useStyles = makeStyles((theme) => ({
+  headerCell: {
+    width: '10rem',
+    textAlign: 'center',
+  },
+}));
+
 export const StatusTableHeader = React.memo<IProps>((props) => {
   const { showServices, vcs, services, setShowServices } = props;
+  const classes = useStyles();
 
   const servicesHeaderCells = useMemo(() => {
     if (!showServices) {
       return null;
     } else {
       return services.map((service) => (
-        <TableCell key={service.Name}>
+        <TableCell className={classes.headerCell} key={service.Name}>
           <Typography>{service.Name}</Typography>
         </TableCell>
       ));
     }
-  }, [services, showServices]);
+  }, [classes.headerCell, services, showServices]);
 
   const headerServicesPlaceholders = useMemo(() => {
     if (!showServices) {
       return null;
     } else {
-      return services.map((service) => <TableCell key={service.Name} />);
+      return services.map((service) => <TableCell className={classes.headerCell} key={service.Name} />);
     }
-  }, [services, showServices]);
+  }, [classes.headerCell, services, showServices]);
 
   // Build the top row (services and vcs)
   const topRow = useMemo(() => {
@@ -39,8 +48,8 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
 
     const topRow = (
       <TableRow>
-        <TableCell />
-        <TableCell>
+        <TableCell className={classes.headerCell} />
+        <TableCell className={classes.headerCell}>
           <Button onClick={onClick}>{showServices ? 'Hide' : 'Show'}</Button>
         </TableCell>
         {servicesHeaderCells}
@@ -51,16 +60,18 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
     );
 
     return topRow;
-  }, [services, servicesHeaderCells, setShowServices, showServices, vcs]);
+  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs]);
 
+  // DEV_NOTE : O.L : Setting the TableCell width to a small number is a trick to force "fit-content"
+  // TODO : O.L : Find a better method for 'fit-content'
   return (
     <TableHead>
       <TableRow>
-        <TableCell>Validators</TableCell>
-        <TableCell>Node services</TableCell>
+        <TableCell className={classes.headerCell}>Validators</TableCell>
+        <TableCell className={classes.headerCell}>Node services</TableCell>
         {headerServicesPlaceholders}
         {vcs.map((vc) => (
-          <TableCell key={vc.Id}>
+          <TableCell className={classes.headerCell} key={vc.Id}>
             {vc.Id} - {vc.Name}
           </TableCell>
         ))}

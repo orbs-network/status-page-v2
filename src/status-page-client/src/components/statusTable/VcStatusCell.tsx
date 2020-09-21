@@ -10,7 +10,7 @@ interface IProps {
 export const VcStatusCell = React.memo<IProps>((props) => {
   const { vc } = props;
   return (
-    <TableCell>
+    <TableCell style={{ textAlign: 'center' }}>
       {moment.unix(vc.ExpirationTimeSeconds).format('YYYY-MM-DD')} {vc.IsCanary ? 'Canary' : 'Main'} {vc.IsCertified ? 'Certified' : 'Open'}
     </TableCell>
   );
