@@ -4,6 +4,7 @@ import { Guardian } from '../../../../../model/model';
 import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';
 import { NodeVcStatusCell } from './NodeVcStatusCell';
+import { ValidatorInfoCell } from './ValidatorInfoCell';
 
 interface IProps {
   validator: Guardian;
@@ -38,15 +39,12 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   return (
     <TableRow>
       {/* Gist */}
-      <TableCell style={{ textAlign: 'center' }}>{validator.Name}</TableCell>
+      <ValidatorInfoCell validator={validator} />
 
       {/* Services summary  */}
       <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
 
       {/* Expanded services */}
-      {/*<Fade in={expandServices}>*/}
-      {/*  <React.Fragment>{expandedServicesCells}</React.Fragment>*/}
-      {/*</Fade>*/}
       {expandServices ? expandedServicesCells : null}
 
       {/* Vcs status */}

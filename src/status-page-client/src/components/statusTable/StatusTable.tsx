@@ -29,6 +29,14 @@ export const StatusTable = React.memo<IProps>((props) => {
   // console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
   // console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
 
+  const sortedCommitteeValidators = useMemo(() => {
+    return [...committeeValidators].sort(sortValidatorByStake);
+  }, [committeeValidators]);
+
+  const sortedStandByValidators = useMemo(() => {
+    return [...standByValidators].sort(sortValidatorByStake);
+  }, [standByValidators]);
+
   const [showServices, setShowServices] = useState(false);
 
   // console.log({ showServices });
@@ -40,11 +48,13 @@ export const StatusTable = React.memo<IProps>((props) => {
         <StatusTableBody
           services={services}
           vcs={vcs}
-          committeeValidators={committeeValidators}
-          standByValidators={standByValidators}
+          committeeValidators={sortedCommitteeValidators}
+          standByValidators={sortedStandByValidators}
           showServices={showServices}
         />
       </Table>
     </TableContainer>
   );
 });
+
+const sortValidatorByStake = (a: Guardian, b: Guardian) => b.EffectiveStake - a.EffectiveStake;
