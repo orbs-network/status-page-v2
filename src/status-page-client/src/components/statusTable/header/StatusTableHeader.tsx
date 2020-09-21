@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui/core';
 import { VcStatusCell } from './VcStatusCell';
-import { VirtualChain, Service } from '../../../../model/model';
+import { VirtualChain, Service } from '../../../../../model/model';
 import { makeStyles } from '@material-ui/core/styles';
 
 interface IProps {
