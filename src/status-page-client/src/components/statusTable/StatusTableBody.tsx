@@ -27,10 +27,21 @@ export const StatusTableBody = React.memo<IProps>((props) => {
   }, [committeeValidators, standByValidators]);
 
   const validatorRows = useMemo(() => {
-    return allValidators.map((validator) => (
-      <ValidatorRow key={validator.OrbsAddress} validator={validator} expandServices={showServices} servicesNames={servicesNames} vcsIds={vcsIds} />
-    ));
-  }, [allValidators, servicesNames, showServices, vcsIds]);
+    return allValidators.map((validator) => {
+      const isInCommittee = committeeValidators.includes(validator);
+
+      return (
+        <ValidatorRow
+          key={validator.OrbsAddress}
+          validator={validator}
+          isInCommittee={isInCommittee}
+          expandServices={showServices}
+          servicesNames={servicesNames}
+          vcsIds={vcsIds}
+        />
+      );
+    });
+  }, [allValidators, committeeValidators, servicesNames, showServices, vcsIds]);
 
   return <TableBody>{validatorRows}</TableBody>;
 });
