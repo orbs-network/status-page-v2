@@ -28,7 +28,7 @@
     "prettify": "npx prettier \"src/**/*.ts\" --write",
     "dev": "npm run build && open http://localhost/json && nodemon -e js,ts --watch src --exec npm run start:dev",
     "start:dev": "npm run build && npm start",
-    "postinstall": "npm run build",
+    "postinstall": "cd src/status-page-client && npm i && npm run build",
     "start": "node --async-stack-traces ./dist/main.js"
   },
   "devDependencies": {
