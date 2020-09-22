@@ -54,5 +54,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
     });
   }, [classes.link, nodeServices, serviceNames]);
 
-  return <TableCell style={{ backgroundColor, textAlign: 'center' }}>{servicesIcons}</TableCell>;
+  // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
+  // TODO : O.L : Find a better solution
+  return <TableCell style={{ backgroundColor, textAlign: 'center', border: '1px solid black', borderRight: 'none' }}>{servicesIcons}</TableCell>;
 });

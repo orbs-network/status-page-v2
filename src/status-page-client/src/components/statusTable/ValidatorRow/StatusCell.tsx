@@ -25,9 +25,13 @@ interface IProps {
 
 const useStyles = makeStyles((theme) => ({
   cell: {
+    // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
+    // TODO : O.L : Find a better solution
     border: '1px solid black',
-    boxSizing: 'border-box',
+    borderRight: 'none',
+    // boxSizing: 'border-box',
     width: 'fit-content',
+    borderCollapse: 'collapse',
   },
   link: {
     textDecoration: 'none',
