@@ -45,7 +45,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
       const title = serviceStatusOK ? servicesName : `${servicesName} : ${nodeService.StatusMsg || nodeService.Status}`;
 
       return (
-        <Tooltip title={title} key={servicesName}>
+        <Tooltip title={title} key={servicesName} arrow>
           <a className={classes.link} href={nodeService.URLs.Status} target={'_blank'} rel={'noopener noreferrer'}>
             {icon}
           </a>

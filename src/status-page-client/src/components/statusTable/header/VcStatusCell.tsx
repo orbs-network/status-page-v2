@@ -42,7 +42,7 @@ export const VcStatusCell = React.memo<IProps>((props) => {
   }, [vc.ExpirationTimeSeconds]);
 
   return (
-    <Tooltip title={tooltipText}>
+    <Tooltip title={tooltipText} arrow>
       <TableCell style={{ textAlign: 'center', backgroundColor: bgColor }}>
         <Typography>{moment.unix(vc.ExpirationTimeSeconds).format('YYYY-MM-DD')}</Typography>
         {vc.IsCertified ? (

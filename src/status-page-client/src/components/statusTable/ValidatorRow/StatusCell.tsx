@@ -111,7 +111,7 @@ export const StatusCell = React.memo<IProps>((props) => {
 
   // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (
-    <Tooltip title={tooltip || title} placement={'right'}>
+    <Tooltip title={tooltip || title} placement={'right'} arrow>
       <TableCell
         className={classes.cell}
         style={{ backgroundColor, overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '0px', textAlign: 'center' }}
