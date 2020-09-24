@@ -20,6 +20,7 @@ export async function updateModel(model: Model, config: Configuration) {
     // choose the services that exist in a private network
     Service.Boyar,
     Service.Signer,
+    Service.Logger,
   ];
 
   const vcMgmtData = await fetchJson(`${config.RootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);

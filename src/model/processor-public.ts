@@ -23,7 +23,7 @@ export async function updateModel(model: Model, config: Configuration) {
     Service.Signer,
     Service.Management,
     Service.EthereumWriter,
-    Service.Rewards,
+    Service.Logger,
   ];
 
   const guardians = readGuardians(rootNodeData);
