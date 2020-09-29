@@ -26,7 +26,7 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const reputation = null;
 
   return (
-    <TableCell style={{ textAlign: 'center' }}>
+    <TableCell style={{ textAlign: 'center', borderBottom: '2px solid #cccccc20' }}>
       <CommonLink href={validator.Website}>
         <Typography style={{ fontWeight: 'bold' }}>{validator.Name}</Typography>
       </CommonLink>

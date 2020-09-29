@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   cell: {
     // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
     // TODO : O.L : Find a better solution
-    border: '1px solid black',
+    border: '2px solid #06142e',
     borderRight: 'none',
     // boxSizing: 'border-box',
     width: 'fit-content',

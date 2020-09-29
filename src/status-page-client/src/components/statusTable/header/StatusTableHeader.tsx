@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
   headerCell: {
     width: '10rem',
     textAlign: 'center',
+    borderBottom: '2px solid #cccccc20'
   },
 }));
 
@@ -50,7 +51,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
       <TableRow>
         <TableCell className={classes.headerCell} />
         <TableCell className={classes.headerCell}>
-          <Button onClick={onClick}>{showServices ? 'Hide' : 'Show'}</Button>
+          <Button variant="outlined" onClick={onClick}>{showServices ? 'Hide Services' : 'Expand Services'}</Button>
         </TableCell>
         {servicesHeaderCells}
         {vcs.map((vc) => (

@@ -6,13 +6,13 @@ import red from '@material-ui/core/colors/red';
 export function backgroundColorFromHealthLevel(healthLevel: HealthLevel) {
   switch (healthLevel) {
     case HealthLevel.Green: {
-      return green['500'];
+      return '#66bb6a';
     }
     case HealthLevel.Yellow: {
-      return yellow['500'];
+      return '#c18223';
     }
     case HealthLevel.Red: {
-      return red['500'];
+      return '#d32f2f';
     }
     default: {
       throw new Error(`Unsupported health level of ${healthLevel}`);
