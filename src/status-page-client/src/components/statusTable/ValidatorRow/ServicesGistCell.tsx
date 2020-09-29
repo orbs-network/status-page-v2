@@ -17,6 +17,12 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'none',
     color: 'inherit',
   },
+  cell: {
+    textAlign: 'center', 
+    border: '2px solid #06142e', 
+    borderRight: 'none',
+    minWidth: '140px'
+  }
 }));
 
 export const ServicesGistCell = React.memo<IProps>((props) => {
@@ -56,5 +62,5 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
 
   // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
   // TODO : O.L : Find a better solution
-  return <TableCell style={{ backgroundColor, textAlign: 'center', border: '2px solid #06142e', borderRight: 'none' }}>{servicesIcons}</TableCell>;
+  return <TableCell className={classes.cell} style={{backgroundColor}}>{servicesIcons}</TableCell>;
 });

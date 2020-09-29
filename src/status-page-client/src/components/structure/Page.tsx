@@ -6,10 +6,7 @@ interface IProps {}
 const useStyles = makeStyles((theme) => ({
   page: {
     height: '100%',
-    width: 'fit-content',
-    maxWidth: '100%',
     boxSizing: 'border-box',
-    paddingBottom: '2em',
   },
 }));
 

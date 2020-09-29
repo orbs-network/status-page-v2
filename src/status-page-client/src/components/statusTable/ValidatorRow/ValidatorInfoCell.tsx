@@ -12,7 +12,13 @@ interface IProps {
   isInCommittee: boolean;
 }
 
-const useStyles = makeStyles((theme) => ({}));
+const useStyles = makeStyles((theme) => ({
+  cell: {
+    textAlign: 'left', 
+    borderBottom: '2px solid #cccccc20',
+    minWidth: '260px'
+  }
+}));
 
 export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const { validator, isInCommittee } = props;
@@ -26,7 +32,7 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const reputation = null;
 
   return (
-    <TableCell style={{ textAlign: 'center', borderBottom: '2px solid #cccccc20' }}>
+    <TableCell className={classes.cell}>
       <CommonLink href={validator.Website}>
         <Typography style={{ fontWeight: 'bold' }}>{validator.Name}</Typography>
       </CommonLink>

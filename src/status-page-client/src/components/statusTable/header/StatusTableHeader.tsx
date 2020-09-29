@@ -15,7 +15,8 @@ const useStyles = makeStyles((theme) => ({
   headerCell: {
     width: '10rem',
     textAlign: 'center',
-    borderBottom: '2px solid #cccccc20'
+    borderBottom: '2px solid #cccccc20',
+    fontSize: '1.2rem',
   },
 }));
 

@@ -37,12 +37,21 @@ export const baseTheme = responsiveFontSizes(
         colorPrimary: {
           // color: PRIMARY_TEXT,
         },
+        caption: {
+          fontSize: '1rem'
+        },
       },
       MuiLink: {
         root: {
           // color: blue[500],
         },
       },
+      MuiTooltip: {
+        tooltip: {
+          fontSize: '1rem',
+          backgroundColor: '#606060f8'
+        }
+      }
     },
   })
 );

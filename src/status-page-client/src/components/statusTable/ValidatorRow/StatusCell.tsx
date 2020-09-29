@@ -29,8 +29,7 @@ const useStyles = makeStyles((theme) => ({
     // TODO : O.L : Find a better solution
     border: '2px solid #06142e',
     borderRight: 'none',
-    // boxSizing: 'border-box',
-    width: 'fit-content',
+    minWidth: '200px',
     borderCollapse: 'collapse',
   },
   link: {
