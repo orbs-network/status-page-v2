@@ -42,7 +42,7 @@ export const StatusTable = React.memo<IProps>((props) => {
   // console.log({ showServices });
 
   return (
-    <TableContainer component={Paper} style={{ width: '90rem', maxWidth: '100%' }}>
+    <TableContainer component={Paper} style={{ width: 'fit-content', overflowX: 'inherit' }}>
       <Table size={'small'}>
         <StatusTableHeader services={services} vcs={vcs} setShowServices={setShowServices} showServices={showServices} />
         <StatusTableBody

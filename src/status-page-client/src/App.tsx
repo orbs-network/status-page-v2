@@ -9,15 +9,13 @@ import { StatusPage } from './pages/StatusPage';
 const useStyles = makeStyles((theme) => ({
   appMain: {
     height: '100%',
-    maxWidth: '90%',
     boxSizing: 'border-box',
-    padding: theme.spacing(2),
+    padding: '2em',
+    display: 'inline-block'
   },
-
   headerSeparator: {
     height: `${HEADER_HEIGHT_REM}rem`,
   },
-
   mainWrapper: {
     backgroundColor: '#06142e',
     backgroundRepeat: 'repeat-y',
@@ -26,11 +24,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundPosition: 'top center',
     // minHeight: `calc(100% - ${HEADER_HEIGHT_REM}rem)`,
     minHeight: `calc(100% - ${HEADER_HEIGHT_REM}rem)`,
-
+    display: 'block',
     // Center the content
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    textAlign: 'center'
   },
 }));
 

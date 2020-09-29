@@ -12,7 +12,13 @@ interface IProps {
   isInCommittee: boolean;
 }
 
-const useStyles = makeStyles((theme) => ({}));
+const useStyles = makeStyles((theme) => ({
+  cell: {
+    textAlign: 'left', 
+    borderBottom: '2px solid #cccccc20',
+    minWidth: '260px'
+  }
+}));
 
 export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const { validator, isInCommittee } = props;
@@ -26,7 +32,7 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const reputation = null;
 
   return (
-    <TableCell style={{ textAlign: 'center' }}>
+    <TableCell className={classes.cell}>
       <CommonLink href={validator.Website}>
         <Typography style={{ fontWeight: 'bold' }}>{validator.Name}</Typography>
       </CommonLink>
@@ -34,9 +40,19 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
       <Tooltip title={certifiedText} arrow>
         <VerifiedUserIcon style={{ color: certifiedColor }} />
       </Tooltip>
-      <Tooltip title={committeeText} arrow>
+      <Tooltip title={concatStake(committeeText, validator)} arrow>
         <SupervisedUserCircleIcon style={{ color: committeeColor }} />
       </Tooltip>
     </TableCell>
   );
 });
+
+const concatStake = (text: string, validator: Guardian) => {
+  return (
+    <span>
+      {text}
+      <br/>
+      {validator.EffectiveStake.toLocaleString()} ORBS
+    </span>
+  );
+};

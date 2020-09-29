@@ -5,6 +5,8 @@ import moment from 'moment';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
 import { green, orange, red } from '@material-ui/core/colors';
+import { backgroundColorFromHealthLevel } from '../ValidatorRow/statusTableUtils';
+import { HealthLevel } from '../../../shared/HealthLevel';
 
 interface IProps {
   vc: VirtualChain;
@@ -26,13 +28,13 @@ export const VcStatusCell = React.memo<IProps>((props) => {
     const isExpiringInLessThanAMonth = vc.ExpirationTimeSeconds < monthFromNow;
 
     if (hasExpired) {
-      bgColor = red['500'];
+      bgColor = backgroundColorFromHealthLevel(HealthLevel.Red);
       tooltipText = 'VC has expired';
     } else if (isExpiringInLessThanAMonth) {
-      bgColor = orange['400'];
+      bgColor = backgroundColorFromHealthLevel(HealthLevel.Yellow);
       tooltipText = 'VC expires in less than 30 days';
     } else {
-      bgColor = green['400'];
+      bgColor = backgroundColorFromHealthLevel(HealthLevel.Green);
     }
 
     return {

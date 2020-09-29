@@ -15,6 +15,8 @@ const useStyles = makeStyles((theme) => ({
   headerCell: {
     width: '10rem',
     textAlign: 'center',
+    borderBottom: '2px solid #cccccc20',
+    fontSize: '1.2rem'
   },
 }));
 
@@ -50,7 +52,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
       <TableRow>
         <TableCell className={classes.headerCell} />
         <TableCell className={classes.headerCell}>
-          <Button onClick={onClick}>{showServices ? 'Hide' : 'Show'}</Button>
+          <Button variant="outlined" onClick={onClick}>{showServices ? 'Hide Services' : 'Expand Services'}</Button>
         </TableCell>
         {servicesHeaderCells}
         {vcs.map((vc) => (
@@ -67,12 +69,15 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell className={classes.headerCell}>Validators</TableCell>
-        <TableCell className={classes.headerCell}>Node services</TableCell>
+        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Validators</TableCell>
+        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Node services</TableCell>
         {headerServicesPlaceholders}
         {vcs.map((vc) => (
-          <TableCell className={classes.headerCell} key={vc.Id}>
-            {vc.Id} - {vc.Name}
+          <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
+            {vc.Id}
+            {
+              vc.Name ? `- ${vc.Name}` : false
+            } 
           </TableCell>
         ))}
       </TableRow>

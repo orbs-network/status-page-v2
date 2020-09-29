@@ -16,16 +16,16 @@ export const baseTheme = responsiveFontSizes(
     palette: {
       // TODO : Adjust all styles after structure is done
       type: 'dark',
-      primary: { main: '#09142c' },
+      primary: { main: '#06142e' },
       secondary: { main: '#74f6fd' },
       background: {
         default: '#0a0f25',
         // paper: "#192a45",
-        paper: '#09142c',
+        paper: '#06142e80',
       },
     },
     typography: {
-      // fontFamily: 'Montserrat',
+      fontFamily: 'Montserrat',
     },
     overrides: {
       MuiPaper: {
@@ -37,12 +37,28 @@ export const baseTheme = responsiveFontSizes(
         colorPrimary: {
           // color: PRIMARY_TEXT,
         },
+        caption: {
+          fontSize: '1rem'
+        },
       },
       MuiLink: {
         root: {
           // color: blue[500],
         },
       },
+      MuiTooltip: {
+        tooltip: {
+          fontSize: '1rem',
+          backgroundColor: '#606060f8'
+        }
+      },
+      MuiSvgIcon: {
+        root: {
+          width: '0.8em',
+          height: '0.8em',
+          margin: '3px 2px 0px 0px'
+        }
+      }
     },
   })
 );

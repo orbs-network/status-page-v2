@@ -27,11 +27,13 @@ const useStyles = makeStyles((theme) => ({
   cell: {
     // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
     // TODO : O.L : Find a better solution
-    border: '1px solid black',
+    border: '2px solid #06142e',
     borderRight: 'none',
-    // boxSizing: 'border-box',
-    width: 'fit-content',
     borderCollapse: 'collapse',
+    overflowX: 'hidden', 
+    textOverflow: 'ellipsis', 
+    whiteSpace: 'nowrap', 
+    textAlign: 'left'
   },
   link: {
     textDecoration: 'none',
@@ -43,12 +45,8 @@ export const StatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
   const { healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, statusLink } = props;
   const backgroundColor = backgroundColorFromHealthLevel(healthLevel);
-  const truncatedTitle = useMemo(() => {
-    return truncate(title);
-  }, [title]);
-
   const titleComponent = useMemo(() => {
-    let baseComponent = <Typography variant={'caption'}>{title}</Typography>;
+    let baseComponent = <Typography variant={'caption'}>{newlineCommas(title)}</Typography>;
     let finalComponent;
 
     if (titleLink) {
@@ -84,11 +82,11 @@ export const StatusCell = React.memo<IProps>((props) => {
   const statusIcon = useMemo(() => {
     if (statusLink) {
       return (
-        // <Tooltip title={'Status'}>
-        <a className={classes.link} href={statusLink} target={'_blank'} rel={'noopener noreferrer'}>
-          <HelpIcon />
-        </a>
-        // </Tooltip>
+        <Tooltip title={'Status'} arrow>
+          <a className={classes.link} href={statusLink} target={'_blank'} rel={'noopener noreferrer'}>
+            <HelpIcon />
+          </a>
+        </Tooltip>
       );
     } else {
       return null;
@@ -98,11 +96,11 @@ export const StatusCell = React.memo<IProps>((props) => {
   const logsIcon = useMemo(() => {
     if (logsLink) {
       return (
-        // <Tooltip title={'Logs'}>
-        <a className={classes.link} href={logsLink} target={'_blank'} rel={'noopener noreferrer'}>
-          <AssignmentIcon />
-        </a>
-        // </Tooltip>
+        <Tooltip title={'Logs'} arrow>
+          <a className={classes.link} href={logsLink} target={'_blank'} rel={'noopener noreferrer'}>
+            <AssignmentIcon />
+          </a>
+        </Tooltip>
       );
     } else {
       return null;
@@ -111,10 +109,10 @@ export const StatusCell = React.memo<IProps>((props) => {
 
   // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (
-    <Tooltip title={tooltip || title} placement={'right'} arrow>
+    <Tooltip title={combineText(title, tooltip)} placement={'right'} arrow>
       <TableCell
         className={classes.cell}
-        style={{ backgroundColor, overflowX: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '0px', textAlign: 'center' }}
+        style={{ backgroundColor, maxWidth: title.length > 2 ? '180px' : '0px', minWidth: title.length > 2 ? '180px' : '0px' }}
       >
         {titleComponent}
         <br />
@@ -127,5 +125,13 @@ export const StatusCell = React.memo<IProps>((props) => {
   );
 });
 
-const TITLE_LENGTH = 10;
-const truncate = (input: string) => (input.length > TITLE_LENGTH ? `${input.substring(0, TITLE_LENGTH)}...` : input);
+const combineText = (title: string, tooltip?: string) => {
+  if (!tooltip) return title;
+  return <span>{tooltip}<br/><br/>{title}</span>;
+}
+
+const newlineCommas = (input : string) => {
+  const arr = input.split(', ');
+  if (arr.length === 1) return input;
+  return arr.map((text, i) => <span style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
+};

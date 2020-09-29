@@ -13,6 +13,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import logo from './logo-white.svg';
 import { HEADER_HEIGHT_REM } from '../../../theme/Theme';
+import { Typography } from '@material-ui/core';
 
 export const HOVER_COLOR = '#16faff';
 
@@ -29,6 +30,10 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     width: 70,
+  },
+  title: {
+    flexGrow: 1,
+    textAlign: 'center',
   },
   nav: {
     display: 'inherit',
@@ -79,6 +84,9 @@ export const Header = React.memo((props) => {
         <NavLink to="/">
           <img className={classes.logo} src={logo} alt="Orbs" />
         </NavLink>
+        <Typography variant="h2" className={classes.title}>
+          Network Status
+        </Typography>
       </Toolbar>
     </AppBar>
   );
