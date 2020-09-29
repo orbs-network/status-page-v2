@@ -40,3 +40,23 @@ Web based status page for Orbs Network (for V2).
   npm start
   open http://localhost/json
   ```
+  
+## Deploy (Heroku)
+
+* Install the heroku cli [https://devcenter.heroku.com/articles/heroku-command-line][heroku CLI]
+
+
+* Add heroku as a remote for git (Only once)
+  ```
+  npm run gitAddRemoteHeroku
+  ```
+  
+* Deploy
+  ```
+  npm run deployHeroku
+  ```
+  
+  
+
+
+[heroku CLI]: https://devcenter.heroku.com/articles/heroku-command-line
