@@ -29,7 +29,9 @@
     "dev": "npm run build && open http://localhost/json && nodemon -e js,ts --watch src --exec npm run start:dev",
     "start:dev": "npm run build && npm start",
     "postinstall": "cd src/status-page-client && npm i && npm run build",
-    "start": "node --async-stack-traces ./dist/main.js"
+    "start": "node --async-stack-traces ./dist/main.js",
+    "gitAddRemoteHeroku": "heroku login",
+    "deployHeroku": "git push heroku master"
   },
   "devDependencies": {
     "@types/express": "^4.17.3",
