@@ -45,13 +45,13 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
   const servicesIcons = useMemo(() => {
     return nodeServices.map((nodeService, index) => {
       const serviceStatusOK = nodeService.Status === HealthLevel.Green;
-      const servicesName = serviceNames[index]; // TODO : O.L : Merge data objects
+      const serviceName = serviceNames[index]; // TODO : O.L : Merge data objects
 
       const icon = serviceStatusOK ? <CheckIcon /> : <CloseIcon />;
-      const title = serviceStatusOK ? servicesName : `${servicesName} : ${nodeService.StatusMsg || nodeService.Status}`;
+      const title = serviceStatusOK ? serviceName : `${serviceName} : ${nodeService.StatusMsg || nodeService.Status}`;
 
       return (
-        <Tooltip title={title} key={servicesName} arrow>
+        <Tooltip title={createTooltip(serviceName, nodeService.StatusMsg , nodeService.StatusToolTip)} key={serviceName} arrow>
           <a className={classes.link} href={nodeService.URLs.Status} target={'_blank'} rel={'noopener noreferrer'}>
             {icon}
           </a>
@@ -64,3 +64,12 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
   // TODO : O.L : Find a better solution
   return <TableCell className={classes.cell} style={{backgroundColor}}>{servicesIcons}</TableCell>;
 });
+
+const createTooltip = (servicesName: string, status: string, error?: string) => {
+  return (
+    <span>{servicesName}:<br/>
+      {error ? <span>{error}<br/></span> : false}
+      {status}
+    </span>
+  );
+}

@@ -56,7 +56,7 @@ export const baseTheme = responsiveFontSizes(
         root: {
           width: '0.8em',
           height: '0.8em',
-          margin: '0 1px'
+          margin: '3px 2px 0px 0px'
         }
       }
     },

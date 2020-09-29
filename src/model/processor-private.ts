@@ -55,7 +55,7 @@ function readGuardians(mgmtData: any): Guardians {
       Logger.error(`Could not read a valid Topology, current network seems empty.`);
   }
   return _.mapValues(topology, (guardianData) => {
-    let ip = _.isString(guardianData.Endpoint) ? guardianData.Endpoint : '';
+    const ip = _.isString(guardianData.Endpoint) ? guardianData.Endpoint : '';
     return {
       EthAddress: guardianData.Address,
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
