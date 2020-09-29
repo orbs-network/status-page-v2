@@ -51,6 +51,13 @@ export const baseTheme = responsiveFontSizes(
           fontSize: '1rem',
           backgroundColor: '#606060f8'
         }
+      },
+      MuiSvgIcon: {
+        root: {
+          width: '0.8em',
+          height: '0.8em',
+          margin: '0 1px'
+        }
       }
     },
   })

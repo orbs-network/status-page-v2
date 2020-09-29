@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     width: '10rem',
     textAlign: 'center',
     borderBottom: '2px solid #cccccc20',
-    fontSize: '1.2rem',
+    fontSize: '1.2rem'
   },
 }));
 
@@ -69,12 +69,15 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell className={classes.headerCell}>Validators</TableCell>
-        <TableCell className={classes.headerCell}>Node services</TableCell>
+        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Validators</TableCell>
+        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Node services</TableCell>
         {headerServicesPlaceholders}
         {vcs.map((vc) => (
-          <TableCell className={classes.headerCell} key={vc.Id}>
-            {vc.Id} - {vc.Name}
+          <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
+            {vc.Id}
+            {
+              vc.Name ? `- ${vc.Name}` : false
+            } 
           </TableCell>
         ))}
       </TableRow>

@@ -83,11 +83,11 @@ export const StatusCell = React.memo<IProps>((props) => {
   const statusIcon = useMemo(() => {
     if (statusLink) {
       return (
-        // <Tooltip title={'Status'}>
-        <a className={classes.link} href={statusLink} target={'_blank'} rel={'noopener noreferrer'}>
-          <HelpIcon />
-        </a>
-        // </Tooltip>
+        <Tooltip title={'Status'} arrow>
+          <a className={classes.link} href={statusLink} target={'_blank'} rel={'noopener noreferrer'}>
+            <HelpIcon />
+          </a>
+        </Tooltip>
       );
     } else {
       return null;
@@ -97,11 +97,11 @@ export const StatusCell = React.memo<IProps>((props) => {
   const logsIcon = useMemo(() => {
     if (logsLink) {
       return (
-        // <Tooltip title={'Logs'}>
-        <a className={classes.link} href={logsLink} target={'_blank'} rel={'noopener noreferrer'}>
-          <AssignmentIcon />
-        </a>
-        // </Tooltip>
+        <Tooltip title={'Logs'} arrow>
+          <a className={classes.link} href={logsLink} target={'_blank'} rel={'noopener noreferrer'}>
+            <AssignmentIcon />
+          </a>
+        </Tooltip>
       );
     } else {
       return null;
