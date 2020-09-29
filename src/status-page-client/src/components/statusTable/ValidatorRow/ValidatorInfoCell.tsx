@@ -40,9 +40,19 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
       <Tooltip title={certifiedText} arrow>
         <VerifiedUserIcon style={{ color: certifiedColor }} />
       </Tooltip>
-      <Tooltip title={committeeText} arrow>
+      <Tooltip title={concatStake(committeeText, validator)} arrow>
         <SupervisedUserCircleIcon style={{ color: committeeColor }} />
       </Tooltip>
     </TableCell>
   );
 });
+
+const concatStake = (text: string, validator: Guardian) => {
+  return (
+    <span>
+      {text}
+      <br/>
+      {validator.EffectiveStake.toLocaleString()} ORBS
+    </span>
+  );
+};
