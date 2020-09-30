@@ -14,10 +14,13 @@ interface IProps {
 
 const useStyles = makeStyles((theme) => ({
   cell: {
-    textAlign: 'left', 
+    textAlign: 'left',
     borderBottom: '2px solid #cccccc20',
-    minWidth: '260px'
-  }
+    minWidth: '260px',
+  },
+  noMaxWidth: {
+    maxWidth: 'none',
+  },
 }));
 
 export const ValidatorInfoCell = React.memo<IProps>((props) => {
@@ -36,7 +39,23 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
       <CommonLink href={validator.Website}>
         <Typography style={{ fontWeight: 'bold' }}>{validator.Name}</Typography>
       </CommonLink>
-      <Typography>{validator.Ip}</Typography>
+      <Typography>
+        <Tooltip
+          arrow
+          interactive
+          placement="right"
+          classes={{ tooltip: classes.noMaxWidth }}
+          title={
+            <span>
+              Guardian: <code>0x{validator.EthAddress}</code>
+              <br />
+              Node: <code>0x{validator.OrbsAddress}</code>
+            </span>
+          }
+        >
+          <span>{validator.Ip}</span>
+        </Tooltip>
+      </Typography>
       <Tooltip title={certifiedText} arrow>
         <VerifiedUserIcon style={{ color: certifiedColor }} />
       </Tooltip>
@@ -51,7 +70,7 @@ const concatStake = (text: string, validator: Guardian) => {
   return (
     <span>
       {text}
-      <br/>
+      <br />
       {validator.EffectiveStake.toLocaleString()} ORBS
     </span>
   );
