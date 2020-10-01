@@ -84,7 +84,7 @@ function readGuardians(rootNodeData: any): Guardians {
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
       Ip: ip,
       Website: _.isString(guardianData.Website) ? guardianData.Website : '',
-      EffectiveStake: _.isNumber(guardianData.EffectiveStake) ? guardianData.EffectiveStake : 1,
+      EffectiveStake: _.isNumber(guardianData.EffectiveStake) ? guardianData.EffectiveStake : 0,
       IsCertified: _.isNumber(guardianData.IdentityType) ? guardianData.IdentityType === 1 : false,
       OrbsAddress: _.isString(guardianData.OrbsAddress) ? guardianData.OrbsAddress : '',
       NodeManagementURL: URLs.generateNodeManagmentUrl(ip),
