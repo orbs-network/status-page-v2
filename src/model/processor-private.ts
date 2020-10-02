@@ -62,7 +62,7 @@ function readGuardians(mgmtData: any): Guardians {
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
       Ip: ip,
       Website: '',
-      EffectiveStake: 1,
+      EffectiveStake: 0,
       IsCertified: false,
       OrbsAddress: guardianData.Address,
       NodeManagementURL: URLs.generateNodeManagmentUrl(ip),
