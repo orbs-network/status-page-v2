@@ -1,7 +1,4 @@
 import { HealthLevel } from '../../../shared/HealthLevel';
-import green from '@material-ui/core/colors/green';
-import yellow from '@material-ui/core/colors/yellow';
-import red from '@material-ui/core/colors/red';
 
 export function backgroundColorFromHealthLevel(healthLevel: HealthLevel) {
   switch (healthLevel) {
