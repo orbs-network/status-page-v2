@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Paper, Table, TableBody, TableContainer } from '@material-ui/core';
+import { Paper, Table, TableContainer } from '@material-ui/core';
 import { VirtualChain, Guardian, Service } from '../../../../model/model';
 import { StatusTableHeader } from './header/StatusTableHeader';
-import { toJS } from 'mobx';
-import { ValidatorRow } from './ValidatorRow/ValidatorRow';
 import { StatusTableBody } from './StatusTableBody';
 
 export interface ValidatorStatusGist {

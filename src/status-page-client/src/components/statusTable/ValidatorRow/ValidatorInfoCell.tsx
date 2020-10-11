@@ -32,7 +32,7 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
   const committeeColor = isInCommittee ? green[400] : red[400];
   const committeeText = isInCommittee ? 'In Committee' : 'Not in Committee';
   // TODO : O.L : Add reputation after it is implemented in the vc.
-  const reputation = null;
+  // const reputation = null;
 
   return (
     <TableCell className={classes.cell}>

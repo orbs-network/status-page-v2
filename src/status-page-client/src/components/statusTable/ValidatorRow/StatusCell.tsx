@@ -1,12 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { TableCell, Tooltip, Typography } from '@material-ui/core';
 import { HealthLevel } from '../../../shared/HealthLevel';
 import { makeStyles } from '@material-ui/core/styles';
-import WorkIcon from '@material-ui/icons/Work';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import green from '@material-ui/core/colors/green';
-import yellow from '@material-ui/core/colors/yellow';
-import red from '@material-ui/core/colors/red';
 import HelpIcon from '@material-ui/icons/Help';
 import { backgroundColorFromHealthLevel } from './statusTableUtils';
 
@@ -133,5 +129,5 @@ const combineText = (title: string, tooltip?: string) => {
 const newlineCommas = (input : string) => {
   const arr = input.split(', ');
   if (arr.length === 1) return input;
-  return arr.map((text, i) => <span style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
+  return arr.map((text, i) => <span key={i} style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
 };
