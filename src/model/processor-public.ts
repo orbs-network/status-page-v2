@@ -28,9 +28,9 @@ export async function updateModel(model: Model, config: Configuration) {
     // choose the services that exist in a public network
     Service.Boyar,
     Service.Signer,
+    Service.Logger,
     Service.Management,
     Service.EthereumWriter,
-    Service.Logger,
   ];
 
   const guardians = readGuardians(rootNodeData);
@@ -63,7 +63,7 @@ export async function updateModel(model: Model, config: Configuration) {
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {
   return _.map(rootNodeData.Payload.CurrentVirtualChains, (vcData, vcId) => {
-    let expirationTime = _.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
+    const expirationTime = _.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
     if (expirationTime > 0) {
@@ -91,7 +91,7 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
 
 function readGuardians(rootNodeData: any): Guardians {
   return _.mapValues(rootNodeData.Payload.Guardians, (guardianData) => {
-    let ip = _.isString(guardianData.Ip) ? guardianData.Ip : '';
+    const ip = _.isString(guardianData.Ip) ? guardianData.Ip : '';
     return {
       EthAddress: guardianData.EthAddress,
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
@@ -116,7 +116,7 @@ function readGuardians(rootNodeData: any): Guardians {
 async function calcReputation(url: string, committeeMembers: Guardians) {
   const data = await fetchJson(url);
 
-  let orbsToEthAddr: { [key: string]: string } = {};
+  const orbsToEthAddr: { [key: string]: string } = {};
   _.map(committeeMembers, (node) => {
     orbsToEthAddr[node.OrbsAddress] = node.EthAddress;
   });
@@ -140,7 +140,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   const allBadReputation = data.Payload?.TimeEnteredBadReputation || {};
   _.map(allBadReputation, (badRepData, nodeId: string) => {
     if (_.has(committeeMembers, nodeId)) {
-      let vcBadRep = committeeMembers[nodeId].NodeReputation.NodeVirtualChainBadReputations;
+      const vcBadRep = committeeMembers[nodeId].NodeReputation.NodeVirtualChainBadReputations;
       _.map(badRepData, (badRep: number, vcId: string) => {
         vcBadRep[vcId] = badRep;
       });
@@ -150,7 +150,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   });
 
   _.map(committeeMembers, (node) => {
-    let rep = node.NodeReputation;
+    const rep = node.NodeReputation;
     let result: string[] = [];
     _.map(rep.NodeVirtualChainBadReputations, (value, key) => {
       if (value !== 0) {

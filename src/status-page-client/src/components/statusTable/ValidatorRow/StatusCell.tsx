@@ -108,7 +108,7 @@ export const StatusCell = React.memo<IProps>((props) => {
     <Tooltip title={combineText(title, tooltip)} placement={'right'} arrow>
       <TableCell
         className={classes.cell}
-        style={{ backgroundColor, maxWidth: title.length > 2 ? '180px' : '0px', minWidth: title.length > 2 ? '180px' : '0px' }}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '0px', minWidth: isLongCell(title) ? '180px' : '0px' }}
       >
         {titleComponent}
         <br />
@@ -131,3 +131,11 @@ const newlineCommas = (input : string) => {
   if (arr.length === 1) return input;
   return arr.map((text, i) => <span key={i} style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
 };
+
+// should the cell be short or long
+const isLongCell = (title : string) => {
+  const lc = title.toLowerCase();
+  if (lc === 'ok') return false;
+  if (lc === 'started') return false;
+  return true;
+}
