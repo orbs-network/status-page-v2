@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Configuration, NetworkType } from '../config';
-import { fetchJson, isStaleTime } from '../helpers';
+import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
 import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder } from './model';
 import * as Public from './processor-public';
@@ -87,7 +87,8 @@ export class Processor {
         vcStatusData.Payload?.Management?.Protocol?.Current || 0,
       );
     } catch (err) {
-      return nodeVirtualChainBuilder(urls, `${err}`, HealthLevel.Red, `${err}`);
+      Logger.error(`Error while attemtping to fetch status of Node Virtual Chain ${node.Name}(${node.Ip}): ${err}`);
+      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Red, `HTTP gateway for node may be down, status endpoint does not respond`);
     }
   }
 
@@ -126,7 +127,8 @@ export class Processor {
         versionTag,
       );
     } catch (err) {
-      return nodeServiceBuilder(urls, `${err}`, HealthLevel.Red, `${err}`);
+      Logger.error(`Error while attemtping to fetch status of Node Service ${service.Name}: ${err}`);
+      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
   }
 
@@ -141,8 +143,8 @@ export class Processor {
       healthLevelToolTip = 'Missing timestamp field. Information may be stale information.';
     }
     else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
-      healthLevel = HealthLevel.Yellow;
-      healthLevelToolTip = `Information is stale, was updated on ${timestamp}`;
+      healthLevel = HealthLevel.Red;
+      healthLevelToolTip = `Information is stale, was updated ${timeAgoText(timestamp)}`;
     }
     return { healthLevel, healthLevelToolTip };
   }

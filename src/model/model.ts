@@ -1,6 +1,7 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp: string = '';
+  StatusMsg: string = '';
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};

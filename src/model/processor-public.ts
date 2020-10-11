@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Configuration } from '../config';
-import { fetchJson, isStaleTime, getCurrentClockTime } from '../helpers';
+import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
 import { Model, VirtualChain, Service, Guardians, HealthLevel } from './model';
 import * as URLs from './url-generator';
@@ -11,10 +11,17 @@ const EthWriterStatusSuffix = '/services/ethereum-writer/status';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeData = await fetchJson(`${config.RootNodeEndpoint}${ManagementStatusSuffix}`);
+  const timestamp = rootNodeData.Timestamp || '';
+  if (timestamp === '' || isStaleTime(timestamp, config.StaleStatusTimeSeconds)) {
+    model.StatusMsg = `Network information is stale, was updated ${timeAgoText(timestamp)}. `;
+    Logger.error(model.StatusMsg);
+  }
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
   if (_.size(virtualChainList) === 0 ) {
-    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
+    const msg = `Could not read valid Virtual Chains, current network seems not to be running any. `
+    model.StatusMsg += msg;
+    Logger.error(msg);
   }
 
   const services = [
@@ -30,7 +37,9 @@ export async function updateModel(model: Model, config: Configuration) {
   const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
   const committeeMembers = _.pick(guardians, committeeMembersAddresses);
   if (_.size(committeeMembers) === 0 ) {
-    Logger.error(`Could not read a valid Committee, current network seems empty.`);
+    const msg = `Could not read a valid Committee, current network seems empty. `;
+    model.StatusMsg += msg;
+    Logger.error(msg);
   }
   const standbyMembersAddresses = _.map(
     _.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby),
@@ -38,7 +47,11 @@ export async function updateModel(model: Model, config: Configuration) {
   );
   const standByMembers = _.pick(guardians, standbyMembersAddresses);
 
-  calcReputation(`${config.RootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+  try {
+    calcReputation(`${config.RootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+  } catch (e) {
+    Logger.error(`Error while attemtping to fetch etherum reputation data. skipping: ${e}`);
+  }
 
   model.TimeSeconds = getCurrentClockTime();
   model.Timestamp = new Date().toISOString();
