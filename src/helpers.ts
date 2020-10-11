@@ -30,6 +30,23 @@ export function isStaleTime(referenceTimeSeconds: number | string, differenceSec
   return currentTime > referenceTimeSeconds + differenceSeconds;
 }
 
+export function timeAgoText(timeAgo:number | string): string {
+  const currentTime = getCurrentClockTime();
+  if (_.isString(timeAgo)) {
+    timeAgo = Math.round(new Date(timeAgo).valueOf() / 1000);
+  }
+  const diff = currentTime - timeAgo;
+  if (diff < 60) {
+    return `${diff} seconds ago`;
+  } else if (diff < 3600) {
+    return `${Math.round(diff/60)} minute(s) and ${diff%60} seconds ago`;
+  } else if (diff < 86400) {
+    return `more than ${Math.round(diff/3600)} hour(s) ago`
+  } else {
+    return `more than ${Math.round(diff/86400)} day(s) ago`
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonResponse = any;
 
