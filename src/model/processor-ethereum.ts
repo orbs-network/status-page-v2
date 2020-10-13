@@ -19,9 +19,10 @@ export async function getEthereumStatus(config: Configuration): Promise<Ethereum
     const block = await web3.eth.getBlock('latest');
     const events = await stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
+
     events.sort((n1:any, n2:any) => n2.blockNumber - n1.blockNumber); // sort desc
     for (let event of events) {
-        if (event.event === 'Stake' || event.event === 'Unstake') {
+        if (event.event === 'Staked' || event.event === 'Unstaked') {
             const eventBlock = await web3.eth.getBlock(event.blockNumber);
             lastEventTime = Number(eventBlock.timestamp);
             break;
@@ -29,10 +30,10 @@ export async function getEthereumStatus(config: Configuration): Promise<Ethereum
     }
 
     let healthMessage = '';
-    if (stakingRewardsBalance < config.MinBlance) {
+    if (stakingRewardsBalance < config.MinStakingBlance) {
         healthMessage += `Staking Reward Balance ${stakingRewardsBalance} bellow minimum. `;
     }
-    if (bootstrapRewardsBalance < config.MinBlance) {
+    if (bootstrapRewardsBalance < config.MinBootstrapBlance) {
         healthMessage += `Bootstrap Reward Balance ${bootstrapRewardsBalance} bellow minimum. `;
     }
     if (lastEventTime + config.MaxTimeSinceLastEvent < getCurrentClockTime() ) {
