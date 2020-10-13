@@ -13,7 +13,8 @@ export interface Configuration {
   StakingRewardsAddress: string;
   BootstrapRewardsAddress: string;
   StakingAddress: string;
-  MinBlance: number;
+  MinStakingBlance: number;
+  MinBootstrapBlance: number;
   MaxTimeSinceLastEvent: number;
 }
 
@@ -63,11 +64,17 @@ export function validateConfiguration(config: Configuration) {
     if (!config.StakingAddress) {
       throw new Error(`StakingAddress is empty.`);
     }
-    if (typeof config.MinBlance != 'number') {
-      throw new Error(`MinBlance is not a number.`);
+    if (typeof config.MinStakingBlance != 'number') {
+      throw new Error(`MinStakingBlance is not a number.`);
     }
-    if (config.MinBlance <= 0) {
-      throw new Error(`MinBlance is empty, zero or negative.`);
+    if (config.MinStakingBlance <= 0) {
+      throw new Error(`MinStakingBlance is empty, zero or negative.`);
+    }
+    if (typeof config.MinBootstrapBlance != 'number') {
+      throw new Error(`MinBootstrapBlance is not a number.`);
+    }
+    if (config.MinBootstrapBlance <= 0) {
+      throw new Error(`MinBootstrapBlance is empty, zero or negative.`);
     }
     if (typeof config.MaxTimeSinceLastEvent != 'number') {
       throw new Error(`MaxTimeSinceLastEvent is not a number.`);
