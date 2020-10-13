@@ -1,25 +1,26 @@
 export interface Configuration {
+  // server settings
   Port: number;
   ProcessorPollTimeSeconds: number;
-  NetworkType: NetworkType;
-  RootNodeEndpoint: string;
+  // staleness
   StaleStatusTimeSeconds: number;
   ExpirationWarningTimeInDays: number;
+  // network
+  NetworkType: NetworkType;
+  RootNodeEndpoints: string[];
+  // ethereum
+  EthereumEndpoint: string;
+  StakingRewardsAddress: string;
+  BootstrapRewardsAddress: string;
+  StakingAddress: string;
+  MinBlance: number;
+  MaxTimeSinceLastEvent: number;
 }
 
 export enum NetworkType {
   Public = 'public',
   Private = 'private',
 }
-
-export const defaultConfiguration = {
-  Port: 80,
-  ProcessorPollTimeSeconds: 5 * 60,
-  NetworkType: NetworkType.Public,
-  RootNodeEndpoint: 'http://34.255.138.28',
-  StaleStatusTimeSeconds: 15 * 60,
-  ExpirationWarningTimeInDays: 30,
-};
 
 export function validateConfiguration(config: Configuration) {
   if (!config.Port) {
@@ -34,22 +35,45 @@ export function validateConfiguration(config: Configuration) {
   if (typeof config.ProcessorPollTimeSeconds != 'number') {
     throw new Error(`ProcessorPollTimeSeconds is not a number.`);
   }
-  if (!config.NetworkType) {
-    throw new Error(`NetworkType is empty in config.`);
+  if (!config.NetworkType || !(config.NetworkType === NetworkType.Private || config.NetworkType === NetworkType.Public)) {
+    throw new Error(`NetworkType is empty (or wrong) in config.`);
   }
-  if (!config.RootNodeEndpoint) {
-    throw new Error(`RootNodeEndpoint is empty in config.`);
-  }
-  if (!config.StaleStatusTimeSeconds) {
-    throw new Error(`StaleStatusTimeSeconds is empty or zero.`);
+  if (!config.RootNodeEndpoints || config.RootNodeEndpoints.length === 0 || config.RootNodeEndpoints[0] === '') {
+    throw new Error(`RootNodeEndpoints is empty in config.`);
   }
   if (typeof config.StaleStatusTimeSeconds != 'number') {
     throw new Error(`StaleStatusTimeSeconds is not a number.`);
   }
-  if (!config.ExpirationWarningTimeInDays) {
-    throw new Error(`ExpirationWarningTimeInDays is empty or zero.`);
+  if (!config.StaleStatusTimeSeconds || config.StaleStatusTimeSeconds <= 0) {
+    throw new Error(`StaleStatusTimeSeconds is empty, zero or negative.`);
   }
   if (typeof config.ExpirationWarningTimeInDays != 'number') {
     throw new Error(`ExpirationWarningTimeInDays is not a number.`);
+  }
+  if (!config.ExpirationWarningTimeInDays || config.ExpirationWarningTimeInDays <= 0) {
+    throw new Error(`ExpirationWarningTimeInDays is empty, zero or negative.`);
+  }
+  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
+    if (!config.StakingRewardsAddress) {
+      throw new Error(`StakingRewardsAddress is empty.`);
+    }
+    if (!config.BootstrapRewardsAddress) {
+      throw new Error(`StaleStatusTimeSeconds is empty.`);
+    }
+    if (!config.StakingAddress) {
+      throw new Error(`StakingAddress is empty.`);
+    }
+    if (typeof config.MinBlance != 'number') {
+      throw new Error(`MinBlance is not a number.`);
+    }
+    if (config.MinBlance <= 0) {
+      throw new Error(`MinBlance is empty, zero or negative.`);
+    }
+    if (typeof config.MaxTimeSinceLastEvent != 'number') {
+      throw new Error(`MaxTimeSinceLastEvent is not a number.`);
+    }  
+    if (config.MaxTimeSinceLastEvent <= 0) {
+      throw new Error(`StakingAddress is empty, zero or negative.`);
+    }
   }
 }
