@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Fade, TableCell, TableRow, Typography } from '@material-ui/core';
+import { TableRow } from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';

@@ -6,7 +6,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { baseTheme } from './theme/Theme';
 
-import { makeStyles, StylesProvider, ThemeProvider } from '@material-ui/core/styles';
+import { StylesProvider, ThemeProvider } from '@material-ui/core/styles';
 
 interface IProps {}
 

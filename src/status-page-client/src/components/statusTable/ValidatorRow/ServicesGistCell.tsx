@@ -48,7 +48,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
       const serviceName = serviceNames[index]; // TODO : O.L : Merge data objects
 
       const icon = serviceStatusOK ? <CheckIcon /> : <CloseIcon />;
-      const title = serviceStatusOK ? serviceName : `${serviceName} : ${nodeService.StatusMsg || nodeService.Status}`;
+      // const title = serviceStatusOK ? serviceName : `${serviceName} : ${nodeService.StatusMsg || nodeService.Status}`;
 
       return (
         <Tooltip title={createTooltip(serviceName, nodeService.StatusMsg , nodeService.StatusToolTip)} key={serviceName} arrow>

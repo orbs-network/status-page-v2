@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { useStatusStore } from '../store/storeHooks';
 import { toJS } from 'mobx';
 import { Page } from '../components/structure/Page';
-import { StatusTable, ValidatorStatusGist, VcGist } from '../components/statusTable/StatusTable';
+import { StatusTable, ValidatorStatusGist } from '../components/statusTable/StatusTable';
 
 interface IProps {}
 

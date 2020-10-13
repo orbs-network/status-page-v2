@@ -1,12 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { TableCell, Tooltip, Typography } from '@material-ui/core';
 import { HealthLevel } from '../../../shared/HealthLevel';
 import { makeStyles } from '@material-ui/core/styles';
-import WorkIcon from '@material-ui/icons/Work';
 import AssignmentIcon from '@material-ui/icons/Assignment';
-import green from '@material-ui/core/colors/green';
-import yellow from '@material-ui/core/colors/yellow';
-import red from '@material-ui/core/colors/red';
 import HelpIcon from '@material-ui/icons/Help';
 import { backgroundColorFromHealthLevel } from './statusTableUtils';
 
@@ -112,7 +108,7 @@ export const StatusCell = React.memo<IProps>((props) => {
     <Tooltip title={combineText(title, tooltip)} placement={'right'} arrow>
       <TableCell
         className={classes.cell}
-        style={{ backgroundColor, maxWidth: title.length > 2 ? '180px' : '0px', minWidth: title.length > 2 ? '180px' : '0px' }}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '0px', minWidth: isLongCell(title) ? '180px' : '0px' }}
       >
         {titleComponent}
         <br />
@@ -133,5 +129,13 @@ const combineText = (title: string, tooltip?: string) => {
 const newlineCommas = (input : string) => {
   const arr = input.split(', ');
   if (arr.length === 1) return input;
-  return arr.map((text, i) => <span style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
+  return arr.map((text, i) => <span key={i} style={{fontSize: '0.8rem'}}>{text}{i !== arr.length-1 ? <br/> : false}</span>)
 };
+
+// should the cell be short or long
+const isLongCell = (title : string) => {
+  const lc = title.toLowerCase();
+  if (lc === 'ok') return false;
+  if (lc === 'started') return false;
+  return true;
+}

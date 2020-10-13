@@ -4,7 +4,6 @@ import { VirtualChain } from '../../../../../model/model';
 import moment from 'moment';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
-import { green, orange, red } from '@material-ui/core/colors';
 import { backgroundColorFromHealthLevel } from '../ValidatorRow/statusTableUtils';
 import { HealthLevel } from '../../../shared/HealthLevel';
 
