@@ -1,11 +1,19 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp: string = '';
-  StatusMsg: string = '';
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
   StandByNodes: Guardians = {};
+  EthereumStatus?: EthereumStatus = undefined; // only public-network
+}
+
+export interface EthereumStatus {
+  StakingRewardsBalance: number;
+  BootstrapRewardsBalance: number;
+  LastStakeUnstakeTime: number;
+  Status: HealthLevel;
+  StatusMessage: string;
 }
 
 export enum HealthLevel {
@@ -56,7 +64,7 @@ export interface Guardian {
   NodeManagementURL: string;
   NodeVirtualChains: NodeVirtualChains;
   NodeServices: NodeServices;
-  NodeReputation: NodeReputation;
+  NodeReputation: NodeReputation; // only public
 }
 
 export interface NodeServiceUrls {

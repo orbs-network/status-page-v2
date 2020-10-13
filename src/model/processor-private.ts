@@ -7,9 +7,23 @@ import * as Logger from '../logger';
 
 // Important URLS for private-network - init explore of network from these.
 const NodeManagementSuffix = ':7666/node/management';
+const Protocol = 'http://';
 
 export async function updateModel(model: Model, config: Configuration) {
-  const rootNodeData = await fetchJson(`${config.RootNodeEndpoint}${NodeManagementSuffix}`);
+  const rootNodeEndpoints = config.RootNodeEndpoints;
+  for(const rootNodeEndpoint of rootNodeEndpoints) {
+      try {
+          return readData(model, rootNodeEndpoint);
+      } catch (e) {
+          Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another.`)
+      }
+  }
+
+  throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`)
+}
+
+async function readData(model: Model, rootNodeEndpoint: string) {
+  const rootNodeData = await fetchJson(`${Protocol}${rootNodeEndpoint}${NodeManagementSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData);
   if (_.size(virtualChainList) === 0 ) {
@@ -23,7 +37,7 @@ export async function updateModel(model: Model, config: Configuration) {
     Service.Logger,
   ];
 
-  const vcMgmtData = await fetchJson(`${config.RootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
+  const vcMgmtData = await fetchJson(`${Protocol}${rootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
   const guardaisn = _.keyBy(readGuardians(vcMgmtData), (o) => o.EthAddress);
 
   model.TimeSeconds = getCurrentClockTime();

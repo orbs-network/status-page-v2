@@ -1,7 +1,8 @@
-import { Configuration, validateConfiguration, defaultConfiguration } from './config';
 import yargs from 'yargs';
-import { readFileSync } from 'fs';
 import * as Logger from './logger';
+import { readFileSync } from 'fs';
+import { Configuration, validateConfiguration } from './config';
+import { defaultConfiguration } from './config.default';
 
 export function parseArgs(argv: string[]): Configuration {
   let res: Configuration;

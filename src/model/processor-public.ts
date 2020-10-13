@@ -1,27 +1,35 @@
 import _ from 'lodash';
+import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import * as Logger from '../logger';
 import { Model, VirtualChain, Service, Guardians, HealthLevel } from './model';
+import { generateErrorEthereumStatus, getEthereumStatus } from './processor-ethereum';
 import * as URLs from './url-generator';
 
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
+const Protocol = 'http://';
 
 export async function updateModel(model: Model, config: Configuration) {
-  const rootNodeData = await fetchJson(`${config.RootNodeEndpoint}${ManagementStatusSuffix}`);
-  const timestamp = rootNodeData.Timestamp || '';
-  if (timestamp === '' || isStaleTime(timestamp, config.StaleStatusTimeSeconds)) {
-    model.StatusMsg = `Network information is stale, was updated ${timeAgoText(timestamp)}. `;
-    Logger.error(model.StatusMsg);
+  const rootNodeEndpoints = config.RootNodeEndpoints;
+  for(const rootNodeEndpoint of rootNodeEndpoints) {
+      try {
+          return await readData(model, rootNodeEndpoint, config);
+      } catch (e) {
+          Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another.`)
+      }
   }
+
+  throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`)
+}
+
+async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
+  const rootNodeData = await fetchJson(`${Protocol}${rootNodeEndpoint}${ManagementStatusSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
   if (_.size(virtualChainList) === 0 ) {
-    const msg = `Could not read valid Virtual Chains, current network seems not to be running any. `
-    model.StatusMsg += msg;
-    Logger.error(msg);
+    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
   }
 
   const services = [
@@ -33,24 +41,38 @@ export async function updateModel(model: Model, config: Configuration) {
     Service.Logger,
   ];
 
-  const guardians = readGuardians(rootNodeData);
-  const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
-  const committeeMembers = _.pick(guardians, committeeMembersAddresses);
-  if (_.size(committeeMembers) === 0 ) {
-    const msg = `Could not read a valid Committee, current network seems empty. `;
-    model.StatusMsg += msg;
-    Logger.error(msg);
-  }
-  const standbyMembersAddresses = _.map(
-    _.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby),
-    'EthAddress'
-  );
-  const standByMembers = _.pick(guardians, standbyMembersAddresses);
+  let committeeMembers = {};
+  let standByMembers = {};
 
-  try {
-    calcReputation(`${config.RootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
-  } catch (e) {
-    Logger.error(`Error while attemtping to fetch etherum reputation data. skipping: ${e}`);
+  const guardians = readGuardians(rootNodeData);
+  // check in sync mode (stale ref) - remove guardians that are not me.
+  const currentRefTime = rootNodeData.Payload?.CurrentRefTime || 0;
+  if (isStaleTime(currentRefTime, config.StaleStatusTimeSeconds*4 /*1 hour*/)) {
+    committeeMembers = _.pickBy(guardians, (g) => g.Ip === rootNodeEndpoint);
+    Logger.log(`Network information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime): 'unknown time'}. Service might be syncing.`);
+  } else {  
+    const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
+    committeeMembers = _.pick(guardians, committeeMembersAddresses);
+    if (_.size(committeeMembers) === 0 ) {
+      Logger.error(`Could not read a valid Committee, current network seems empty.`);
+    }
+    const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
+    standByMembers = _.pick(guardians, standbyMembersAddresses);
+
+    try {
+      calcReputation(`${Protocol}${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+    } catch (e) {
+      Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
+    }
+  }
+
+  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
+    try {
+      model.EthereumStatus = await getEthereumStatus(config);
+    } catch (e) {
+      model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch ethereum status data: ${e}`);
+      Logger.error(model.EthereumStatus.StatusMessage);
+    }
   }
 
   model.TimeSeconds = getCurrentClockTime();
