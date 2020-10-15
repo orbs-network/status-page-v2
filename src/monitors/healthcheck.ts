@@ -12,20 +12,20 @@ import { Model } from "../model/model";
 import { checkStatusChange } from './status';
 
 export function healthCheck(oldModel:Model, newModel: Model, config: Configuration): string {
-    if (oldModel.TimeSeconds === 0){
-        return `Health Check: Status-Page-v2 just started runnig ...\n`;
-    } else if (_.size(newModel.CommitteeNodes) === 0) {
-        return `Health Check: Network seems to be empty of Committee Nodes ...\n`;
-    } else if (_.size(newModel.VirtualChains) === 0 ) {
-        return `Health Check: Network seems to have no Virtual-Chains defined ...\n`;
-    } else if (_.size(newModel.Services) === 0 ) {
-        return `Health Check: Network nodes seem to have no Services defined ...\n`;
-    } else if (timeForMorningMessage(oldModel.TimeSeconds, newModel.TimeSeconds, config.HealthCheckTimeOfDayInSeconds)) {
-        const msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
-        if (msg.length > 0) {
-            return msg;
-        } else {
-            return `Hello! its ${new Date().toUTCString()} and the network is purring like a kitten. All good!\n`
+    if (timeForMorningMessage(oldModel.TimeSeconds, newModel.TimeSeconds, config.HealthCheckTimeOfDayInSeconds)) {
+        if (_.size(newModel.CommitteeNodes) === 0) {
+            return `Health Check: Network seems to be empty of Committee Nodes ...\n`;
+        } else if (_.size(newModel.VirtualChains) === 0 ) {
+            return `Health Check: Network seems to have no Virtual-Chains defined ...\n`;
+        } else if (_.size(newModel.Services) === 0 ) {
+            return `Health Check: Network nodes seem to have no Services defined ...\n`;
+        } else  {
+            const msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
+            if (msg.length > 0) {
+                return msg;
+            } else {
+                return `Hello! its ${new Date().toUTCString()} and the network is purring like a kitten. All good!\n`
+            }
         }
     }
     return '';
