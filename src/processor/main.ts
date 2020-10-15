@@ -1,16 +1,28 @@
+/**
+ * Copyright 2020 the orbs-network/status-page-v2 authors
+ * This file is part of the orbs-network/status-page-v2 library in the Orbs project.
+ *
+ * This source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree.
+ * The above notice should be included in all copies or substantial portions of the software.
+ */
+
 import _ from 'lodash';
 import { Configuration, NetworkType } from '../config';
 import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder } from './model';
-import * as Public from './processor-public';
-import * as Private from './processor-private';
+import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder } from '../model/model';
+import * as Public from './public-net';
+import * as Private from './private-net';
 import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
+import { Monitors } from '../monitors/main';
 
 export class Processor {
   private model = new Model();
+  private monitors: Monitors;
 
-  constructor(private config: Configuration) {}
+  constructor(private config: Configuration) {
+    this.monitors = new Monitors(this.config);
+  }
 
   getModel(): Model {
     return this.model;
@@ -27,6 +39,7 @@ export class Processor {
       } else {
         await Private.updateModel(newModel, this.config);
       }
+      Logger.log('Processor: finished discovering nodes to query.');
 
       // read all the different url-generated datas
       let tasks: Promise<any>[] = [];
@@ -35,7 +48,14 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
+      this.generateOnlyUrls(newModel.AllRegisteredNodes, newModel.VirtualChains, newModel.Services);
+      Logger.log('Processor: finished query all nodes/vcs/services.');
 
+      // monitoring
+      this.monitors.run(this.model, newModel);
+      Logger.log('Processor: finished monitoring.');
+
+      // update model
       this.model = newModel;
     } catch (e) {
       Logger.error(`Failed to update model, error: ${e}. Skipping ... `);
@@ -130,6 +150,13 @@ export class Processor {
       Logger.error(`Error while attemtping to fetch status of Node Service ${service.Name}: ${err}`);
       return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
+  }
+
+  private generateOnlyUrls(guardians: Guardians, virtualChains: VirtualChain[], services: Service[]){ 
+    _.forOwn(guardians, g => {
+      _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id)));
+      _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service)));
+    });
   }
 
   private healthLevel(errMsg: string, timestamp: string) {
