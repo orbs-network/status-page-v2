@@ -1,7 +1,15 @@
+/**
+ * Copyright 2020 the orbs-network/status-page-v2 authors
+ * This file is part of the orbs-network/status-page-v2 library in the Orbs project.
+ *
+ * This source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree.
+ * The above notice should be included in all copies or substantial portions of the software.
+ */
+
 import _ from 'lodash';
 import { Configuration } from '../config';
 import { fetchJson, getCurrentClockTime } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel } from './model';
+import { Model, VirtualChain, Service, Guardians, HealthLevel } from '../model/model';
 import * as URLs from './url-generator';
 import * as Logger from '../logger';
 
@@ -38,14 +46,15 @@ async function readData(model: Model, rootNodeEndpoint: string) {
   ];
 
   const vcMgmtData = await fetchJson(`${Protocol}${rootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
-  const guardaisn = _.keyBy(readGuardians(vcMgmtData), (o) => o.EthAddress);
+  const guardians = _.keyBy(readGuardians(vcMgmtData), (o) => o.EthAddress);
 
   model.TimeSeconds = getCurrentClockTime();
   model.Timestamp = new Date().toISOString();
   model.VirtualChains = virtualChainList;
   model.Services = services;
-  model.CommitteeNodes = guardaisn;
+  model.CommitteeNodes = guardians;
   model.StandByNodes = {};
+  model.AllRegisteredNodes = {};
 }
 
 function readVirtualChains(rootNodeData: any): VirtualChain[] {

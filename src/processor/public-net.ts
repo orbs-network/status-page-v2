@@ -1,9 +1,17 @@
+/**
+ * Copyright 2020 the orbs-network/status-page-v2 authors
+ * This file is part of the orbs-network/status-page-v2 library in the Orbs project.
+ *
+ * This source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree.
+ * The above notice should be included in all copies or substantial portions of the software.
+ */
+
 import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel } from './model';
-import { generateErrorEthereumStatus, getEthereumStatus } from './processor-ethereum';
+import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian } from '../model/model';
+import { generateErrorEthereumStatus, getEthereumStatus } from './ethereum';
 import * as URLs from './url-generator';
 
 // Important URLS for public-network - init explore of network from these.
@@ -71,7 +79,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.EthereumStatus = await getEthereumStatus(config);
     } catch (e) {
       model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch ethereum status data: ${e}`);
-      Logger.error(model.EthereumStatus.StatusMessage);
+      Logger.error(model.EthereumStatus.StatusToolTip);
     }
   }
 
@@ -81,6 +89,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.Services = services;
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
+  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardian(g)});
 }
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {
@@ -133,6 +142,27 @@ function readGuardians(rootNodeData: any): Guardians {
       },
     };
   });
+}
+
+function copyGuardian(guardianData: Guardian): Guardian {
+  return {
+    EthAddress: guardianData.EthAddress,
+    Name: guardianData.Name ,
+    Ip: guardianData.Ip,
+    Website: guardianData.Website,
+    EffectiveStake: guardianData.EffectiveStake,
+    IsCertified: guardianData.IsCertified,
+    OrbsAddress: guardianData.OrbsAddress,
+    NodeManagementURL: URLs.generateNodeManagmentUrl(guardianData.Ip),
+    NodeVirtualChains: {},
+    NodeServices: {},
+    NodeReputation: {
+      NodeVirtualChainReputations: {},
+      NodeVirtualChainBadReputations: {},
+      ReputationStatus: HealthLevel.Green,
+      ReputationToolTip: '',
+    },
+  };
 }
 
 async function calcReputation(url: string, committeeMembers: Guardians) {
