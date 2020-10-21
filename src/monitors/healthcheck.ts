@@ -18,7 +18,7 @@ export function healthCheck(newModel: Model): string {
     } else if (_.size(newModel.Services) === 0 ) {
         return `Network nodes seem to have *no Services* defined ...\n`;
     } else  {
-        const msg = 'c' + checkStatusChange(new Model(), newModel); // see if there are any non health statuses
+        const msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
         if (msg.length > 0) {
             return `Network is not sunny ☔:\n${msg}`;
         } else {
