@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { TableCell, Tooltip } from '@material-ui/core';
 import { NodeService } from '../../../../../model/model';
 import { HealthLevel } from '../../../shared/HealthLevel';
-import { backgroundColorFromHealthLevel } from './statusTableUtils';
+import { backgroundColorFromHealthLevel } from '../../statusUtils';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';

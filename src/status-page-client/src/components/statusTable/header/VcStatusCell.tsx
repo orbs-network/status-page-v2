@@ -4,7 +4,7 @@ import { VirtualChain } from '../../../../../model/model';
 import moment from 'moment';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
 import NewReleasesIcon from '@material-ui/icons/NewReleases';
-import { backgroundColorFromHealthLevel } from '../ValidatorRow/statusTableUtils';
+import { backgroundColorFromHealthLevel } from '../../statusUtils';
 import { HealthLevel } from '../../../shared/HealthLevel';
 
 interface IProps {
