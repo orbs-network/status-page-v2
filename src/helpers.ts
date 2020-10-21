@@ -58,22 +58,23 @@ export function timeAgoText(timeAgo:number | string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonResponse = any;
 
-export async function fetchJson(url: string) {
-  return await retry(
+export async function fetchJson(url: string): Promise<JsonResponse> {
+  return retry(
     async () => {
       const response = await fetch(url, { timeout: 15000 });
       if (response.ok && String(response.headers.get('content-type')).toLowerCase().includes('application/json')) {
         try {
           const res = await response.json();
           if (res.error) {
-            throw new Error(`Invalid response for url '${url}`);
+            throw new Error(`Invalid response (json contains error) for url '${url}`);
           }
           return res;
         } catch (e) {
-          throw new Error(`Invalid response for url '${url}`);
+          throw new Error(`Invalid response (not json) for url '${url}`);
         }  
-     } else {
-        throw new Error(`Invalid response for url '${url}': Status Code: ${response.status}, Content-Type: ${response.headers.get('content-type')}, Content: ${await response.text()}`);
+      } else {
+        const t = await response.text();
+        throw new Error(`Invalid response for url '${url}': Status Code: ${response.status}, Content-Type: ${response.headers.get('content-type')}, Content: ${t.length > 150 ? t.substring(0,150) + '...' : t}`);
       }
     },
     { retries: 3, delay: 300 }

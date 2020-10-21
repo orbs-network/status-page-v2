@@ -17,13 +17,17 @@ export class Monitors {
   
     async run(oldModel:Model, newModel: Model) {
         if(this.config.SlackToken.length > 0) {
-            const msg = checkStatusChange(oldModel, newModel);
-            if (msg.length > 0) {
-                this.sendSlack(msg, this.config);
+            // if restart it is always time for morning message
+            if (this.timeForMorningMessage(oldModel.TimeSeconds, newModel.TimeSeconds)) {
+                const healthMsg = healthCheck(newModel);
+                const begMsg = oldModel.TimeSeconds <= 0
+                    ? 'Server (re)start'
+                    : 'Daily';
+                this.sendSlack(`${begMsg} Health Check: ${healthMsg}`, this.config);
             } else {
-                const healthMsg = healthCheck(oldModel, newModel, this.config);
-                if (healthMsg.length > 0) {
-                    this.sendSlack(healthMsg, this.config);
+                const msg = checkStatusChange(oldModel, newModel);
+                if (msg.length > 0) {
+                    this.sendSlack(`Network News: the following *new issue* are making it rain ☔:\n${msg}`, this.config);
                 }
             }
         }
@@ -31,9 +35,19 @@ export class Monitors {
 
     readonly slackUserName = 'StatusPageMonitor';
     readonly slackUserEmoji = ':desktop_computer:';
-    async sendSlack(message: string, config:Configuration) {
+    private async sendSlack(message: string, config:Configuration) {
       const slack = new WebClient(config.SlackToken);
       await slack.chat.postMessage({text : message, username: this.slackUserName, icon_emoji: this.slackUserEmoji, channel: config.SlackChannel});
+    }
+
+    private timeForMorningMessage(time0: number, time1: number): boolean {
+        return this.toSecondOfDay(time0) <= this.config.HealthCheckTimeOfDayInSeconds && 
+               this.config.HealthCheckTimeOfDayInSeconds <= this.toSecondOfDay(time1);
+    }
+    
+    private toSecondOfDay(time: number) {
+        const date = new Date(time * 1000);
+        return date.getUTCHours() * 3600 + date.getUTCMinutes() * 60 + date.getUTCSeconds();
     }
 }
 
