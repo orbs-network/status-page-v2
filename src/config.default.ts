@@ -27,7 +27,7 @@ export const defaultConfiguration: Configuration = {
   StakingRewardsAddress: String(process.env.STAKING_REWARD_ADDRESS),
   BootstrapRewardsAddress: String(process.env.BOOTSTRAP_REWARD_ADDRESS),
   StakingAddress: String(process.env.STAKING_ADDRESS),
-  MinStakingBlance: Number(process.env.MIN_STAKING_BALANCE) || 1,
-  MinBootstrapBlance: Number(process.env.MIN_BOOTSTRAP_BALANCE) || 1,
+  MinStakingBlance: Number(process.env.MIN_STAKING_BALANCE) || 1000,
+  MinBootstrapBlance: Number(process.env.MIN_BOOTSTRAP_BALANCE) || 33,
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SINCE_LAST_EVENT) || 86400,
 };

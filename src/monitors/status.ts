@@ -72,8 +72,5 @@ function errorMapToString(errorMap: ErrorMap): string {
             msg += `${k}: ${v.count} nodes seem to have a problem, first issue "${v.firstError}"\n`;
         };
     });
-    if ( msg.length > 0 ) {
-        return `Network News: the following new issues have occured:\n${msg}`
-    }
-    return '';
+    return msg;
 }

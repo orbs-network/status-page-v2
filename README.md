@@ -18,6 +18,9 @@ Web based status page for Orbs Network (for V2).
   npm install
   ```
 
+* Create enviroment variables.
+Quickest way is to copy the `.env.example` into `.env` and fill out all mandatory fields. Currently to use the ORBS mainnet the only thing you need is to add an infura api-key. If you run a private ORBS network, replace the NETWORK_TYPE & NETWORK_NODE_ENDPOINTS, and can remove all the Ethereum section.
+
 * Run server in developer mode (rebuilds and restarts server on every file change):
 
   ```
