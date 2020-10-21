@@ -25,7 +25,7 @@ export async function updateModel(model: Model, config: Configuration) {
       try {
           return await readData(model, rootNodeEndpoint, config);
       } catch (e) {
-          Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another.`)
+          Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
       }
   }
 
