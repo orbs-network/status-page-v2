@@ -21,11 +21,11 @@ export function serve(config: Configuration) {
   app.set('json spaces', 2);
 
   // Serves static files for the client
-  app.use(express.static(path.join(__dirname, '../src/status-page-client/build')));
+  app.use(express.static(path.join(__dirname, './status-page-client/build')));
 
   // Serves index file of client
   app.get('/', (_,res) => {
-    res.sendFile(path.join(__dirname, '../src/status-page-client/build/index.html'));
+    res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
   });
 
   app.get('/json', (_request, response) => {
