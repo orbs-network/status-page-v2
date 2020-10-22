@@ -21,7 +21,7 @@ export const defaultConfiguration: Configuration = {
   ExpirationWarningTimeInDays: Number(process.env.VC_EXPIRATION_WARN_DAYS) || 30,
 
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
-  RootNodeEndpoints: String(process.env.NETWORK_NODE_ENDPOINTS).split(','),
+  RootNodeEndpoints: process.env.NETWORK_NODE_ENDPOINTS ? String(process.env.NETWORK_NODE_ENDPOINTS).split(',') : [],
 
   EthereumEndpoint: String(process.env.ETHEREUM_ENDPOINT),
   StakingRewardsAddress: String(process.env.STAKING_REWARD_ADDRESS),

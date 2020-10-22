@@ -1,4 +1,4 @@
-import { HealthLevel } from '../../../shared/HealthLevel';
+import { HealthLevel } from '../shared/HealthLevel';
 
 export function backgroundColorFromHealthLevel(healthLevel: HealthLevel) {
   switch (healthLevel) {

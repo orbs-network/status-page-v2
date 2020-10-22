@@ -37,19 +37,19 @@ export async function getEthereumStatus(config: Configuration): Promise<Ethereum
         }
     }
 
-    let healthMessage = '';
+    const healthMessages = [];
     if (stakingRewardsBalance < config.MinStakingBlance) {
-        healthMessage += `Staking Reward Balance ${stakingRewardsBalance} bellow minimum. `;
+        healthMessages.push(`Staking rewards wallet balance (${Math.floor(stakingRewardsBalance)}) is below the threshold (${config.MinStakingBlance}).`);
     }
     if (bootstrapRewardsBalance < config.MinBootstrapBlance) {
-        healthMessage += `Bootstrap Reward Balance ${bootstrapRewardsBalance} bellow minimum. `;
+        healthMessages.push(`Bootstrap rewards wallet balance (${Math.floor(bootstrapRewardsBalance)}) is below the threshold (${config.MinBootstrapBlance}).`);
     }
     if (lastEventTime + config.MaxTimeSinceLastEvent < getCurrentClockTime() ) {
-        healthMessage += `Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `;
+        healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
     }
-    let healthLevel = healthMessage === '' ? HealthLevel.Green: HealthLevel.Red;
-    
-  
+    const healthMessage = healthMessages.join("\n") || "OK";
+    const healthLevel = healthMessages.length == 0 ? HealthLevel.Green: HealthLevel.Red;
+
     return {
         StakingRewardsBalance: stakingRewardsBalance,
         BootstrapRewardsBalance: bootstrapRewardsBalance,
@@ -89,4 +89,4 @@ function getContract(web3:any, abi:any, address: string) {
 
 function toTokenNumber(n: string):number {
     return new BigNumber(n).dividedBy("1e18").toNumber();
-  }
+}

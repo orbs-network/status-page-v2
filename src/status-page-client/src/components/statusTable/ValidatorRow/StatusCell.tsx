@@ -4,7 +4,7 @@ import { HealthLevel } from '../../../shared/HealthLevel';
 import { makeStyles } from '@material-ui/core/styles';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import HelpIcon from '@material-ui/icons/Help';
-import { backgroundColorFromHealthLevel } from './statusTableUtils';
+import { backgroundColorFromHealthLevel } from '../../statusUtils';
 
 interface IProps {
   title: string;
