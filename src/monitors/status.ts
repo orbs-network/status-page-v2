@@ -9,7 +9,11 @@
 import _ from 'lodash';
 import { Guardian, HealthLevel, Model } from "../model/model";
 
-interface ErrorMap {
+interface ErrorMap { // Network level errors
+    [key: string]: string;
+}
+
+interface ErrorCounterMap { // counter for each type of error for all nodes.
     [key: string]: ErrorAndCount;
 }
 class ErrorAndCount {
@@ -19,17 +23,23 @@ class ErrorAndCount {
 
 export function checkStatusChange(oldModel:Model, newModel: Model): string {
     const errorMap: ErrorMap = {};
-    _.forEach(newModel.VirtualChains, (v) => {errorMap[toVCTag(v.Id)] = new ErrorAndCount()});
-    _.forEach(newModel.Services, (v) => {errorMap[toServiceTag(v.Name)] = new ErrorAndCount()});
-    errorMap[toReputationTag()] = new ErrorAndCount();
+    const errorCounterMap: ErrorCounterMap = {};
+    _.forEach(newModel.VirtualChains, (v) => {errorCounterMap[toVCTag(v.Id)] = new ErrorAndCount()});
+    _.forEach(newModel.Services, (v) => {errorCounterMap[toServiceTag(v.Name)] = new ErrorAndCount()});
+    errorCounterMap[toReputationTag()] = new ErrorAndCount();
 
-    _.forOwn(newModel.CommitteeNodes, (g, key) => guardianStatusChange(oldModel.CommitteeNodes[key], g, errorMap));
-    _.forOwn(newModel.StandByNodes, (g, key) => guardianStatusChange(oldModel.StandByNodes[key], g, errorMap));
+    _.forOwn(newModel.CommitteeNodes, (g, key) => guardianStatusChange(oldModel.CommitteeNodes[key], g, errorCounterMap));
+    _.forOwn(newModel.StandByNodes, (g, key) => guardianStatusChange(oldModel.StandByNodes[key], g, errorCounterMap));
 
-    return errorMapToString(errorMap);
+    const oldEthStatus = oldModel?.EthereumStatus?.Status || HealthLevel.Green;
+    if (oldEthStatus === HealthLevel.Green && newModel?.EthereumStatus?.Status !== HealthLevel.Green) {
+        errorMap['PoS Contracts Health'] = newModel?.EthereumStatus?.StatusToolTip || 'Unknown';
+    }
+
+    return errorMapToString(errorMap, errorCounterMap);
 }
 
-function guardianStatusChange(oldModelGuardian:Guardian, newModelGuaridan:Guardian, errorMap: ErrorMap) {
+function guardianStatusChange(oldModelGuardian:Guardian, newModelGuaridan:Guardian, errorMap: ErrorCounterMap) {
     _.forOwn(newModelGuaridan.NodeVirtualChains, (vc, vcid) => {
         singleStatusChange(oldModelGuardian?.NodeVirtualChains[vcid]?.Status || HealthLevel.Green, vc.Status, vc.StatusToolTip, errorMap[toVCTag(vcid)]);
     });
@@ -65,9 +75,13 @@ function toReputationTag(): string {
     return 'Reputation';
 }
 
-function errorMapToString(errorMap: ErrorMap): string {
+function errorMapToString(errorMap: ErrorMap, errorCounterMap: ErrorCounterMap): string {
     let msg = '';
     _.forOwn(errorMap, (v, k) => {
+        msg += `${k}: new problematic status message: "${v}"\n`;
+    });
+
+    _.forOwn(errorCounterMap, (v, k) => {
         if (v.count > 0) {
             msg += `${k}: ${v.count} nodes seem to have a problem, first issue "${v.firstError}"\n`;
         };
