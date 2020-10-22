@@ -22,7 +22,7 @@ export function healthCheck(newModel: Model): string {
         if (msg.length > 0) {
             return `Network is not sunny ☔:\n${msg}`;
         } else {
-            return `Network is purring like a kitten :cat2:. All good!\n`
+            return `Network is purring like a kitten :cat2:. All good ☀️!\n`
         }
     }
 }
