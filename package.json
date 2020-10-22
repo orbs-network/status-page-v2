@@ -22,7 +22,7 @@
     "prebuild": "npm run clean",
     "heroku-prebuild": "cd src/status-page-client && npm i && npm run build",
     "build": "tsc --skipLibCheck -p ./tsconfig.prod.json && npm run copy_client_build",
-    "copy_client_build": "mkdir -p ./dist/status-page-client/build && cp -r src/status-page-client/build ./dist/status-page-client/build",
+    "copy_client_build": "mkdir -p ./dist/status-page-client/build && cp -r src/status-page-client/build/ ./dist/status-page-client/",
     "test": "ava --verbose --timeout=10m --serial",
     "test:quick": "echo '-- TEST --' && ava --verbose --timeout=10m --serial",
     "test:e2e": "ava --verbose --timeout=10m --serial --config ./ava.config.e2e.js",
