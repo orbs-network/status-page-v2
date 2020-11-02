@@ -76,7 +76,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
           <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
             {vc.Id}
             {
-              vc.Name ? `- ${vc.Name}` : false
+              vc.Name ? ` - ${vc.Name}` : false
             } 
           </TableCell>
         ))}
