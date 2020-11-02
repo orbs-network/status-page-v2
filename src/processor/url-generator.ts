@@ -9,7 +9,7 @@
 import { VirtualChainUrls, NodeServiceUrls, NodeVirtualChainUrls, Service } from '../model/model';
 
 const PrismSuffix = '.prism.orbs.network/';
-const SubscriptionUiPrefix = 'subscription.orbs.network/vc/';
+const SubscriptionUiPrefix = 'subscription.orbs.network/vc';
 export function generateVirtualChainUrls(vcId: string): VirtualChainUrls {
   return {
     Prism: `https://${vcId}${PrismSuffix}`,
@@ -26,15 +26,19 @@ export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirt
     Management: `http://${ip}:7666/vchains/${vcid}/management`,
     Logs: `http://${ip}/vchains/${vcid}${LogsSuffix}`,
     Version: '',
+    Metrics: `http://${ip}/vchains/${vcid}/metrics`,
   };
 }
 
 export function generateNodeServiceUrls(ip: string, service: Service): NodeServiceUrls {
-  return {
+  const res = {
     Status: `http://${ip}/services/${service.ServiceUrlName}${StatusSuffix}`,
     Logs: `http://${ip}/services/${service.ServiceUrlName}${LogsSuffix}`,
     Version: '',
+    Metrics: '',
   };
+  if (service.Name === 'Boyar') res.Metrics = `http://${ip}:9100/metrics`;
+  return res;
 }
 
 export function updateNodeServiceUrlsWithVersion(urls: NodeServiceUrls, repoUrl: string, version: string) {

@@ -80,6 +80,7 @@ export interface NodeServiceUrls {
   Status: string;
   Logs: string;
   Version: string;
+  Metrics: string;
 }
 
 export interface NodeVirtualChainUrls extends NodeServiceUrls {

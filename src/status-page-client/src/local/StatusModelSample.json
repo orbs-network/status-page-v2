@@ -13,7 +13,7 @@
       "SubscriptionStatusToolTip": "VirtualChain will expire in less than 30 days.",
       "VirtualChainUrls": {
         "Prism": "https://1000000.prism.orbs.network/",
-        "Subscription": "https://subscription.orbs.network/vc//1000000"
+        "Subscription": "https://subscription.orbs.network/vc/1000000"
       }
     }
   ],

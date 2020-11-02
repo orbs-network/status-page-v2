@@ -21,6 +21,7 @@ export const NodeVcStatusCell = React.memo<IProps>((props) => {
       tooltip={nodeVc.StatusToolTip}
       statusLink={nodeVc.URLs.Status}
       logsLink={nodeVc.URLs.Logs}
+      metricsLink={nodeVc.URLs.Metrics}
     />
   );
 });

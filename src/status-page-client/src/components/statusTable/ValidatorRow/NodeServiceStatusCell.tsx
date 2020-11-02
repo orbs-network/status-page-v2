@@ -19,6 +19,7 @@ export const NodeServiceStatusCell = React.memo<IProps>((props) => {
       tooltip={nodeService.StatusToolTip}
       statusLink={nodeService.URLs.Status}
       logsLink={nodeService.URLs.Logs}
+      metricsLink={nodeService.URLs.Metrics}
     />
   );
 });

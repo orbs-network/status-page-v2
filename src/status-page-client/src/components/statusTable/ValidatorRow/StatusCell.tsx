@@ -4,6 +4,7 @@ import { HealthLevel } from '../../../shared/HealthLevel';
 import { makeStyles } from '@material-ui/core/styles';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import HelpIcon from '@material-ui/icons/Help';
+import InsertChartIcon from '@material-ui/icons/InsertChart';
 import { backgroundColorFromHealthLevel } from '../../statusUtils';
 
 interface IProps {
@@ -17,6 +18,7 @@ interface IProps {
   // Icons links
   statusLink?: string;
   logsLink?: string;
+  metricsLink?: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
     overflowX: 'hidden', 
     textOverflow: 'ellipsis', 
     whiteSpace: 'nowrap', 
-    textAlign: 'left'
+    textAlign: 'left',
+    padding: '8px'
   },
   link: {
     textDecoration: 'none',
@@ -39,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const StatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
-  const { healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, statusLink } = props;
+  const { healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, metricsLink, statusLink } = props;
   const backgroundColor = backgroundColorFromHealthLevel(healthLevel);
   const titleComponent = useMemo(() => {
     let baseComponent = <Typography variant={'caption'}>{newlineCommas(title)}</Typography>;
@@ -59,7 +62,7 @@ export const StatusCell = React.memo<IProps>((props) => {
   }, [classes.link, title, titleLink]);
 
   const subTitleComponent = useMemo(() => {
-    let baseComponent = <Typography variant={'caption'}>{subTitle}</Typography>;
+    let baseComponent = <Typography variant={'caption'} style={{lineHeight: '25px', borderBottom: '1px dotted #ddd'}}>{subTitle}</Typography>;
     let finalComponent;
 
     if (subTitleLink) {
@@ -103,12 +106,26 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
   }, [classes.link, logsLink]);
 
+  const metricsIcon = useMemo(() => {
+    if (metricsLink) {
+      return (
+        <Tooltip title={'Metrics'} arrow>
+          <a className={classes.link} href={metricsLink} target={'_blank'} rel={'noopener noreferrer'}>
+            <InsertChartIcon />
+          </a>
+        </Tooltip>
+      );
+    } else {
+      return null;
+    }
+  }, [classes.link, metricsLink]);
+
   // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (
     <Tooltip title={combineText(title, tooltip)} placement={'right'} arrow>
       <TableCell
         className={classes.cell}
-        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '0px', minWidth: isLongCell(title) ? '180px' : '0px' }}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
       >
         {titleComponent}
         <br />
@@ -116,6 +133,7 @@ export const StatusCell = React.memo<IProps>((props) => {
         <br />
         {statusIcon}
         {logsIcon}
+        {metricsIcon}
       </TableCell>
     </Tooltip>
   );

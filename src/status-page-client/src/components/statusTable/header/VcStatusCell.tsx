@@ -3,7 +3,7 @@ import { TableCell, Tooltip, Typography } from '@material-ui/core';
 import { VirtualChain } from '../../../../../model/model';
 import moment from 'moment';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
-import NewReleasesIcon from '@material-ui/icons/NewReleases';
+import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import { backgroundColorFromHealthLevel } from '../../statusUtils';
 import { HealthLevel } from '../../../shared/HealthLevel';
 
@@ -53,7 +53,7 @@ export const VcStatusCell = React.memo<IProps>((props) => {
         ) : null}
         {vc.IsCanary ? (
           <Tooltip title={'Canary'} arrow>
-            <NewReleasesIcon />
+            <OfflineBoltIcon htmlColor='#ffd95c' />
           </Tooltip>
         ) : null}
       </TableCell>
