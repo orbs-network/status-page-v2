@@ -8,7 +8,7 @@
 
 export class Model {
   TimeSeconds = 0; // UTC seconds
-  Timestamp: string = '';
+  Timestamp = '';
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
@@ -54,8 +54,8 @@ export class Service {
   static Boyar = new Service('Boyar', 'boyar', 'https://github.com/orbs-network/boyarin/tree/');
   static Signer = new Service('Signer', 'signer', 'https://github.com/orbs-network/signer-service/tree/');
   static EthereumWriter = new Service('EthereumWriter', 'ethereum-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
-  static Logger = new Service('Logger', 'logs-service', 'https://github.com/orbs-network/rewards-service/tree/');
-  static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/logs-service/tree/');
+  static Logger = new Service('Logger', 'logs-service', 'https://github.com/orbs-network/logs-service/tree/');
+  static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
 }
 
 export interface Guardians {
@@ -104,14 +104,14 @@ export interface NodeVirtualChain {
 
 export function nodeVirtualChainBuilder(
   urls: NodeVirtualChainUrls,
-  statusMsg: string = '',
+  statusMsg = '',
   status: HealthLevel = HealthLevel.Green,
-  statusTooltip: string = '',
-  timestamp: string = '',
-  version: string = '',
-  blockHeight: number = 0,
-  blockHeightToolTip: string = '',
-  protocolVersion: number = 0
+  statusTooltip = '',
+  timestamp = '',
+  version = '',
+  blockHeight = 0,
+  blockHeightToolTip = '',
+  protocolVersion = 0
 ): NodeVirtualChain {
   return {
     StatusMsg: statusMsg,
@@ -141,11 +141,11 @@ export interface NodeService {
 
 export function nodeServiceBuilder(
   urls: NodeServiceUrls,
-  statusMsg: string = '',
+  statusMsg = '',
   status: HealthLevel = HealthLevel.Green,
-  statusTooltip: string = '',
-  timestamp: string = '',
-  version: string = ''
+  statusTooltip = '',
+  timestamp = '',
+  version = ''
 ): NodeService {
   return {
     StatusMsg: statusMsg,
