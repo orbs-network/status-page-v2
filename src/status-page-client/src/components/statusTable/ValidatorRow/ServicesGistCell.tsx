@@ -5,6 +5,7 @@ import { HealthLevel } from '../../../shared/HealthLevel';
 import { backgroundColorFromHealthLevel } from '../../statusUtils';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
+import SearchIcon from '@material-ui/icons/Search';
 import { makeStyles } from '@material-ui/core/styles';
 
 interface IProps {
@@ -35,9 +36,9 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
       return HealthLevel.Red;
     } else if (allHealthStatues.includes(HealthLevel.Yellow)) {
       return HealthLevel.Yellow;
-    } else {
+    } else if (allHealthStatues.includes(HealthLevel.Green)) {
       return HealthLevel.Green;
-    }
+    } else return HealthLevel.Gray;
   }, [nodeServices]);
 
   const backgroundColor = backgroundColorFromHealthLevel(aggregatedStatus);
@@ -45,9 +46,10 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
   const servicesIcons = useMemo(() => {
     return nodeServices.map((nodeService, index) => {
       const serviceStatusOK = nodeService.Status === HealthLevel.Green;
+      const serviceStatusUnknown = nodeService.Status === HealthLevel.Gray;
       const serviceName = serviceNames[index]; // TODO : O.L : Merge data objects
 
-      const icon = serviceStatusOK ? <CheckIcon /> : <CloseIcon />;
+      const icon = serviceStatusUnknown ? <SearchIcon /> : (serviceStatusOK ? <CheckIcon /> : <CloseIcon />);
       // const title = serviceStatusOK ? serviceName : `${serviceName} : ${nodeService.StatusMsg || nodeService.Status}`;
 
       return (

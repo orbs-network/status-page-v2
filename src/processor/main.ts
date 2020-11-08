@@ -33,7 +33,7 @@ export class Processor {
     try {
       Logger.log('Processor: waking up do refresh model.');
 
-      let newModel = new Model();
+      const newModel = new Model();
       if (this.config.NetworkType === NetworkType.Public) {
         await Public.updateModel(newModel, this.config);
       } else {
@@ -42,7 +42,7 @@ export class Processor {
       Logger.log('Processor: finished discovering nodes to query.');
 
       // read all the different url-generated datas
-      let tasks: Promise<any>[] = [];
+      const tasks: Promise<any>[] = [];
       tasks.push(...this.readNodesVirtualChains(newModel.CommitteeNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesVirtualChains(newModel.StandByNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
@@ -66,7 +66,7 @@ export class Processor {
    * Functions that are for all network types
    */
   private readNodesVirtualChains(nodes: Guardians, virtualChains: VirtualChain[]) {
-    let tasks: Promise<any>[] = [];
+    const tasks: Promise<any>[] = [];
     _.map(nodes, (node) => {
       _.forEach(virtualChains, (vc) => {
         tasks.push(
@@ -89,7 +89,7 @@ export class Processor {
 
       const errMsg = vcStatusData?.Error || '';
       const timestamp = vcStatusData.Timestamp || '';
-      let { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
+      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
       const inOrderBlockHeight = vcStatusData.Payload?.BlockStorage?.InOrderBlock?.BlockHeight || 0;
       const topBlockHeight = vcStatusData.Payload?.BlockStorage?.TopBlock?.BlockHeight || 0; //
@@ -113,7 +113,7 @@ export class Processor {
   }
 
   private readNodesServices(nodes: Guardians, services: Service[]) {
-    let tasks: Promise<any>[] = [];
+    const tasks: Promise<any>[] = [];
     _.map(nodes, (node) => {
       _.forEach(services, (service) => {
         tasks.push(
@@ -136,7 +136,7 @@ export class Processor {
 
       const errMsg = data?.Error || '';
       const timestamp = data.Timestamp || '';
-      let { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
+      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
       return nodeServiceBuilder(
         urls,
@@ -154,8 +154,8 @@ export class Processor {
 
   private generateOnlyUrls(guardians: Guardians, virtualChains: VirtualChain[], services: Service[]){ 
     _.forOwn(guardians, g => {
-      _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id)));
-      _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service)));
+      _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id), 'Unknown', HealthLevel.Gray));
+      _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service), 'Unknown', HealthLevel.Gray));
     });
   }
 

@@ -89,7 +89,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.Services = services;
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
-  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardian(g)});
+  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
 }
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {
@@ -144,7 +144,7 @@ function readGuardians(rootNodeData: any): Guardians {
   });
 }
 
-function copyGuardian(guardianData: Guardian): Guardian {
+function copyGuardianForAllRegistered(guardianData: Guardian): Guardian {
   return {
     EthAddress: guardianData.EthAddress,
     Name: guardianData.Name ,
@@ -159,7 +159,7 @@ function copyGuardian(guardianData: Guardian): Guardian {
     NodeReputation: {
       NodeVirtualChainReputations: {},
       NodeVirtualChainBadReputations: {},
-      ReputationStatus: HealthLevel.Green,
+      ReputationStatus: HealthLevel.Gray,
       ReputationToolTip: '',
     },
   };
