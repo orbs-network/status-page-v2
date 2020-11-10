@@ -9,10 +9,11 @@ interface IProps {
   standByValidators: Guardian[];
   services: Service[];
   showServices: boolean;
+  isShowAllRegistered: boolean;
 }
 
 export const StatusTableBody = React.memo<IProps>((props) => {
-  const { vcs, services, committeeValidators, standByValidators, showServices } = props;
+  const { vcs, services, committeeValidators, standByValidators, showServices, isShowAllRegistered } = props;
 
   const servicesNames = useMemo(() => {
     return services.map((service) => service.Name);
@@ -38,6 +39,7 @@ export const StatusTableBody = React.memo<IProps>((props) => {
           expandServices={showServices}
           servicesNames={servicesNames}
           vcsIds={vcsIds}
+          isShowAllRegistered={isShowAllRegistered}
         />
       );
     });

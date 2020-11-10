@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Configuration, NetworkType } from '../config';
 import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
 import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
@@ -48,7 +48,7 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
-      this.generateOnlyUrls(newModel.AllRegisteredNodes, newModel.VirtualChains, newModel.Services);
+      this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
       Logger.log('Processor: finished query all nodes/vcs/services.');
 
       // monitoring
@@ -152,10 +152,20 @@ export class Processor {
     }
   }
 
-  private generateOnlyUrls(guardians: Guardians, virtualChains: VirtualChain[], services: Service[]){ 
-    _.forOwn(guardians, g => {
-      _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id), 'Unknown', HealthLevel.Gray));
-      _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service), 'Unknown', HealthLevel.Gray));
+  private fillInAllRegistered(all: Guardians, committee: Guardians, standbys: Guardians,virtualChains: VirtualChain[], services: Service[]){ 
+    _.forOwn(all, g => {
+      if (_.has(committee, g.EthAddress)) {
+        const member = committee[g.EthAddress];
+        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(member.NodeVirtualChains[vc.Id]));
+        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceCopy(member.NodeServices[service.Name]));
+      } else if (_.has(standbys, g.EthAddress)) {
+        const standby = standbys[g.EthAddress];
+        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(standby.NodeVirtualChains[vc.Id]));
+        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceCopy(standby.NodeServices[service.Name]));
+      } else {
+        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id), 'Unknown', HealthLevel.Gray));
+        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service), 'Unknown', HealthLevel.Gray));
+      }
     });
   }
 

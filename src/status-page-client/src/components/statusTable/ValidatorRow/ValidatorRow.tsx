@@ -12,10 +12,11 @@ interface IProps {
   expandServices: boolean;
   servicesNames: string[];
   vcsIds: string[];
+  isShowAllRegistered: boolean;
 }
 
 export const ValidatorRow = React.memo<IProps>((props) => {
-  const { validator, expandServices, servicesNames, vcsIds, isInCommittee } = props;
+  const { validator, expandServices, servicesNames, vcsIds, isInCommittee, isShowAllRegistered } = props;
 
   const expandedServicesCells = useMemo(() => {
     return servicesNames.map((serviceName) => {
@@ -40,7 +41,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   return (
     <TableRow>
       {/* Gist */}
-      <ValidatorInfoCell validator={validator} isInCommittee={isInCommittee} />
+      <ValidatorInfoCell validator={validator} isInCommittee={isInCommittee} isShowAllRegistered={isShowAllRegistered} />
 
       {/* Services summary  */}
       <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />

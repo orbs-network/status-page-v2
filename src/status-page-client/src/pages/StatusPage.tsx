@@ -57,6 +57,7 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
             (standByNodes ? Object.values(standByNodes) : []) : // regular view
             (allRegisteredNodes ? Object.values(allRegisteredNodes) : []) // in 'Show All Registered' everybody is standby
         }
+        isShowAllRegistered={showAllRegistered}
       />
       <br/>
       <Button variant="outlined" onClick={onClick}>{showAllRegistered ? 'Show Current Validators' : 'Show All Registered'}</Button>
