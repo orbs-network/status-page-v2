@@ -27,7 +27,7 @@ export class Monitors {
             } else {
                 const msg = checkStatusChange(oldModel, newModel);
                 if (msg.length > 0) {
-                    this.sendSlack(`Network News: the following *new issue* are making it rain ☔:\n${msg}`, this.config);
+                    this.sendSlack(`Network News: the following *new issue(s)* are making it rain ☔:\n${msg}`, this.config);
                 }
             }
         }

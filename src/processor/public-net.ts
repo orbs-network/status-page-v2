@@ -76,7 +76,9 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
     try {
-      model.EthereumStatus = await getEthereumStatus(config);
+      const stakingRewardsAddress = String(rootNodeData?.Payload?.CurrentContractAddress["stakingRewardsWallet"] || config.StakingRewardsAddress);
+      const bootstrapRewardsAddress = String(rootNodeData?.Payload?.CurrentContractAddress["bootstrapRewardsWallet"] || config.BootstrapRewardsAddress);
+      model.EthereumStatus = await getEthereumStatus(stakingRewardsAddress, bootstrapRewardsAddress, config);
     } catch (e) {
       model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch ethereum status data: ${e}`);
       Logger.error(model.EthereumStatus.StatusToolTip);

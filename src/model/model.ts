@@ -104,6 +104,20 @@ export interface NodeVirtualChain {
   URLs: NodeVirtualChainUrls;
 }
 
+export function nodeVirtualChainCopy(vc:NodeVirtualChain) {
+  return {
+    StatusMsg: vc.StatusMsg,
+    Status: vc.Status,
+    StatusToolTip: vc.StatusToolTip,
+    Timestamp: vc.Timestamp,
+    Version: vc.Version,
+    BlockHeight: vc.BlockHeight,
+    BlockHeightToolTip: vc.BlockHeightToolTip,
+    ProtocolVersion: vc.ProtocolVersion,
+    URLs: vc.URLs,
+  }
+}
+
 export function nodeVirtualChainBuilder(
   urls: NodeVirtualChainUrls,
   statusMsg = '',
@@ -139,6 +153,17 @@ export interface NodeService {
   Timestamp: string;
   Version: string;
   URLs: NodeServiceUrls;
+}
+
+export function nodeServiceCopy(ns:NodeService){
+  return {
+    StatusMsg: ns.StatusMsg,
+    Status: ns.Status,
+    StatusToolTip: ns.StatusToolTip,
+    Timestamp: ns.Timestamp,
+    Version: ns.Version,
+    URLs: ns.URLs,
+  };
 }
 
 export function nodeServiceBuilder(

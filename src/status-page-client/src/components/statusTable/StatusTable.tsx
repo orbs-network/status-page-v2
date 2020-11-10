@@ -19,10 +19,11 @@ interface IProps {
   committeeValidators: Guardian[];
   standByValidators: Guardian[];
   services: Service[];
+  isShowAllRegistered: boolean;
 }
 
 export const StatusTable = React.memo<IProps>((props) => {
-  const { vcs, committeeValidators, standByValidators, services } = props;
+  const { vcs, committeeValidators, standByValidators, services, isShowAllRegistered } = props;
   // console.log({ vcs });
   // console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
   // console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
@@ -49,6 +50,7 @@ export const StatusTable = React.memo<IProps>((props) => {
           committeeValidators={sortedCommitteeValidators}
           standByValidators={sortedStandByValidators}
           showServices={showServices}
+          isShowAllRegistered={isShowAllRegistered}
         />
       </Table>
     </TableContainer>
