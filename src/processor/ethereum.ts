@@ -47,7 +47,8 @@ export async function getEthereumStatus(stakingRewardsAddress:string, bootstrapR
     if (lastEventTime + config.MaxTimeSinceLastEvent < getCurrentClockTime() ) {
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
     }
-    const healthMessage = healthMessages.join("\n") || "OK";
+    const healthTooltip = healthMessages.join("\n") || "OK";
+    const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'Ok' : 'Issues Detected'}`;
     const healthLevel = healthMessages.length == 0 ? HealthLevel.Green: HealthLevel.Red;
 
     return {
@@ -55,7 +56,8 @@ export async function getEthereumStatus(stakingRewardsAddress:string, bootstrapR
         BootstrapRewardsBalance: bootstrapRewardsBalance,
         LastStakeUnstakeTime: lastEventTime,
         Status: healthLevel,
-        StatusToolTip: healthMessage
+        StatusMsg: healthMessage,
+        StatusToolTip: healthTooltip
     };
 }
 
@@ -65,6 +67,7 @@ export function generateErrorEthereumStatus(msg:string):EthereumStatus {
         BootstrapRewardsBalance: 0,
         LastStakeUnstakeTime: 0,
         Status: HealthLevel.Red,
+        StatusMsg: `PoS Contracts status: Ethereum Error Detected`,
         StatusToolTip: msg,
     }
 }

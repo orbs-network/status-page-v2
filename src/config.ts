@@ -13,6 +13,8 @@ export interface Configuration {
   SlackToken: string;
   SlackChannel: string;
   HealthCheckTimeOfDayInSeconds: number;
+  RootNodeStaleWarnTimeSeconds: number;
+  RootNodeStaleErrorTimeSeconds: number;
 
   // staleness
   StaleStatusTimeSeconds: number;
