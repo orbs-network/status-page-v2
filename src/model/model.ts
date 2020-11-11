@@ -9,6 +9,7 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp = '';
+  RootNodeStatus?: RootNodeStatus = undefined; // only public-network
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
@@ -17,11 +18,18 @@ export class Model {
   EthereumStatus?: EthereumStatus = undefined; // only public-network
 }
 
+export interface RootNodeStatus {
+  Status: HealthLevel;
+  StatusToolTip: string;
+  StatusMsg: string;
+}
+
 export interface EthereumStatus {
   StakingRewardsBalance: number;
   BootstrapRewardsBalance: number;
   LastStakeUnstakeTime: number;
   Status: HealthLevel;
+  StatusMsg: string;
   StatusToolTip: string;
 }
 

@@ -10,7 +10,7 @@ import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, RootNodeStatus } from '../model/model';
 import { generateErrorEthereumStatus, getEthereumStatus } from './ethereum';
 import * as URLs from './url-generator';
 
@@ -52,26 +52,22 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   let committeeMembers = {};
   let standByMembers = {};
 
-  const guardians = readGuardians(rootNodeData);
-  // check in sync mode (stale ref) - remove guardians that are not me.
   const currentRefTime = rootNodeData.Payload?.CurrentRefTime || 0;
-  if (isStaleTime(currentRefTime, config.StaleStatusTimeSeconds*4 /*1 hour*/)) {
-    committeeMembers = _.pickBy(guardians, (g) => g.Ip === rootNodeEndpoint);
-    Logger.log(`Network information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime): 'unknown time'}. Service might be syncing.`);
-  } else {  
-    const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
-    committeeMembers = _.pick(guardians, committeeMembersAddresses);
-    if (_.size(committeeMembers) === 0 ) {
-      Logger.error(`Could not read a valid Committee, current network seems empty.`);
-    }
-    const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
-    standByMembers = _.pick(guardians, standbyMembersAddresses);
+  model.RootNodeStatus = generateRootNodeStatus(rootNodeEndpoint, currentRefTime, config);
 
-    try {
-      calcReputation(`${Protocol}${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
-    } catch (e) {
-      Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
-    }
+  const guardians = readGuardians(rootNodeData);
+  const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
+  committeeMembers = _.pick(guardians, committeeMembersAddresses);
+  if (_.size(committeeMembers) === 0 ) {
+    Logger.error(`Could not read a valid Committee, current network seems empty.`);
+  }
+  const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
+  standByMembers = _.pick(guardians, standbyMembersAddresses);
+
+  try {
+    calcReputation(`${Protocol}${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+  } catch (e) {
+    Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
   }
 
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
@@ -80,7 +76,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       const bootstrapRewardsAddress = String(rootNodeData?.Payload?.CurrentContractAddress["bootstrapRewardsWallet"] || config.BootstrapRewardsAddress);
       model.EthereumStatus = await getEthereumStatus(stakingRewardsAddress, bootstrapRewardsAddress, config);
     } catch (e) {
-      model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch ethereum status data: ${e}`);
+      model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch Ethereum status data: ${e}`);
       Logger.error(model.EthereumStatus.StatusToolTip);
     }
   }
@@ -92,6 +88,31 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
   model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
+}
+
+function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : RootNodeStatus {
+  let rootNodeStatus = HealthLevel.Green;
+  let rootNodeStatusMsg = 'Status Page: OK';
+  let rootNodeStatusToolTip = 'Network Information Up-to-date';
+  if (isStaleTime(currentRefTime, config.RootNodeStaleWarnTimeSeconds)) {
+    const timeMsg = `Status information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime): 'unknown time'}`;
+    Logger.log(`${timeMsg}. Service might be syncing or ethereum outage.`);
+    if (isStaleTime(currentRefTime, config.RootNodeStaleErrorTimeSeconds)) {
+      rootNodeStatus = HealthLevel.Red;
+      rootNodeStatusMsg = 'Status Page: Issues Detected'
+      rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Consider replacing root node (IP:${rootNodeEndpoint}).`;
+    } else {
+      rootNodeStatus = HealthLevel.Yellow;
+      rootNodeStatusMsg = 'Status Page: Issues Detected'
+      rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Please check root node (IP:${rootNodeEndpoint}).`;
+    }
+  }
+
+  return {
+    Status: rootNodeStatus,
+    StatusMsg: rootNodeStatusMsg,
+    StatusToolTip: rootNodeStatusToolTip
+  };
 }
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {

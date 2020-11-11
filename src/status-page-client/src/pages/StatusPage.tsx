@@ -4,7 +4,7 @@ import { useStatusStore } from '../store/storeHooks';
 import { toJS } from 'mobx';
 import { Page } from '../components/structure/Page';
 import { StatusTable, ValidatorStatusGist } from '../components/statusTable/StatusTable';
-import { POSContractsStatus } from "../components/ethereumStatus/POSContractsStatus";
+import { StatusRow } from "../components/networkStatus/StatusRow";
 import { Button } from '@material-ui/core';
 
 interface IProps {}
@@ -41,7 +41,8 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
 
   return (
     <Page>
-      <POSContractsStatus
+      <StatusRow
+        rootStatus={statusStore?.statusModel?.RootNodeStatus}
         ethereumStatus={statusStore?.statusModel?.EthereumStatus}
       />
       <StatusTable

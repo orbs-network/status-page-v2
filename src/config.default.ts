@@ -19,6 +19,8 @@ export const defaultConfiguration: Configuration = {
 
   StaleStatusTimeSeconds: Number(process.env.STATUS_STALE_TIME_SECONDS) || 15 * 60,
   ExpirationWarningTimeInDays: Number(process.env.VC_EXPIRATION_WARN_DAYS) || 30,
+  RootNodeStaleWarnTimeSeconds: Number(process.env.ROOT_NODE_STALE_WARN_TIME_SECONDS) || 3600,
+  RootNodeStaleErrorTimeSeconds: Number(process.env.ROOT_NODE_STALE_ERROR_TIME_SECONDS) || 43200,
 
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
   RootNodeEndpoints: process.env.NETWORK_NODE_ENDPOINTS ? String(process.env.NETWORK_NODE_ENDPOINTS).split(',') : [],
