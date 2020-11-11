@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
             ...theme.typography.h6,
+            fontSize: '1rem !important'
         },
         icon: {
             margin: 5

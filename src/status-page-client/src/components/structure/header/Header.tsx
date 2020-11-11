@@ -81,7 +81,7 @@ export const Header = React.memo((props) => {
   return (
     <AppBar position="fixed" data-testid="header" className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
-        <NavLink to="/">
+        <NavLink to="/" style={{position: 'absolute'}}>
           <img className={classes.logo} src={logo} alt="Orbs" />
         </NavLink>
         <Typography variant="h2" className={classes.title}>

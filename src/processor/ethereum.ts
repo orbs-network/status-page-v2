@@ -29,7 +29,7 @@ export async function getEthereumStatus(stakingRewardsAddress:string, bootstrapR
     let lastEventTime = 0;
 
     events.sort((n1:any, n2:any) => n2.blockNumber - n1.blockNumber); // sort desc
-    for (let event of events) {
+    for (const event of events) {
         if (event.event === 'Staked' || event.event === 'Unstaked') {
             const eventBlock = await web3.eth.getBlock(event.blockNumber);
             lastEventTime = Number(eventBlock.timestamp);
@@ -48,7 +48,7 @@ export async function getEthereumStatus(stakingRewardsAddress:string, bootstrapR
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
-    const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'Ok' : 'Issues Detected'}`;
+    const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
     const healthLevel = healthMessages.length == 0 ? HealthLevel.Green: HealthLevel.Red;
 
     return {

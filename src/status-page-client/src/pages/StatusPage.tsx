@@ -45,6 +45,7 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
         rootStatus={statusStore?.statusModel?.RootNodeStatus}
         ethereumStatus={statusStore?.statusModel?.EthereumStatus}
       />
+      <br/>
       <StatusTable
         vcs={virtualChains || []}
         services={services || []}
