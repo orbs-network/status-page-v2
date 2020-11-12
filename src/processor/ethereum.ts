@@ -9,7 +9,7 @@
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { Configuration } from '../config';
-import { getCurrentClockTime, timeAgoText } from '../helpers';
+import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
 
 const protocolWalletAbi = [ { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "client", "type": "address" } ], "name": "ClientSet", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "addr", "type": "address" } ], "name": "EmergencyWithdrawal", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "added", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "total", "type": "uint256" } ], "name": "FundsAddedToPool", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "uint256", "name": "maxAnnualRate", "type": "uint256" } ], "name": "MaxAnnualRateSet", "type": "event" }, { "anonymous": false, "inputs": [], "name": "OutstandingTokensReset", "type": "event" }, { "inputs": [], "name": "getToken", "outputs": [ { "internalType": "contract IERC20", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "balance", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "topUp", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "withdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "annual_rate", "type": "uint256" } ], "name": "setMaxAnnualRate", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "emergencyWithdraw", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "client", "type": "address" } ], "name": "setClient", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "getMaxAnnualRate", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "resetOutstandingTokens", "outputs": [], "stateMutability": "nonpayable", "type": "function" } ];
@@ -38,6 +38,9 @@ export async function getEthereumStatus(stakingRewardsAddress:string, bootstrapR
     }
 
     const healthMessages = [];
+    if (isStaleTime(block.timestamp, config.RootNodeStaleErrorTimeSeconds)) {
+        healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.timestamp)}.`);
+    }  
     if (stakingRewardsBalance < config.MinStakingBlance) {
         healthMessages.push(`Staking rewards wallet balance (${Math.floor(stakingRewardsBalance)}) is below the threshold (${config.MinStakingBlance}).`);
     }
