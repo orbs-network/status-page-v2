@@ -16,7 +16,7 @@ export class Monitors {
     constructor(private config: Configuration) {}
   
     async run(oldModel:Model, newModel: Model) {
-        if(this.config.SlackToken.length > 0) {
+        if(this.config.SlackToken && this.config.SlackToken.length > 0) {
             // if restart it is always time for morning message
             if (this.timeForMorningMessage(oldModel.TimeSeconds, newModel.TimeSeconds)) {
                 const healthMsg = healthCheck(newModel);

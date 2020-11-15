@@ -15,7 +15,7 @@ export interface Configuration {
   HealthCheckTimeOfDayInSeconds: number;
   RootNodeStaleWarnTimeSeconds: number;
   RootNodeStaleErrorTimeSeconds: number;
-
+  VCNameAdapter: any;
   // staleness
   StaleStatusTimeSeconds: number;
   ExpirationWarningTimeInDays: number;
@@ -69,15 +69,6 @@ export function validateConfiguration(config: Configuration) {
     throw new Error(`ExpirationWarningTimeInDays is empty, zero or negative.`);
   }
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
-    if (!config.StakingRewardsAddress) {
-      throw new Error(`StakingRewardsAddress is empty.`);
-    }
-    if (!config.BootstrapRewardsAddress) {
-      throw new Error(`StaleStatusTimeSeconds is empty.`);
-    }
-    if (!config.StakingAddress) {
-      throw new Error(`StakingAddress is empty.`);
-    }
     if (typeof config.MinStakingBlance != 'number') {
       throw new Error(`MinStakingBlance is not a number.`);
     }

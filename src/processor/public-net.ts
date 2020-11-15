@@ -72,9 +72,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
     try {
-      const stakingRewardsAddress = String(rootNodeData?.Payload?.CurrentContractAddress["stakingRewardsWallet"] || config.StakingRewardsAddress);
-      const bootstrapRewardsAddress = String(rootNodeData?.Payload?.CurrentContractAddress["bootstrapRewardsWallet"] || config.BootstrapRewardsAddress);
-      model.EthereumStatus = await getEthereumStatus(stakingRewardsAddress, bootstrapRewardsAddress, config);
+      model.EthereumStatus = await getEthereumStatus(rootNodeData, config);
     } catch (e) {
       model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch Ethereum status data: ${e}`);
       Logger.error(model.EthereumStatus.StatusToolTip);
@@ -129,9 +127,10 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
         healthLevelToolTip = 'VirtualChain expired.';
       }
     }
+    
     return {
       Id: vcId,
-      Name: _.isString(vcData.Name) ? vcData.Name : '',
+      Name: vcName(vcId, vcData.Name, config),
       IsCanary: _.isString(vcData.RolloutGroup) ? vcData.RolloutGroup != 'main' : false,
       IsCertified: _.isNumber(vcData.IdentityType) ? vcData.IdentityType === 1 : false,
       GenesisTimeSeconds: _.isNumber(vcData.GenesisRefTime) ? vcData.GenesisRefTime : 0,
@@ -141,6 +140,15 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
       VirtualChainUrls: URLs.generateVirtualChainUrls(vcId),
     };
   });
+}
+
+function vcName(vcId:string, vcName:string, config:Configuration) {
+  if (_.has(config.VCNameAdapter, vcId)) {
+    return config.VCNameAdapter[vcId];
+  } else if (_.isString(vcName) ) {
+    return vcName;
+  }
+  return '';
 }
 
 function readGuardians(rootNodeData: any): Guardians {

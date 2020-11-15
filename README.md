@@ -12,6 +12,10 @@ Web based status page for Orbs Network (for V2).
 
   * Recommended extensions [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), [Prettier - code Formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
 
+* This project contain a backend server and frontend server. To develop and test the frontend the backend must be also running and both servers need to agree on the port (default 8081).
+
+### Backend Server
+
 * Run in terminal in root project directory:
 
   ```
@@ -26,22 +30,37 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
   ```
   npm run dev
   ```
+  A browser window will automatically open http://localhost:8081/json (the port is configuarble, but note that it need to match the frontend for devlopment).
 
-## Build
+  * Other Option to build and run
+  ```
+  npm run build
+  npm run start
+  open http://localhost:8081/json
+  ```
 
-* Run in terminal in root project directory:
+* Built code will be inside `./dist`.
+
+
+### Frontend Server
+
+* go to the front end root directory & install it
+
+  ```
+  cd src/status-page-client
+  npm install
+  ```
+  * note if you change the port in the backend update the package.json `proxy` field accordingly.
+
+* Build
 
   ```
   npm run build
   ```
 
-* Built code will be inside `./dist`.
-
-  * Run it with: 
-  
+* Run
   ```
-  npm start
-  open http://localhost/json
+  npm run start
   ```
   
 ## Deploy (Heroku)
@@ -55,11 +74,76 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
   ```
   
 * Deploy
+  Please note, the best practice is to deploy to heroku while you are in a clean master branch enviroment. So develop in your branch, create PR, merge to master, pull master and only then deploy to heroku.
   ```
   npm run deployHeroku
   ```
-  
-  
 
+## Enviroument Variables
+
+  * PORT 
+    * Output port for accessing backend server (http://domain:8081/json) 
+    * Default is considered to be 8081
+    
+  * NETWORK_TYPE
+    * Decides the flavour of the server accept only two value `pubilic` and `private`.
+  
+  * NETWORK_NODE_ENDPOINTS
+    * A comma separated list of ips that can be used to discover the nework. The server tries them one after the other. First one that answers is used.
+  
+  * SLACK_TOKEN, SLACK_CHANNEL, HEALTH_CHECK_TIME_OF_DAY_IN_SECONDS
+    * Optional
+    * Token & Channel Name for a slack enviroment to allow sending alerts.
+    * `HEALTH_CHECK_TIME_OF_DAY_IN_SECONDS` sets a time for daily health check message to be sent to the slack channel. This is meant to help avoid server death that goes unnoticed.
+    * If token and channel exist, every `POLL_INTERVAL_SECONDS` the current state is comapre with previous and if any new field turned "Red" it will also send an alert.
+
+  * POLL_INTERVAL_SECONDS
+    * Optional.
+    * Time to wait between server checks. This is the heartbeat of the backend server.
+    * Default is 5 minutes.
+  
+  * STATUS_STALE_TIME_SECONDS
+    * Optional
+    * If the information from any source (any of the servers queried to gather infomation) is older than this number consider that information as stale and notify system.
+    * Default is 15 minutes
+  
+  * ROOT_NODE_STALE_WARN_TIME_SECONDS, ROOT_NODE_STALE_ERROR_TIME_SECONDS
+    * Optional
+    * For the root node (the one we use to discover the network) there is special case and we have time for warning and time for error
+    * Defaults are 1 hour and 12 hours, respectively
+  
+  * VC_EXPIRATION_WARN_DAYS
+    * Optional.
+    * Creates a warning if a VC subscription time is less than this number of days before expiration.
+    * Default is 30 days.
+  
+  * VC_NAME_OVERRIDE
+    * Optional
+    * Allows to a simple override for VC-names in the UI. This field is a stringified JSON object with keys matching VC Ids exacly and the desired name. Wrong field here may crash the server.
+    * Default is empty.
+    * Example `{"100":"Original","1000004":"Core Canary"}`
+
+  * Ethereum Related
+    In public network that is connected to Ethereum supply an ethereum endpoint to allow reading the related statuses.
+    * ETHEREUM_ENDPOINT
+      * Provider url for accessing Ethereum. It is optional if not supplied all the Ethereum checks will be skipped.
+      * If left empty other fields will be ignored.
+      * For example. `https://mainnet.infura.io/v3/<your key here>`
+    * STAKING_ADDRESS, MAX_TIME_SECONDS_SINCE_LAST_EVENT
+      * Optional.
+      * The staking address undelying the Ethereum economy of your network. The time component is to allow checking the livness of your network if no event happened in the last amount of time then there might be a problem on the Ethereum side.
+      * Overrides the address for staking address.
+      * Default time is 1 day.
+    * STAKING_REWARD_ADDRESS, MIN_STAKING_BALANCE
+      * Optional
+      * Checks that there is a minimum amout of staking reward in the address
+      * Override the address for staking reward.
+      * Override the minimum that is by default 1000.
+    * BOOTSTRAP_REWARD_ADDRESS, MIN_BOOTSTRAP_BALANCE
+      * Optional
+      * Checks that there is a minimum amout of bootstrap reward in the address
+      * Override the address for bootstrap reward.
+      * Override the minimum that is by default 33.
+    
 
 [heroku CLI]: https://devcenter.heroku.com/articles/heroku-command-line
