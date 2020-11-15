@@ -1,7 +1,7 @@
 {
   "name": "@orbs-network/status-page-v2",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Web based status page for Orbs Network (for V2)",
   "author": "Tal Kol <talkol@gmail.com>",
   "license": "MIT",
