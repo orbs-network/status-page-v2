@@ -16,6 +16,7 @@ export class Model {
   StandByNodes: Guardians = {};
   AllRegisteredNodes: Guardians = {};
   EthereumStatus?: EthereumStatus = undefined; // only public-network
+  SupplyStatus?: SupplyStatus = undefined; // only public-network
 }
 
 export interface RootNodeStatus {
@@ -31,6 +32,18 @@ export interface EthereumStatus {
   Status: HealthLevel;
   StatusMsg: string;
   StatusToolTip: string;
+}
+
+export interface SupplyStatus {
+    contract: string;
+    stakingContract: string;
+    nonCirculatingWallets: string[];
+    supplyInCirculation: string;
+    totalSupply: string;
+    decimals: string;
+    block: number;
+    blockTimestamp: number;
+    updatedAt: string;
 }
 
 export enum HealthLevel {

@@ -11,7 +11,7 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, RootNodeStatus } from '../model/model';
-import { generateErrorEthereumStatus, getEthereumStatus } from './ethereum';
+import { generateErrorEthereumContractsStatus, getEthereumStatus } from './ethereum';
 import * as URLs from './url-generator';
 
 // Important URLS for public-network - init explore of network from these.
@@ -72,9 +72,11 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
     try {
-      model.EthereumStatus = await getEthereumStatus(rootNodeData, config);
+      const res = await getEthereumStatus(rootNodeData, config);
+      model.EthereumStatus = res.contractsStatus;
+      model.SupplyStatus = res.supplyStatus;
     } catch (e) {
-      model.EthereumStatus = generateErrorEthereumStatus(`Error while attemtping to fetch Ethereum status data: ${e}`);
+      model.EthereumStatus = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e}`);
       Logger.error(model.EthereumStatus.StatusToolTip);
     }
   }
