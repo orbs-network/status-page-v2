@@ -54,7 +54,8 @@ export function getWeb3(ethereumEndpoint: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getResources(nodeData:any, web3:any) : Promise<OrbsEthResrouces>{
-    const block = await web3.eth.getBlock('latest');
+    let block = await web3.eth.getBlock('latest');
+    block = await web3.eth.getBlock(Number(block.number)-10); // avoid jitter 
 
     if (!_.isObject(nodeData?.Payload?.CurrentContractAddress)) { 
         throw new Error(`NodeData does not contain current contract addresses`);
