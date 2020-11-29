@@ -10,20 +10,22 @@ import _ from 'lodash';
 import { Model } from "../model/model";
 import { checkStatusChange } from './status';
 
-export function healthCheck(newModel: Model): string {
+export function healthCheck(newModel: Model) {
+    let msg = '', healthMsg = '';
     if (_.size(newModel.CommitteeNodes) === 0) {
-        return `Network seems to be empty of *Committee Nodes* ...\n`;
+        healthMsg = `Network seems to be empty of *Committee Nodes* ...\n`;
     } else if (_.size(newModel.VirtualChains) === 0 ) {
-        return `Network seems to have *no Virtual-Chains* defined ...\n`;
+        healthMsg = `Network seems to have *no Virtual-Chains* defined ...\n`;
     } else if (_.size(newModel.Services) === 0 ) {
-        return `Network nodes seem to have *no Services* defined ...\n`;
+        healthMsg = `Network nodes seem to have *no Services* defined ...\n`;
     } else  {
-        const msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
+        msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
         if (msg.length > 0) {
-            return `Network is not sunny ☔:\n${msg}`;
+            healthMsg = `Network is not sunny ☔:\n${msg}`;
         } else {
-            return `Network is purring like a kitten :cat2:. All good ☀️!\n`
+            healthMsg = `Network is purring like a kitten :cat2:. All good ☀️!\n`
         }
     }
+    return {msg, healthMsg};
 }
 

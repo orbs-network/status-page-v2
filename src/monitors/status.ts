@@ -17,8 +17,10 @@ interface ErrorCounterMap { // counter for each type of error for all nodes.
     [key: string]: ErrorAndCount;
 }
 class ErrorAndCount {
-    count: number = 0;
+    ips: {[key: string]: boolean} = {};
     firstError: string = '';
+    firstIp = '';
+    firstName = '';
 }
 
 export function checkStatusChange(oldModel:Model, newModel: Model): string {
@@ -41,25 +43,27 @@ export function checkStatusChange(oldModel:Model, newModel: Model): string {
 
 function guardianStatusChange(oldModelGuardian:Guardian, newModelGuaridan:Guardian, errorMap: ErrorCounterMap) {
     _.forOwn(newModelGuaridan.NodeVirtualChains, (vc, vcid) => {
-        singleStatusChange(oldModelGuardian?.NodeVirtualChains[vcid]?.Status || HealthLevel.Green, vc.Status, vc.StatusToolTip, errorMap[toVCTag(vcid)]);
+        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeVirtualChains[vcid]?.Status || HealthLevel.Green, vc.Status, vc.StatusToolTip, errorMap[toVCTag(vcid)]);
     });
 
     _.forOwn(newModelGuaridan.NodeServices, (service, name) => {
-        singleStatusChange(oldModelGuardian?.NodeServices[name]?.Status || HealthLevel.Green, service.Status, service.StatusToolTip, errorMap[toServiceTag(name)]);
+        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeServices[name]?.Status || HealthLevel.Green, service.Status, service.StatusToolTip, errorMap[toServiceTag(name)]);
     });
 
-    singleStatusChange(
+    singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, 
         oldModelGuardian?.NodeReputation?.ReputationStatus || HealthLevel.Green, 
         newModelGuaridan.NodeReputation.ReputationStatus, newModelGuaridan.NodeReputation.ReputationToolTip,
         errorMap[toReputationTag()]);
 }
 
-function singleStatusChange(oldStatus: HealthLevel, newStatus: HealthLevel, newStatusMsg: string, error: ErrorAndCount) {
+function singleStatusChange(name:string, ip:string, oldStatus: HealthLevel, newStatus: HealthLevel, newStatusMsg: string, error: ErrorAndCount) {
     if (oldStatus === HealthLevel.Green && newStatus !== HealthLevel.Green) {
-        if (error.count === 0) {
+        if (_.size(error.ips) === 0) {
             error.firstError = newStatusMsg;
+            error.firstIp = ip;
+            error.firstName = name;
         }
-        error.count = error.count + 1;
+        error.ips[ip] = true;
     }
 } 
 
@@ -82,8 +86,10 @@ function errorMapToString(errorMap: ErrorMap, errorCounterMap: ErrorCounterMap):
     });
 
     _.forOwn(errorCounterMap, (v, k) => {
-        if (v.count > 0) {
-            msg += `${k}: ${v.count} nodes seem to have a problem, first issue "${v.firstError}"\n`;
+        if (_.size(v.ips) === 1) {
+            msg += `${k}: Node ${v.firstName} (${v.firstIp}) is reporting "${v.firstError}"\n`;
+        } else if (_.size(v.ips) > 0) {
+            msg += `${k}: ${_.size(v.ips)} nodes seem to have a problem, first node ${v.firstName} (${v.firstIp}) is reporting "${v.firstError}"\n`;
         };
     });
     return msg;

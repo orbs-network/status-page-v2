@@ -142,7 +142,8 @@ function getWeb3(ethereumEndpoint: string) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getResources(nodeData:any, config:Configuration, web3:any) {
-    const block = await web3.eth.getBlock('latest');
+    let block = await web3.eth.getBlock('latest');
+    block = await web3.eth.getBlock(Number(block.number)-10); // avoid jitter 
 
     let stakingAddress = '', stakingRewardsAddress = '', bootstrapRewardsAddress = '';
     if (_.isObject(nodeData?.Payload?.CurrentContractAddress)) { 
