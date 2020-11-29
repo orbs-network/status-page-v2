@@ -17,33 +17,13 @@ export class Model {
   AllRegisteredNodes: Guardians = {};
   EthereumStatus?: EthereumStatus = undefined; // only public-network
   SupplyStatus?: SupplyStatus = undefined; // only public-network
+  PoSStatus?: PoSStatus = undefined; // only public-network
 }
 
 export interface RootNodeStatus {
   Status: HealthLevel;
   StatusToolTip: string;
   StatusMsg: string;
-}
-
-export interface EthereumStatus {
-  StakingRewardsBalance: number;
-  BootstrapRewardsBalance: number;
-  LastStakeUnstakeTime: number;
-  Status: HealthLevel;
-  StatusMsg: string;
-  StatusToolTip: string;
-}
-
-export interface SupplyStatus {
-    contract: string;
-    stakingContract: string;
-    nonCirculatingWallets: string[];
-    supplyInCirculation: string;
-    totalSupply: string;
-    decimals: string;
-    block: number;
-    blockTimestamp: number;
-    updatedAt: string;
 }
 
 export enum HealthLevel {
@@ -219,3 +199,68 @@ export interface NodeVirtualChainReputations {
 export interface NodeVirtualChainBadReputations {
   [key: string]: number;
 }
+
+export interface EthereumStatus {
+  StakingRewardsBalance: number;
+  BootstrapRewardsBalance: number;
+  LastStakeUnstakeTime: number;
+  Status: HealthLevel;
+  StatusMsg: string;
+  StatusToolTip: string;
+}
+
+export interface SupplyStatus {
+    contract: string;
+    stakingContract: string;
+    nonCirculatingWallets: string[];
+    supplyInCirculation: string;
+    totalSupply: string;
+    decimals: string;
+    block: number;
+    blockTimestamp: number;
+    updatedAt: string;
+}
+
+export interface PoSStatus {
+  Header: Header;
+  TokenData: TokenData;
+  StakedTokenData: StakedTokenData;
+  RewardsAndFeeData: RewardsAndFeeData;
+}
+
+export interface Header {
+  BlockNumber: number;
+  BlockTimestamp: number;
+  
+  BlockTime: string;
+}
+
+export interface TokenData {
+  Contract: string;
+  Decimals: string;
+  TotalSupply: string;
+  SupplyInCirculation: string;
+  DailyActivityNumberOfTransfers: number;
+  DailyActivityTokenTransferred: string;  
+}
+
+export interface StakedTokenData {
+  Contract: string;
+  Decimals: string;
+  StakedTokens: string;
+  UnstakedTokens: string;
+  NumberOfAllPastStakers: number;
+  NumberOfActiveStakers: number;  
+}
+
+export interface RewardsAndFeeData {
+  CurrentStakingRewardPrecentMille: number;
+  GeneralCommitteeGuardianMonthlyBootstrapFund: string;
+  CertifiedCommitteeGuardianMonthlyBoostrapFund: string;
+  GeneralCommitteeGuardianMonthlyFee: string;
+  CertifiedCommitteeGuardianMonthlyFee: string;
+  GeneralCommitteeGuardianBacklogFee: string;
+  CertifiedCommitteeGuardianBacklogFee: string;
+  UnclaimedStakingRewards: string;
+}
+
