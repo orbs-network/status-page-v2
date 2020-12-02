@@ -10,14 +10,15 @@ import _ from 'lodash';
 import { Configuration } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
-import { OrbsEthResrouces, toTokenNumber } from './eth-helper';
+import { getBlockInfo, OrbsEthResrouces, toTokenNumber } from './eth-helper';
 
 
 export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
     const stakingRewardsBalance = toTokenNumber(await resources.stakingRewardsWalletContract.methods.getBalance().call());
     const bootstrapRewardsBalance = toTokenNumber(await resources.bootstrapRewardsWalletContract.methods.getBalance().call());
     
-    const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: resources.blockNumber-10000, toBlock: 'latest'});
+    const currentBlock = await getBlockInfo('latest', web3);
+    const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: currentBlock.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
 
     events.sort((n1:any, n2:any) => n2.blockNumber - n1.blockNumber); // sort desc
@@ -39,8 +40,8 @@ export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
         healthLevel = HealthLevel.Red;
     }
-    if (isStaleTime(resources.blockTime, config.RootNodeStaleErrorTimeSeconds)) {
-        healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${resources.blockNumber}) is from ${timeAgoText(resources.blockTime)}.`);
+    if (isStaleTime(currentBlock.time, config.RootNodeStaleErrorTimeSeconds)) {
+        healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${currentBlock.number}) is from ${timeAgoText(currentBlock.time)}.`);
         healthLevel = HealthLevel.Red;
     }  
     if (stakingRewardsBalance < config.MinStakingBlance) {

@@ -226,12 +226,13 @@ export interface PoSStatus {
   TokenData: TokenData;
   StakedTokenData: StakedTokenData;
   RewardsAndFeeData: RewardsAndFeeData;
+  CommitteeData: CommitteeData;
+  GeneralData: PoSV2General;
 }
 
 export interface Header {
   BlockNumber: number;
   BlockTimestamp: number;
-  
   BlockTime: string;
 }
 
@@ -240,7 +241,7 @@ export interface TokenData {
   Decimals: string;
   TotalSupply: string;
   SupplyInCirculation: string;
-  DailyActivityNumberOfTransfers: number;
+  DailyActivityNumberOfTransfers: string;
   DailyActivityTokenTransferred: string;  
 }
 
@@ -262,5 +263,25 @@ export interface RewardsAndFeeData {
   GeneralCommitteeGuardianBacklogFee: string;
   CertifiedCommitteeGuardianBacklogFee: string;
   UnclaimedStakingRewards: string;
+  AwardedStakingRewards: string;
 }
 
+export interface CommitteeData {
+  CommitteeMembersData : {
+    Committee: string[];
+    Weights: number[];
+    Certification: boolean[];
+    OrbsAddresses: string[];
+    Ips: string[];
+  },
+  CommitteeSize: number;
+  CertifiedComitteeSize: number;
+  TotalCommitteeWeight: number;
+  CertifiedCommitteeWeight: number;
+  StandByAddresses: string[];
+  AllRegisteredAddresses: string[];
+}
+
+export interface PoSV2General {
+  TotalDelegatedStake: string;
+}

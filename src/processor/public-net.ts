@@ -72,6 +72,14 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
   }
 
+  model.TimeSeconds = getCurrentClockTime();
+  model.Timestamp = new Date().toISOString();
+  model.VirtualChains = virtualChainList;
+  model.Services = services;
+  model.CommitteeNodes = committeeMembers;
+  model.StandByNodes = standByMembers;
+  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
+
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
     try {
       const web3 = getWeb3(config.EthereumEndpoint);
@@ -87,14 +95,6 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       Logger.error(model.EthereumStatus.StatusToolTip);
     }
   }
-
-  model.TimeSeconds = getCurrentClockTime();
-  model.Timestamp = new Date().toISOString();
-  model.VirtualChains = virtualChainList;
-  model.Services = services;
-  model.CommitteeNodes = committeeMembers;
-  model.StandByNodes = standByMembers;
-  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
 }
 
 function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : RootNodeStatus {
