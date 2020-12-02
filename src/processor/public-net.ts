@@ -11,8 +11,10 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, RootNodeStatus } from '../model/model';
-import { generateErrorEthereumContractsStatus, getEthereumStatus } from './ethereum';
+import { getResources, getWeb3 } from './eth-helper';
+import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
+import { getPoSStatus } from './stats';
 
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
@@ -70,17 +72,6 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
   }
 
-  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
-    try {
-      const res = await getEthereumStatus(rootNodeData, config);
-      model.EthereumStatus = res.contractsStatus;
-      model.SupplyStatus = res.supplyStatus;
-    } catch (e) {
-      model.EthereumStatus = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e}`);
-      Logger.error(model.EthereumStatus.StatusToolTip);
-    }
-  }
-
   model.TimeSeconds = getCurrentClockTime();
   model.Timestamp = new Date().toISOString();
   model.VirtualChains = virtualChainList;
@@ -88,6 +79,22 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
   model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
+
+  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
+    try {
+      const web3 = getWeb3(config.EthereumEndpoint);
+      const resources = await getResources(rootNodeData, web3);
+   
+      model.EthereumStatus = await getEthereumContractsStatus(resources, web3, config);
+
+      const posData = await getPoSStatus(model, resources, web3);
+      model.SupplyStatus = posData.SupplyStatus;
+      model.PoSStatus = posData.PosData;
+    } catch (e) {
+      model.EthereumStatus = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
+      Logger.error(model.EthereumStatus.StatusToolTip);
+    }
+  }
 }
 
 function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : RootNodeStatus {

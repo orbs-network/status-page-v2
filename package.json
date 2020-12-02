@@ -1,9 +1,9 @@
 {
   "name": "@orbs-network/status-page-v2",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Web based status page for Orbs Network (for V2)",
-  "author": "Tal Kol <talkol@gmail.com>",
+  "author": "Noam Berg <noam.berg@gmail.com>",
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,7 +32,8 @@
     "start:dev": "npm run build && npm start",
     "start": "node --async-stack-traces ./dist/main.js",
     "gitAddRemoteHeroku": "heroku login",
-    "deployHeroku": "git push heroku master"
+    "deployHeroku": "git push heroku master",
+    "testpos": "npm run build && node --async-stack-traces ./dist/test.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.3",
@@ -52,6 +53,8 @@
     "typescript": "~3.7.5"
   },
   "dependencies": {
+    "@makerdao/multicall": "^0.11.0",
+    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.38",
     "@slack/web-api": "^5.12.0",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
