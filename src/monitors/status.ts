@@ -38,6 +38,11 @@ export function checkStatusChange(oldModel:Model, newModel: Model): string {
         errorMap['PoS Contracts Health'] = newModel?.EthereumStatus?.StatusToolTip || 'Unknown';
     }
 
+    const oldPingStatus = oldModel?.PingUrlsStatus?.Status || HealthLevel.Green;
+    if (oldPingStatus === HealthLevel.Green && newModel?.PingUrlsStatus?.Status !== HealthLevel.Green) {
+        errorMap['Monitored URLs Health'] = newModel?.PingUrlsStatus?.StatusToolTip || 'Unknown';
+    }
+
     return errorMapToString(errorMap, errorCounterMap);
 }
 

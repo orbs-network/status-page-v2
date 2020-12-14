@@ -18,6 +18,7 @@ export class Model {
   EthereumStatus?: EthereumStatus = undefined; // only public-network
   SupplyStatus?: SupplyStatus = undefined; // only public-network
   PoSStatus?: PoSStatus = undefined; // only public-network
+  PingUrlsStatus?: PingUrlStatus = undefined;
 }
 
 export interface RootNodeStatus {
@@ -198,6 +199,12 @@ export interface NodeVirtualChainReputations {
 
 export interface NodeVirtualChainBadReputations {
   [key: string]: number;
+}
+
+export interface PingUrlStatus {
+  Status: HealthLevel;
+  StatusMsg: string;
+  StatusToolTip: string;
 }
 
 export interface EthereumStatus {

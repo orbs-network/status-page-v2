@@ -7,14 +7,18 @@
  */
 
 import _ from 'lodash';
+import fetch from 'node-fetch';
 import { Configuration, NetworkType } from '../config';
 import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, PingUrlStatus } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
 import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
 import { Monitors } from '../monitors/main';
+
+const NumberOfPingTries = 10;
+const DefaultPingTimeout = 5;
 
 export class Processor {
   private model = new Model();
@@ -49,8 +53,9 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
-      Logger.log('Processor: finished query all nodes/vcs/services.');
-
+      newModel.PingUrlsStatus = await this.pingUrls();
+      Logger.log('Processor: finished query all nodes/vcs/services/urls.');
+      
       // monitoring
       this.monitors.run(this.model, newModel);
       Logger.log('Processor: finished monitoring.');
@@ -185,4 +190,47 @@ export class Processor {
     }
     return { healthLevel, healthLevelToolTip };
   }
+
+  public async pingUrls(): Promise<PingUrlStatus> {
+    
+    const txs:Promise<any>[] = [];
+    for(let i = 0;i < this.config.PingUrlEndpoints.length;i++) {
+      const threshhold = this.config.PingUrlTimeoutsMillis.length > 0 ? this.config.PingUrlTimeoutsMillis[i] : DefaultPingTimeout;
+      txs.push(pingOneUrl(this.config.PingUrlEndpoints[i], threshhold));
+    }
+    const res = await Promise.all(txs);
+    const healthMessages:string[] = _.map(_.pickBy(res, r => r !== ''), r => r);
+  
+    if (healthMessages.length > 0) {
+      return {
+        Status: HealthLevel.Red,
+        StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
+        StatusToolTip: healthMessages.join("\n"),
+      };   
+    }
+    return {
+      Status: HealthLevel.Green,
+      StatusMsg: "All monitored URLs responded OK",
+      StatusToolTip: "OK",
+    };
+  }
+  
+}
+
+async function pingOneUrl(url:string, threshhold: number): Promise<string> {
+  let numErrs = 0;
+  for (let j = 0;j < NumberOfPingTries;j++) {
+    try {
+      const response = await fetch(url, { timeout: threshhold });
+      if (!response.ok) {
+        numErrs++;
+      }
+    } catch {
+      numErrs++;
+    }
+  }
+  if(numErrs !== 0) {
+    return `URL '${url}' failed to respond ${numErrs} out of ${NumberOfPingTries} times (timeout set at ${threshhold})`;
+  }
+  return '';
 }

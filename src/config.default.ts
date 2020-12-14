@@ -15,7 +15,6 @@ export const defaultConfiguration: Configuration = {
   ProcessorPollTimeSeconds: Number(process.env.POLL_INTERVAL_SECONDS) || 5 * 60,
   SlackToken: String(process.env.SLACK_TOKEN || ''),
   SlackChannel: String(process.env.SLACK_CHANNEL) || 'prod-v2-monitoring',
-  HealthCheckTimeOfDayInSeconds: Number(process.env.HEALTH_CHECK_TIME_OF_DAY_IN_SECONDS) || 21600,
 
   StaleStatusTimeSeconds: Number(process.env.STATUS_STALE_TIME_SECONDS) || 15 * 60,
   RootNodeStaleWarnTimeSeconds: Number(process.env.ROOT_NODE_STALE_WARN_TIME_SECONDS) || 3600,
@@ -24,14 +23,14 @@ export const defaultConfiguration: Configuration = {
   ExpirationWarningTimeInDays: Number(process.env.VC_EXPIRATION_WARN_DAYS) || 30,
   VCNameAdapter: JSON.parse(String(process.env.VC_NAME_OVERRIDE || "{}")),
 
+  PingUrlEndpoints: process.env.PING_URL_ENDPOINTS ? String(process.env.PING_URL_ENDPOINTS).split(',') : [],
+  PingUrlTimeoutsMillis: process.env.PING_URL_TIMEOUTS_MILLIS ? String(process.env.PING_URL_TIMEOUTS_MILLIS).split(',').map(el => Number(el)) : [],
+
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
   RootNodeEndpoints: process.env.NETWORK_NODE_ENDPOINTS ? String(process.env.NETWORK_NODE_ENDPOINTS).split(',') : [],
 
   EthereumEndpoint: String(process.env.ETHEREUM_ENDPOINT),
-  StakingAddress: String(process.env.STAKING_ADDRESS || '').toLowerCase(),
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
-  StakingRewardsAddress: String(process.env.STAKING_REWARD_ADDRESS || '').toLowerCase(),
   MinStakingBlance: Number(process.env.MIN_STAKING_BALANCE) || 1000,
-  BootstrapRewardsAddress: String(process.env.BOOTSTRAP_REWARD_ADDRESS || '').toLowerCase(),
   MinBootstrapBlance: Number(process.env.MIN_BOOTSTRAP_BALANCE) || 33,
   };

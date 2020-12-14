@@ -1,7 +1,7 @@
 {
   "name": "@orbs-network/status-page-v2",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Web based status page for Orbs Network (for V2)",
   "author": "Noam Berg <noam.berg@gmail.com>",
   "license": "MIT",
