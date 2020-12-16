@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Table, TableContainer, TableRow, TableCell } from '@material-ui/core';
-import {RootNodeStatus, EthereumStatus} from "../../../../model/model";
+import {GenStatus, EthereumStatus} from "../../../../model/model";
 import {createStyles, Theme} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import { POSContractsStatus } from "./POSContractsStatus";
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface IProps {
     ethereumStatus: EthereumStatus | undefined
-    rootStatus: RootNodeStatus | undefined
+    rootStatus: GenStatus | undefined
 }
 
 export const StatusRow = React.memo<IProps>((props) => {

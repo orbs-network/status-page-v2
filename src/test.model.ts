@@ -3,17 +3,17 @@ import { HealthLevel, Model } from "./model/model";
 export const testModel:Model = {
   "TimeSeconds": 1606730097,
   "Timestamp": "2020-11-30T09:54:56.659Z",
-  "GeneralStatuses" : {
+  "Statuses" : {
+    "Root Node Health": {
+      "Status": HealthLevel.Green,
+      "StatusMsg": "Status Page: OK",
+      "StatusToolTip": "Network Information Up-to-date"
+    },
     "Monitored URLs Health": {
       "Status": HealthLevel.Green,
       "StatusMsg": "All monitored URLs responded OK",
       "StatusToolTip": "OK"
     }
-  },
-  "RootNodeStatus": {
-    "Status": HealthLevel.Green,
-    "StatusMsg": "Status Page: OK",
-    "StatusToolTip": "Network Information Up-to-date"
   },
   "VirtualChains": [
     {

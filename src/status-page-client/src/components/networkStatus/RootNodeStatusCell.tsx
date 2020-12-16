@@ -1,5 +1,5 @@
 import React from 'react';
-import {RootNodeStatus} from "../../../../model/model";
+import {GenStatus} from "../../../../model/model";
 import {createStyles, Theme, Tooltip} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
-  rootStatus: RootNodeStatus | undefined
+  rootStatus: GenStatus | undefined
 }
 
 export const RootNodeStatusCell = React.memo<IProps>((props) => {

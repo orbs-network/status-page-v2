@@ -12,7 +12,7 @@ import sslChecker from 'ssl-checker';
 import { Configuration, NetworkType } from '../config';
 import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, GenStatus, PingUrlStatusName, CertStatusName } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, GenStatus, StatusName } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
 import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
@@ -54,8 +54,8 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
-      newModel.GeneralStatuses[PingUrlStatusName] = await this.pingUrls();
-      newModel.GeneralStatuses[CertStatusName] = await this.certificateChecks();
+      newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
+      newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
       
       // monitoring

@@ -9,20 +9,22 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp = '';
-  RootNodeStatus?: RootNodeStatus = undefined; // only public-network
+  Statuses: {[key: string]: GenStatus} = {};
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
   StandByNodes: Guardians = {};
   AllRegisteredNodes: Guardians = {};
-  GeneralStatuses: {[key: string]: GenStatus} = {};
-  EthereumStatus?: EthereumStatus = undefined; // only public-network
   SupplyData?: SupplyStatus = undefined; // only public-network
   PoSData?: PoSStatus = undefined; // only public-network
 }
 
-export const PingUrlStatusName = 'Monitored URLs Health';
-export const CertStatusName = 'Monitored Certs Health'
+export enum StatusName {
+  RootNode = 'Root Node Health',
+  EthereumContracts = 'PoS Contracts Health',
+  PingUrls = 'Monitored URLs Health',
+  Certs = 'Monitored Certs Health'
+}
 export interface GenStatus {
   Status: HealthLevel;
   StatusToolTip: string;

@@ -6,6 +6,7 @@ import { Page } from '../components/structure/Page';
 import { StatusTable, ValidatorStatusGist } from '../components/statusTable/StatusTable';
 import { StatusRow } from "../components/networkStatus/StatusRow";
 import { Button } from '@material-ui/core';
+import { EthereumStatus } from '../../../model/model';
 
 interface IProps {}
 
@@ -42,8 +43,8 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   return (
     <Page>
       <StatusRow
-        rootStatus={statusStore?.statusModel?.RootNodeStatus}
-        ethereumStatus={statusStore?.statusModel?.EthereumStatus}
+        rootStatus={statusStore?.statusModel?.Statuses["Root Node Health"]}
+        ethereumStatus={statusStore?.statusModel?.Statuses["PoS Contracts Health"] as EthereumStatus }
       />
       <br/>
       <StatusTable
