@@ -87,9 +87,9 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
    
       model.EthereumStatus = await getEthereumContractsStatus(resources, web3, config);
 
-      const posData = await getPoSStatus(model, resources, web3);
-      model.SupplyStatus = posData.SupplyStatus;
-      model.PoSStatus = posData.PosData;
+      const pos = await getPoSStatus(model, resources, web3);
+      model.SupplyData = pos.SupplyData;
+      model.PoSData = pos.PosData;
     } catch (e) {
       model.EthereumStatus = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.EthereumStatus.StatusToolTip);

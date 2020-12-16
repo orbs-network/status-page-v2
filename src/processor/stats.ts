@@ -136,7 +136,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
                 TotalDelegatedStake: data[DelegationStakeTotal].toFixed(),
             }
         }, 
-        SupplyStatus: {
+        SupplyData: {
             contract: resources.erc20Address,
             stakingContract: resources.stakingAddress,
             nonCirculatingWallets: NON_CIRCULATING_WALLETS,

@@ -25,6 +25,7 @@ export const defaultConfiguration: Configuration = {
 
   PingUrlEndpoints: process.env.PING_URL_ENDPOINTS ? String(process.env.PING_URL_ENDPOINTS).split(',') : [],
   PingUrlTimeoutsMillis: process.env.PING_URL_TIMEOUTS_MILLIS ? String(process.env.PING_URL_TIMEOUTS_MILLIS).split(',').map(el => Number(el)) : [],
+  SslHosts: process.env.SSL_HOSTS ? String(process.env.SSL_HOSTS).split(',') : [],
 
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
   RootNodeEndpoints: process.env.NETWORK_NODE_ENDPOINTS ? String(process.env.NETWORK_NODE_ENDPOINTS).split(',') : [],

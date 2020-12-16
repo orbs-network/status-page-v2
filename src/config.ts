@@ -20,6 +20,7 @@ export interface Configuration {
   ExpirationWarningTimeInDays: number;
   PingUrlEndpoints: string[];
   PingUrlTimeoutsMillis: number[];
+  SslHosts: string[];
   // network
   NetworkType: NetworkType;
   RootNodeEndpoints: string[];

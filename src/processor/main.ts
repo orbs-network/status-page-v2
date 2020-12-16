@@ -8,17 +8,18 @@
 
 import _ from 'lodash';
 import fetch from 'node-fetch';
+import sslChecker from 'ssl-checker';
 import { Configuration, NetworkType } from '../config';
 import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, PingUrlStatus } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, GenStatus, PingUrlStatusName, CertStatusName } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
 import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
 import { Monitors } from '../monitors/main';
 
 const NumberOfPingTries = 10;
-const DefaultPingTimeout = 5;
+const DefaultPingTimeout = 2000;
 
 export class Processor {
   private model = new Model();
@@ -53,7 +54,8 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
-      newModel.PingUrlsStatus = await this.pingUrls();
+      newModel.GeneralStatuses[PingUrlStatusName] = await this.pingUrls();
+      newModel.GeneralStatuses[CertStatusName] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
       
       // monitoring
@@ -191,8 +193,7 @@ export class Processor {
     return { healthLevel, healthLevelToolTip };
   }
 
-  public async pingUrls(): Promise<PingUrlStatus> {
-    
+  public async pingUrls(): Promise<GenStatus> {
     const txs:Promise<any>[] = [];
     for(let i = 0;i < this.config.PingUrlEndpoints.length;i++) {
       const threshhold = this.config.PingUrlTimeoutsMillis.length > 0 ? this.config.PingUrlTimeoutsMillis[i] : DefaultPingTimeout;
@@ -214,7 +215,31 @@ export class Processor {
       StatusToolTip: "OK",
     };
   }
+
+  public async certificateChecks(): Promise<GenStatus> {
+    const healthMessages:string[] = [];
+    const certChecks = await Promise.all(this.config.SslHosts.map(host => sslChecker(host, {method: 'GET', port: 443})));
+    for(let i = 0; i < this.config.SslHosts.length;i++) {
+      if (!certChecks[i].valid) {
+        healthMessages.push(`Host ${this.config.SslHosts[i]} certificate is not valid.`);
+      } else if ( typeof certChecks[i].daysRemaining === 'number' && certChecks[i].daysRemaining < 8) {
+        healthMessages.push(`Host ${this.config.SslHosts[i]} certificate will expire in ${certChecks[i].daysRemaining} days.`);
+      }
+    }
   
+    if (healthMessages.length > 0) {
+      return {
+        Status: HealthLevel.Red,
+        StatusMsg: `${healthMessages.length} of ${this.config.SslHosts.length} monitored certificate checks failed.`,
+        StatusToolTip: healthMessages.join("\n"),
+      };   
+    }
+    return {
+      Status: HealthLevel.Green,
+      StatusMsg: "All monitored certificates are OK",
+      StatusToolTip: "OK",
+    };
+  }
 }
 
 async function pingOneUrl(url:string, threshhold: number): Promise<string> {
