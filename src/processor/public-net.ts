@@ -84,7 +84,9 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       const web3 = getWeb3(config.EthereumEndpoint);
       const resources = await getResources(rootNodeData, web3);
    
-      model.Statuses[StatusName.EthereumContracts] = await getEthereumContractsStatus(resources, web3, config);
+      const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
+      model.Statuses[StatusName.EthereumContracts] = 
+        await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
 
       const pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;

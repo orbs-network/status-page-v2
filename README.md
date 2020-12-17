@@ -125,7 +125,7 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
   * PING_URL_ENDPOINTS
     * Optional
     * Comma seperated full URLs (for example: https://staking.orbs.network/)
-    * Allows to a simple http(s) call to test if this URL are responding in a timely manner.
+    * Allows to a simple http(s) call to test if this URL are responding in a timely manner (default 3000 millis).
 
   * PING_URL_TIMEOUT_MILLIS
     * Optional
@@ -147,17 +147,6 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
       * Optional.
       * The staking address undelying the Ethereum economy of your network. The time component is to allow checking the livness of your network if no event happened in the last amount of time then there might be a problem on the Ethereum side.
       * Overrides the address for staking address.
-      * Default time is 1 day.
-    * MIN_STAKING_BALANCE
-      * Optional
-      * Checks that there is a minimum amout of staking reward in the address
-      * Override the address for staking reward.
-      * Override the minimum that is by default 1000.
-    * MIN_BOOTSTRAP_BALANCE
-      * Optional
-      * Checks that there is a minimum amout of bootstrap reward in the address
-      * Override the address for bootstrap reward.
-      * Override the minimum that is by default 33.
-    
+      * Default time is 1 day.  
 
 [heroku CLI]: https://devcenter.heroku.com/articles/heroku-command-line

@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { getAbiByContractRegistryKey } from '@orbs-network/orbs-ethereum-contracts-v2';
 
@@ -35,8 +34,6 @@ export interface OrbsEthResrouces {
         erc20Contract: any;
         stakingAddress: string;
         stakingContract: any;
-        stakingRewardsWalletContract: any;
-        bootstrapRewardsWalletContract: any;
         delegationsAddress: string;
         stakingRewardsContract: any;
         stakingRewardsWalletAddress: string;
@@ -75,8 +72,6 @@ export async function getResources(nodeData:any, web3:any) : Promise<OrbsEthResr
         erc20Contract: getContract(web3, erc20Abi, erc20Address),
         stakingAddress,
         stakingContract: getContract(web3, stakeAbi, stakingAddress),
-        stakingRewardsWalletContract: getContract(web3, getAbiByContractRegistryKey('stakingRewardsWallet'), stakingRewardsWalletAddress),
-        bootstrapRewardsWalletContract: getContract(web3, getAbiByContractRegistryKey('bootstrapRewardsWallet'), bootstrapRewardsWalletAddress),
         delegationsAddress,
         stakingRewardsContract: getContract(web3, getAbiByContractRegistryKey('stakingRewards'), stakingRewardsAddress),
         stakingRewardsAddress,
@@ -106,8 +101,4 @@ export interface BlockInfo {
 export async function getBlockInfo(blockToFetch: string | number, web3:Web3): Promise<BlockInfo> {
     const block = await web3.eth.getBlock(blockToFetch); 
     return {time: Number(block.timestamp), number: block.number }
-}
-
-export function toTokenNumber(n: string):number {
-    return new BigNumber(n).dividedBy("1e18").toNumber();
 }

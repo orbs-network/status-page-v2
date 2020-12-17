@@ -26,8 +26,6 @@ export interface Configuration {
   RootNodeEndpoints: string[];
   // ethereum
   EthereumEndpoint: string;
-  MinStakingBlance: number;
-  MinBootstrapBlance: number;
   MaxTimeSinceLastEvent: number;
 }
 
@@ -71,18 +69,6 @@ export function validateConfiguration(config: Configuration) {
     throw new Error(`PingUrlTimeoutsMillis when not empty has to be same length as PingUrlEndpoints.`);
   }
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
-    if (typeof config.MinStakingBlance != 'number') {
-      throw new Error(`MinStakingBlance is not a number.`);
-    }
-    if (config.MinStakingBlance <= 0) {
-      throw new Error(`MinStakingBlance is empty, zero or negative.`);
-    }
-    if (typeof config.MinBootstrapBlance != 'number') {
-      throw new Error(`MinBootstrapBlance is not a number.`);
-    }
-    if (config.MinBootstrapBlance <= 0) {
-      throw new Error(`MinBootstrapBlance is empty, zero or negative.`);
-    }
     if (typeof config.MaxTimeSinceLastEvent != 'number') {
       throw new Error(`MaxTimeSinceLastEvent is not a number.`);
     }
