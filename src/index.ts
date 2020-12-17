@@ -35,12 +35,12 @@ export function serve(config: Configuration) {
 
   app.get('/supply', (_request, response) => {
     const body = processor.getModel();
-    response.status(200).json(body.SupplyStatus);
+    response.status(200).json(body.SupplyData);
   });
 
   app.get('/posdata', (_request, response) => {
     const body = processor.getModel();
-    response.status(200).json(body.PoSStatus);
+    response.status(200).json(body.PoSData);
   });
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {

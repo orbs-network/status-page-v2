@@ -12,21 +12,20 @@ export interface Configuration {
   ProcessorPollTimeSeconds: number;
   SlackToken: string;
   SlackChannel: string;
-  HealthCheckTimeOfDayInSeconds: number;
   RootNodeStaleWarnTimeSeconds: number;
   RootNodeStaleErrorTimeSeconds: number;
   VCNameAdapter: any;
   // staleness
   StaleStatusTimeSeconds: number;
   ExpirationWarningTimeInDays: number;
+  PingUrlEndpoints: string[];
+  PingUrlTimeoutsMillis: number[];
+  SslHosts: string[];
   // network
   NetworkType: NetworkType;
   RootNodeEndpoints: string[];
   // ethereum
   EthereumEndpoint: string;
-  StakingRewardsAddress: string;
-  BootstrapRewardsAddress: string;
-  StakingAddress: string;
   MinStakingBlance: number;
   MinBootstrapBlance: number;
   MaxTimeSinceLastEvent: number;
@@ -68,6 +67,9 @@ export function validateConfiguration(config: Configuration) {
   if (!config.ExpirationWarningTimeInDays || config.ExpirationWarningTimeInDays <= 0) {
     throw new Error(`ExpirationWarningTimeInDays is empty, zero or negative.`);
   }
+  if (config.PingUrlTimeoutsMillis.length !== 0 && config.PingUrlTimeoutsMillis.length !== config.PingUrlEndpoints.length) {
+    throw new Error(`PingUrlTimeoutsMillis when not empty has to be same length as PingUrlEndpoints.`);
+  }
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
     if (typeof config.MinStakingBlance != 'number') {
       throw new Error(`MinStakingBlance is not a number.`);
@@ -83,7 +85,7 @@ export function validateConfiguration(config: Configuration) {
     }
     if (typeof config.MaxTimeSinceLastEvent != 'number') {
       throw new Error(`MaxTimeSinceLastEvent is not a number.`);
-    }  
+    }
     if (config.MaxTimeSinceLastEvent <= 0) {
       throw new Error(`StakingAddress is empty, zero or negative.`);
     }

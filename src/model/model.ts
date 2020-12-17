@@ -9,22 +9,29 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp = '';
-  RootNodeStatus?: RootNodeStatus = undefined; // only public-network
+  Statuses: {[key: string]: GenStatus} = {};
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
   StandByNodes: Guardians = {};
   AllRegisteredNodes: Guardians = {};
-  EthereumStatus?: EthereumStatus = undefined; // only public-network
-  SupplyStatus?: SupplyStatus = undefined; // only public-network
-  PoSStatus?: PoSStatus = undefined; // only public-network
+  SupplyData?: SupplyStatus = undefined; // only public-network
+  PoSData?: PoSStatus = undefined; // only public-network
 }
 
-export interface RootNodeStatus {
+export enum StatusName {
+  RootNode = 'Root Node Health',
+  EthereumContracts = 'PoS Contracts Health',
+  PingUrls = 'Monitored URLs Health',
+  Certs = 'Monitored Certs Health'
+}
+export interface GenStatus {
   Status: HealthLevel;
   StatusToolTip: string;
   StatusMsg: string;
 }
+
+export interface RootNodeStatus extends GenStatus {}
 
 export enum HealthLevel {
   Green = 'Green',
@@ -93,10 +100,7 @@ export interface NodeVirtualChains {
   [key: string]: NodeVirtualChain;
 }
 
-export interface NodeVirtualChain {
-  StatusMsg: string;
-  Status: HealthLevel;
-  StatusToolTip: string;
+export interface NodeVirtualChain extends GenStatus {
   Timestamp: string;
   Version: string;
   BlockHeight: number;
@@ -147,10 +151,7 @@ export interface NodeServices {
   [key: string]: NodeService;
 }
 
-export interface NodeService {
-  StatusMsg: string;
-  Status: HealthLevel;
-  StatusToolTip: string;
+export interface NodeService extends GenStatus {
   Timestamp: string;
   Version: string;
   URLs: NodeServiceUrls;
@@ -200,13 +201,10 @@ export interface NodeVirtualChainBadReputations {
   [key: string]: number;
 }
 
-export interface EthereumStatus {
+export interface EthereumStatus extends GenStatus {
   StakingRewardsBalance: number;
   BootstrapRewardsBalance: number;
   LastStakeUnstakeTime: number;
-  Status: HealthLevel;
-  StatusMsg: string;
-  StatusToolTip: string;
 }
 
 export interface SupplyStatus {

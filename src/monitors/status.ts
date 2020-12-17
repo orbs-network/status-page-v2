@@ -33,10 +33,12 @@ export function checkStatusChange(oldModel:Model, newModel: Model): string {
     _.forOwn(newModel.CommitteeNodes, (g, key) => guardianStatusChange(oldModel.CommitteeNodes[key], g, errorCounterMap));
     _.forOwn(newModel.StandByNodes, (g, key) => guardianStatusChange(oldModel.StandByNodes[key], g, errorCounterMap));
 
-    const oldEthStatus = oldModel?.EthereumStatus?.Status || HealthLevel.Green;
-    if (oldEthStatus === HealthLevel.Green && newModel?.EthereumStatus?.Status !== HealthLevel.Green) {
-        errorMap['PoS Contracts Health'] = newModel?.EthereumStatus?.StatusToolTip || 'Unknown';
-    }
+    _.forOwn(newModel.Statuses, (s, key) => {
+        const oldStatus = oldModel.Statuses[key]?.Status || HealthLevel.Green;
+        if (oldStatus === HealthLevel.Green && s.Status !== HealthLevel.Green) {
+            errorMap[key] = s.StatusToolTip;
+        }
+    });
 
     return errorMapToString(errorMap, errorCounterMap);
 }

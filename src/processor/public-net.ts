@@ -10,7 +10,7 @@ import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, RootNodeStatus } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName } from '../model/model';
 import { getResources, getWeb3 } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
@@ -55,7 +55,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   let standByMembers = {};
 
   const currentRefTime = rootNodeData.Payload?.CurrentRefTime || 0;
-  model.RootNodeStatus = generateRootNodeStatus(rootNodeEndpoint, currentRefTime, config);
+  model.Statuses[StatusName.RootNode] = generateRootNodeStatus(rootNodeEndpoint, currentRefTime, config);
 
   const guardians = readGuardians(rootNodeData);
   const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
@@ -85,19 +85,19 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       const web3 = getWeb3(config.EthereumEndpoint);
       const resources = await getResources(rootNodeData, web3);
    
-      model.EthereumStatus = await getEthereumContractsStatus(resources, web3, config);
+      model.Statuses[StatusName.EthereumContracts] = await getEthereumContractsStatus(resources, web3, config);
 
-      const posData = await getPoSStatus(model, resources, web3);
-      model.SupplyStatus = posData.SupplyStatus;
-      model.PoSStatus = posData.PosData;
+      const pos = await getPoSStatus(model, resources, web3);
+      model.SupplyData = pos.SupplyData;
+      model.PoSData = pos.PosData;
     } catch (e) {
-      model.EthereumStatus = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
-      Logger.error(model.EthereumStatus.StatusToolTip);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
+      Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
   }
 }
 
-function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : RootNodeStatus {
+function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : GenStatus {
   let rootNodeStatus = HealthLevel.Green;
   let rootNodeStatusMsg = 'Status Page: OK';
   let rootNodeStatusToolTip = 'Network Information Up-to-date';
