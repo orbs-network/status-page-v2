@@ -19,7 +19,6 @@ import { getPoSStatus } from './stats';
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
-const Protocol = 'http://';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
@@ -35,7 +34,7 @@ export async function updateModel(model: Model, config: Configuration) {
 }
 
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
-  const rootNodeData = await fetchJson(`${Protocol}${rootNodeEndpoint}${ManagementStatusSuffix}`);
+  const rootNodeData = await fetchJson(`${rootNodeEndpoint}${ManagementStatusSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
   if (_.size(virtualChainList) === 0 ) {
@@ -67,7 +66,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
   try {
-    calcReputation(`${Protocol}${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+    calcReputation(`${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
   } catch (e) {
     Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
   }

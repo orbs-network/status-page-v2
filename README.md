@@ -89,12 +89,11 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
     * Decides the flavour of the server accept only two value `pubilic` and `private`.
   
   * NETWORK_NODE_ENDPOINTS
-    * A comma separated list of ips that can be used to discover the nework. The server tries them one after the other. First one that answers is used.
+    * A comma separated list of protocol + domain/ips (for example https://0xcore.orbs.com,http://34.227.204.75) that can be used to discover the nework. The server tries them one after the other. First one that answers is used.
   
-  * SLACK_TOKEN, SLACK_CHANNEL, HEALTH_CHECK_TIME_OF_DAY_IN_SECONDS
+  * SLACK_TOKEN, SLACK_CHANNEL
     * Optional
     * Token & Channel Name for a slack enviroment to allow sending alerts.
-    * `HEALTH_CHECK_TIME_OF_DAY_IN_SECONDS` sets a time for daily health check message to be sent to the slack channel. This is meant to help avoid server death that goes unnoticed.
     * If token and channel exist, every `POLL_INTERVAL_SECONDS` the current state is comapre with previous and if any new field turned "Red" it will also send an alert.
 
   * POLL_INTERVAL_SECONDS
@@ -123,23 +122,38 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
     * Default is empty.
     * Example `{"100":"Original","1000004":"Core Canary"}`
 
+  * PING_URL_ENDPOINTS
+    * Optional
+    * Comma seperated full URLs (for example: https://staking.orbs.network/)
+    * Allows to a simple http(s) call to test if this URL are responding in a timely manner.
+
+  * PING_URL_TIMEOUT_MILLIS
+    * Optional
+    * Comma seperated timeouts in milliseconds. If supplied must match PING_URL_ENDPOINTS in size.
+    * Change default timeout for ping URLs.
+
+  * SSL_HOSTS
+    * Optional
+    * Comma seperated host names (for example 0xcore.orbs.com).
+    * Checks the validity of the certificate of the hosts and warns 7 days before they are expired.
+
   * Ethereum Related
     In public network that is connected to Ethereum supply an ethereum endpoint to allow reading the related statuses.
     * ETHEREUM_ENDPOINT
       * Provider url for accessing Ethereum. It is optional if not supplied all the Ethereum checks will be skipped.
       * If left empty other fields will be ignored.
       * For example. `https://mainnet.infura.io/v3/<your key here>`
-    * STAKING_ADDRESS, MAX_TIME_SECONDS_SINCE_LAST_EVENT
+    * MAX_TIME_SECONDS_SINCE_LAST_EVENT
       * Optional.
       * The staking address undelying the Ethereum economy of your network. The time component is to allow checking the livness of your network if no event happened in the last amount of time then there might be a problem on the Ethereum side.
       * Overrides the address for staking address.
       * Default time is 1 day.
-    * STAKING_REWARD_ADDRESS, MIN_STAKING_BALANCE
+    * MIN_STAKING_BALANCE
       * Optional
       * Checks that there is a minimum amout of staking reward in the address
       * Override the address for staking reward.
       * Override the minimum that is by default 1000.
-    * BOOTSTRAP_REWARD_ADDRESS, MIN_BOOTSTRAP_BALANCE
+    * MIN_BOOTSTRAP_BALANCE
       * Optional
       * Checks that there is a minimum amout of bootstrap reward in the address
       * Override the address for bootstrap reward.
