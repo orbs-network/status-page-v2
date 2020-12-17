@@ -202,9 +202,13 @@ export interface NodeVirtualChainBadReputations {
 }
 
 export interface EthereumStatus extends GenStatus {
-  StakingRewardsBalance: number;
-  BootstrapRewardsBalance: number;
-  LastStakeUnstakeTime: number;
+  StakingRewardsBalance?: number;
+  StakingRewardsAllocated?: number;
+  StakingRewardsTwoWeeks?: number;
+  BootstrapRewardsBalance?: number;
+  BootstrapRewardsAllocated?: number;
+  BootstrapRewardsTwoWeeks?: number;
+  LastStakeUnstakeTime?: number;
 }
 
 export interface SupplyStatus {

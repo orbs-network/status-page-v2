@@ -32,6 +32,4 @@ export const defaultConfiguration: Configuration = {
 
   EthereumEndpoint: String(process.env.ETHEREUM_ENDPOINT),
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
-  MinStakingBlance: Number(process.env.MIN_STAKING_BALANCE) || 1000,
-  MinBootstrapBlance: Number(process.env.MIN_BOOTSTRAP_BALANCE) || 33,
-  };
+};

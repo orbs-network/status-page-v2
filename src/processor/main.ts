@@ -19,7 +19,7 @@ import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServic
 import { Monitors } from '../monitors/main';
 
 const NumberOfPingTries = 10;
-const DefaultPingTimeout = 2000;
+const DefaultPingTimeout = 3000;
 
 export class Processor {
   private model = new Model();

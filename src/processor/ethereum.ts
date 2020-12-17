@@ -6,18 +6,24 @@
  * The above notice should be included in all copies or substantial portions of the software.
  */
 
+import BigNumber from 'bignumber.js';
 import _ from 'lodash';
+// @ts-ignore
+import { aggregate } from '@makerdao/multicall';
 import { Configuration } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
-import { getBlockInfo, OrbsEthResrouces, toTokenNumber } from './eth-helper';
+import { getBlockInfo, OrbsEthResrouces } from './eth-helper';
 
 
-export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
-    const stakingRewardsBalance = toTokenNumber(await resources.stakingRewardsWalletContract.methods.getBalance().call());
-    const bootstrapRewardsBalance = toTokenNumber(await resources.bootstrapRewardsWalletContract.methods.getBalance().call());
-    
-    const currentBlock = await getBlockInfo('latest', web3);
+function bigToNumber(n: BigNumber):number {
+    return n.dividedBy("1e18").toNumber();
+}
+
+export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
+    const {blockNumber, data } = await read(resources, web3);
+   
+    const currentBlock = await getBlockInfo(blockNumber, web3); // use same one as the big read
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: currentBlock.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
 
@@ -44,12 +50,20 @@ export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${currentBlock.number}) is from ${timeAgoText(currentBlock.time)}.`);
         healthLevel = HealthLevel.Red;
     }  
-    if (stakingRewardsBalance < config.MinStakingBlance) {
-        healthMessages.push(`Staking rewards wallet balance (${Math.floor(stakingRewardsBalance)}) is below the threshold (${config.MinStakingBlance}).`);
+    const stakingRewardsTwoWeeks = 80000000*14/365;
+    const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
+    const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
+    if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
+        healthMessages.push(`Staking rewards: wallet balance (${stakingRewardsBalance.toFixed(3)}) minus (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}).`);
         healthLevel = HealthLevel.Red;
     }
-    if (bootstrapRewardsBalance < config.MinBootstrapBlance) {
-        healthMessages.push(`Bootstrap rewards wallet balance (${Math.floor(bootstrapRewardsBalance)}) is below the threshold (${config.MinBootstrapBlance}).`);
+    const bootstrapRewardsTwoWeeks = 3000*22*14/365;
+    const bootstrapRewardsWallet = bigToNumber(data[BootstrapRewardWallet]);
+    const bootstrapAllocatedToken = bigToNumber(new BigNumber(getCurrentClockTime()).minus(data[BootstrapRewardLastWithdraw])
+        .multipliedBy(numOfCertifiedGuardiansInCommittee).multipliedBy(data[BootstrapRewardAnnual]).div(31536000 /*year in sec*/));
+
+    if ((bootstrapRewardsWallet - bootstrapAllocatedToken) < bootstrapRewardsTwoWeeks) {
+        healthMessages.push(`Bootstrap rewards: wallet balance (${bootstrapRewardsWallet.toFixed(3)}) minus (${bootstrapAllocatedToken.toFixed(3)}) is below the 2 week threshold (${bootstrapRewardsTwoWeeks.toFixed(3)}).`);
         healthLevel = HealthLevel.Red;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
@@ -57,7 +71,11 @@ export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web
 
     return {
         StakingRewardsBalance: stakingRewardsBalance,
-        BootstrapRewardsBalance: bootstrapRewardsBalance,
+        StakingRewardsAllocated: stakingRewardsAllocated,
+        StakingRewardsTwoWeeks: stakingRewardsTwoWeeks,
+        BootstrapRewardsBalance: bootstrapRewardsWallet,
+        BootstrapRewardsAllocated: bootstrapAllocatedToken,
+        BootstrapRewardsTwoWeeks: bootstrapRewardsTwoWeeks,
         LastStakeUnstakeTime: lastEventTime,
         Status: healthLevel,
         StatusMsg: healthMessage,
@@ -65,11 +83,50 @@ export async function getEthereumContractsStatus(resources:OrbsEthResrouces, web
     };
 }
 
+const StakeRewardWallet = 'StakeRewardWallet';
+const StakeRewardAllocated = 'StakeRewardAllocated';
+const BootstrapRewardWallet = 'BootstrapRewardWallet';
+const BootstrapRewardAnnual = 'BootstrapRewardAnnual';
+const BootstrapRewardLastWithdraw = 'BootstrapRewardLastWithdraw';
+// Function depends on version 0.11.0 of makderdao/multicall only on 'latest' block
+const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
+export async function read(resources:OrbsEthResrouces, web3:any) {
+    const config = { web3, multicallAddress: MulticallContractAddress};
+
+    const calls: any[] = [
+        {
+            target: resources.stakingRewardsWalletAddress, 
+            call: ['getBalance()(uint256)'],
+            returns: [[StakeRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.stakingRewardsAddress, 
+            call: ['getStakingRewardsWalletAllocatedTokens()(uint256)'],
+            returns: [[StakeRewardAllocated, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.bootstrapRewardsWalletAddress, 
+            call: ['getBalance()(uint256)'],
+            returns: [[BootstrapRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.bootstrapRewardsWalletAddress, 
+            call: ['lastWithdrawal()(uint256)'],
+            returns: [[BootstrapRewardLastWithdraw, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.bootstrapRewardsAddress, 
+            call: ['getCertifiedCommitteeAnnualBootstrap()(uint256)'],
+            returns: [[BootstrapRewardAnnual, (v: BigNumber.Value) => new BigNumber(v)]]
+        }
+    ];
+
+    const r = await aggregate(calls, config);
+    return { blockNumber: r.results.blockNumber, data: r.results.transformed};
+}
+
 export function generateErrorEthereumContractsStatus(msg:string):EthereumStatus {
     return {
-        StakingRewardsBalance: 0,
-        BootstrapRewardsBalance: 0,
-        LastStakeUnstakeTime: 0,
         Status: HealthLevel.Red,
         StatusMsg: `PoS Contracts status: Ethereum Error Detected`,
         StatusToolTip: msg,
