@@ -15,7 +15,6 @@ import * as Logger from '../logger';
 
 // Important URLS for private-network - init explore of network from these.
 const NodeManagementSuffix = ':7666/node/management';
-const Protocol = 'http://';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
@@ -31,7 +30,7 @@ export async function updateModel(model: Model, config: Configuration) {
 }
 
 async function readData(model: Model, rootNodeEndpoint: string) {
-  const rootNodeData = await fetchJson(`${Protocol}${rootNodeEndpoint}${NodeManagementSuffix}`);
+  const rootNodeData = await fetchJson(`${rootNodeEndpoint}${NodeManagementSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData);
   if (_.size(virtualChainList) === 0 ) {
@@ -45,7 +44,7 @@ async function readData(model: Model, rootNodeEndpoint: string) {
     Service.Logger,
   ];
 
-  const vcMgmtData = await fetchJson(`${Protocol}${rootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
+  const vcMgmtData = await fetchJson(`${rootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
   const guardians = _.keyBy(readGuardians(vcMgmtData), (o) => o.EthAddress);
 
   model.TimeSeconds = getCurrentClockTime();
