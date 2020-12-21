@@ -247,22 +247,22 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
     let result: string[] = [];
     _.map(rep.NodeVirtualChainBadReputations, (value, key) => {
       if (value !== 0) {
-        result.push(`${key}=${value}`);
+        result.push(`${key} (${timeAgoText(value)})`);
       }
     });
     if (result.length > 0) {
       rep.ReputationStatus = HealthLevel.Red;
-      rep.ReputationToolTip = `Some VCs have non-zero time to be voted out (${result.join(',')})`;
+      rep.ReputationToolTip = `VCs that entered bad reputation: ${result.join(',')}`;
     } else {
       result = [];
       _.map(rep.NodeVirtualChainReputations, (value, key) => {
         if (value !== 0) {
-          result.push(`${key}=${value}`);
+          result.push(`${key} (value=${value})`);
         }
       });
       if (result.length > 0) {
         rep.ReputationStatus = HealthLevel.Yellow;
-        rep.ReputationToolTip = `Some VCs have non-zero reputations (${result.join(',')})`;
+        rep.ReputationToolTip = `VCs with non perfect reputations: ${result.join(',')}`;
       }
     }
   });

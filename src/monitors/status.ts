@@ -89,9 +89,9 @@ function errorMapToString(errorMap: ErrorMap, errorCounterMap: ErrorCounterMap):
 
     _.forOwn(errorCounterMap, (v, k) => {
         if (_.size(v.ips) === 1) {
-            msg += `${k}: Node ${v.firstName} (${v.firstIp}) is reporting "${v.firstError}"\n`;
+            msg += `${k}: Node ${v.firstName} (${v.firstIp}): "${v.firstError}"\n`;
         } else if (_.size(v.ips) > 0) {
-            msg += `${k}: ${_.size(v.ips)} nodes seem to have a problem, first node ${v.firstName} (${v.firstIp}) is reporting "${v.firstError}"\n`;
+            msg += `${k}: ${_.size(v.ips)} nodes seem to have a problem, first node ${v.firstName} (${v.firstIp}): "${v.firstError}"\n`;
         };
     });
     return msg;
