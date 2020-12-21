@@ -54,7 +54,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
     if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
-        healthMessages.push(`Staking rewards: wallet balance (${stakingRewardsBalance.toFixed(3)}) minus (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}).`);
+        healthMessages.push(`Staking rewards: ORBS wallet balance (${stakingRewardsBalance.toFixed(3)}) minus allocated (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}) all numbers in ORBS.`);
         healthLevel = HealthLevel.Red;
     }
     const bootstrapRewardsTwoWeeks = 3000*22*14/365;
@@ -63,7 +63,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         .multipliedBy(numOfCertifiedGuardiansInCommittee).multipliedBy(data[BootstrapRewardAnnual]).div(31536000 /*year in sec*/));
 
     if ((bootstrapRewardsWallet - bootstrapAllocatedToken) < bootstrapRewardsTwoWeeks) {
-        healthMessages.push(`Bootstrap rewards: wallet balance (${bootstrapRewardsWallet.toFixed(3)}) minus (${bootstrapAllocatedToken.toFixed(3)}) is below the 2 week threshold (${bootstrapRewardsTwoWeeks.toFixed(3)}).`);
+        healthMessages.push(`Bootstrap rewards: DAI wallet balance (${bootstrapRewardsWallet.toFixed(3)}) minus allocated (${bootstrapAllocatedToken.toFixed(3)}) is below the 2 week threshold (${bootstrapRewardsTwoWeeks.toFixed(3)}) all numbers are in DAI.`);
         healthLevel = HealthLevel.Red;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
