@@ -15,6 +15,7 @@ export const defaultConfiguration: Configuration = {
   ProcessorPollTimeSeconds: Number(process.env.POLL_INTERVAL_SECONDS) || 5 * 60,
   SlackToken: String(process.env.SLACK_TOKEN || ''),
   SlackChannel: String(process.env.SLACK_CHANNEL) || 'prod-v2-monitoring',
+  SlackSuppressMsgs: process.env.SLACK_SUPPRESS_MSGS ? String(process.env.SLACK_SUPPRESS_MSGS).split(',') : [],
 
   StaleStatusTimeSeconds: Number(process.env.STATUS_STALE_TIME_SECONDS) || 15 * 60,
   RootNodeStaleWarnTimeSeconds: Number(process.env.ROOT_NODE_STALE_WARN_TIME_SECONDS) || 3600,

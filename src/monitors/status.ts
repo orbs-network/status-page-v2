@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import * as Logger from '../logger';
 import { Guardian, HealthLevel, Model } from "../model/model";
 
 interface ErrorMap { // Network level errors
@@ -23,15 +24,15 @@ class ErrorAndCount {
     firstName = '';
 }
 
-export function checkStatusChange(oldModel:Model, newModel: Model): string {
+export function checkStatusChange(oldModel:Model, newModel: Model, suppressMsgs:string[]): string {
     const errorMap: ErrorMap = {};
     const errorCounterMap: ErrorCounterMap = {};
     _.forEach(newModel.VirtualChains, (v) => {errorCounterMap[toVCTag(v.Id)] = new ErrorAndCount()});
     _.forEach(newModel.Services, (v) => {errorCounterMap[toServiceTag(v.Name)] = new ErrorAndCount()});
     errorCounterMap[toReputationTag()] = new ErrorAndCount();
 
-    _.forOwn(newModel.CommitteeNodes, (g, key) => guardianStatusChange(oldModel.CommitteeNodes[key], g, errorCounterMap));
-    _.forOwn(newModel.StandByNodes, (g, key) => guardianStatusChange(oldModel.StandByNodes[key], g, errorCounterMap));
+    _.forOwn(newModel.CommitteeNodes, (g, key) => guardianStatusChange(oldModel.CommitteeNodes[key], g, errorCounterMap, suppressMsgs));
+    _.forOwn(newModel.StandByNodes, (g, key) => guardianStatusChange(oldModel.StandByNodes[key], g, errorCounterMap, suppressMsgs));
 
     _.forOwn(newModel.Statuses, (s, key) => {
         const oldStatus = oldModel.Statuses[key]?.Status || HealthLevel.Green;
@@ -43,23 +44,27 @@ export function checkStatusChange(oldModel:Model, newModel: Model): string {
     return errorMapToString(errorMap, errorCounterMap);
 }
 
-function guardianStatusChange(oldModelGuardian:Guardian, newModelGuaridan:Guardian, errorMap: ErrorCounterMap) {
+function guardianStatusChange(oldModelGuardian:Guardian, newModelGuaridan:Guardian, errorMap: ErrorCounterMap, suppressMsgs:string[]) {
     _.forOwn(newModelGuaridan.NodeVirtualChains, (vc, vcid) => {
-        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeVirtualChains[vcid]?.Status || HealthLevel.Green, vc.Status, vc.StatusToolTip, errorMap[toVCTag(vcid)]);
+        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeVirtualChains[vcid]?.Status || HealthLevel.Green, vc.Status, vc.StatusToolTip, errorMap[toVCTag(vcid)], suppressMsgs);
     });
 
     _.forOwn(newModelGuaridan.NodeServices, (service, name) => {
-        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeServices[name]?.Status || HealthLevel.Green, service.Status, service.StatusToolTip, errorMap[toServiceTag(name)]);
+        singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, oldModelGuardian?.NodeServices[name]?.Status || HealthLevel.Green, service.Status, service.StatusToolTip, errorMap[toServiceTag(name)], suppressMsgs);
     });
 
     singleStatusChange(newModelGuaridan.Name, newModelGuaridan.Ip, 
         oldModelGuardian?.NodeReputation?.ReputationStatus || HealthLevel.Green, 
         newModelGuaridan.NodeReputation.ReputationStatus, newModelGuaridan.NodeReputation.ReputationToolTip,
-        errorMap[toReputationTag()]);
+        errorMap[toReputationTag()], suppressMsgs);
 }
 
-function singleStatusChange(name:string, ip:string, oldStatus: HealthLevel, newStatus: HealthLevel, newStatusMsg: string, error: ErrorAndCount) {
+function singleStatusChange(name:string, ip:string, oldStatus: HealthLevel, newStatus: HealthLevel, newStatusMsg: string, error: ErrorAndCount, suppressMsgs:string[]) {
     if (oldStatus === HealthLevel.Green && newStatus !== HealthLevel.Green) {
+        if (_.findIndex(suppressMsgs, msg => newStatusMsg.indexOf(msg) !== -1) !== -1) {
+            Logger.log(`Suppressed message "${newStatusMsg}"`);
+            return; // newStatusMsg contained one of the suppressed messages so ignore this
+        }
         if (_.size(error.ips) === 0) {
             error.firstError = newStatusMsg;
             error.firstIp = ip;

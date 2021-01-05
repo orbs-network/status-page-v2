@@ -21,11 +21,11 @@ export class Monitors {
     async run(oldModel:Model, newModel: Model) {
         if(this.config.SlackToken && this.config.SlackToken.length > 0) {
             if (oldModel.TimeSeconds <= 0) { // (re)start
-                const {msg, healthMsg} = healthCheck(newModel);
+                const {msg, healthMsg} = healthCheck(newModel, this.config.SlackSuppressMsgs);
                 this.msg = msg;
                 this.sendSlack(`Health Check: ${healthMsg}`, this.config);
             } else {
-                const msg = checkStatusChange(oldModel, newModel);
+                const msg = checkStatusChange(oldModel, newModel, this.config.SlackSuppressMsgs);
                 if (msg.length > 0) {
                     if (this.msg !== msg) {
                         this.msg = msg;

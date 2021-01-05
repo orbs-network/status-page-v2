@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Model } from "../model/model";
 import { checkStatusChange } from './status';
 
-export function healthCheck(newModel: Model) {
+export function healthCheck(newModel: Model, suppressMsgs: string[]) {
     let msg = '', healthMsg = '';
     if (_.size(newModel.CommitteeNodes) === 0) {
         healthMsg = `Network seems to be empty of *Committee Nodes* ...\n`;
@@ -19,7 +19,7 @@ export function healthCheck(newModel: Model) {
     } else if (_.size(newModel.Services) === 0 ) {
         healthMsg = `Network nodes seem to have *no Services* defined ...\n`;
     } else  {
-        msg = checkStatusChange(new Model(), newModel); // see if there are any non health statuses
+        msg = checkStatusChange(new Model(), newModel, suppressMsgs); // see if there are any non health statuses
         if (msg.length > 0) {
             healthMsg = `Network is not sunny ☔:\n${msg}`;
         } else {

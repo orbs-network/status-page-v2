@@ -12,6 +12,7 @@ export interface Configuration {
   ProcessorPollTimeSeconds: number;
   SlackToken: string;
   SlackChannel: string;
+  SlackSuppressMsgs: string[];
   RootNodeStaleWarnTimeSeconds: number;
   RootNodeStaleErrorTimeSeconds: number;
   VCNameAdapter: any;
