@@ -245,25 +245,20 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   _.map(committeeMembers, (node) => {
     const rep = node.NodeReputation;
     let result: string[] = [];
-    _.map(rep.NodeVirtualChainBadReputations, (value, key) => {
-      if (value !== 0) {
-        result.push(`${key} (${timeAgoText(value)})`);
+    let foundRed = false;
+    _.map(rep.NodeVirtualChainReputations, (value, key) => {
+      if (value !== 0) { 
+        if (rep.NodeVirtualChainBadReputations[key] !== 0) {
+          foundRed = true;
+          result.push(`VC '${key}': reputation issue severity ${value} started ${timeAgoText(rep.NodeVirtualChainBadReputations[key])}`);
+        } else {
+          result.push(`VC '${key}': reputation issue severity ${value}`);          
+        }
       }
     });
     if (result.length > 0) {
-      rep.ReputationStatus = HealthLevel.Red;
-      rep.ReputationToolTip = `VCs that entered bad reputation: ${result.join(',')}`;
-    } else {
-      result = [];
-      _.map(rep.NodeVirtualChainReputations, (value, key) => {
-        if (value !== 0) {
-          result.push(`${key} (value=${value})`);
-        }
-      });
-      if (result.length > 0) {
-        rep.ReputationStatus = HealthLevel.Yellow;
-        rep.ReputationToolTip = `VCs with non perfect reputations: ${result.join(',')}`;
-      }
+      rep.ReputationStatus = foundRed ? HealthLevel.Red : HealthLevel.Yellow;
+      rep.ReputationToolTip = result.join(', ');
     }
   });
 }
