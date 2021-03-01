@@ -18,6 +18,11 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: '2px solid #cccccc20',
     fontSize: '1.2rem'
   },
+  link: {
+    textDecoration: 'none',
+    color: 'inherit',
+    borderBottom: '1px dotted #ddd',
+  },
 }));
 
 export const StatusTableHeader = React.memo<IProps>((props) => {
@@ -74,7 +79,11 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
         {headerServicesPlaceholders}
         {vcs.map((vc) => (
           <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
-            {vc.Id}
+            {vc.IsCanary ? (vc.Id) : (
+              <a href={vc.VirtualChainUrls.Prism} target={'_blank'} rel={'noopener noreferrer'} className={classes.link}>
+               {vc.Id}
+              </a>
+            )}
             {
               vc.Name ? ` - ${vc.Name}` : false
             } 
