@@ -45,7 +45,7 @@ export class Monitors {
             await slack.chat.postMessage({text : message, username: this.messagerUserName, icon_emoji: this.slackUserEmoji, channel: this.config.MonitorSlackChannel});
         }
         if (this.config.MonitorDiscordURL && this.config.MonitorDiscordURL.length > 0) {
-            const res = await fetch(this.config.MonitorDiscordURL,
+            await fetch(this.config.MonitorDiscordURL,
                 {
                   method: 'post',
                   body:    JSON.stringify({
@@ -54,7 +54,6 @@ export class Monitors {
                   }),
                   headers: { 'Content-Type': 'application/json' },
                 });
-              return await res.json();
         }
     }
 
