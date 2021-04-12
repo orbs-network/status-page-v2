@@ -11,7 +11,7 @@ import BigNumber from 'bignumber.js';
 // @ts-ignore
 import { aggregate } from '@makerdao/multicall';
 import { Model } from '../model/model';
-import { FirstPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, OrbsEthResrouces, Topics } from './eth-helper';
+import { BlockTimestamp, FirstPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics } from './eth-helper';
 
 const THIRTY_DAYS_IN_BLOCKS = 45000;
 
@@ -23,18 +23,17 @@ const ADVISORS = "0x574d48b2ec0a5e968adb77636656672327402634";
 const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUNDING_PARTNERS, ADVISORS];
 
 export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
-    const {blockNumber, data } = await read(resources, web3);
-    const currentBlock = await getBlockInfo(blockNumber - 1, web3); // avoid jitter
+    const { block, data } = await read(resources, web3);
 
     // Token
     const supplyInCirculation = data[Erc20TotalSupply]
         .minus(data[Erc20LongTerm]).minus(data[Erc20PrivateSale]).minus(data[Erc20TeamAndFounding]).minus(data[Erc20Advisors])
         .minus(data[StakingLongTerm]).minus(data[StakingPrivateSale]).minus(data[StakingTeamAndFounding]).minus(data[StakingAdvisors]);
 
-    const startBlock = await getBlockInfo(blockNumber - THIRTY_DAYS_IN_BLOCKS, web3);
-    const timePeriodSeconds = currentBlock.time - startBlock.time;
+    const startBlock = await getBlockInfo(block.number - THIRTY_DAYS_IN_BLOCKS, web3);
+    const timePeriodSeconds = block.time - startBlock.time;
 
-    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, currentBlock.number, 100000);
+    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, 100000);
     const dailyNumberOfTransfers = (transferEvents.length * 86400) / (timePeriodSeconds);
     let totalTransfers = new BigNumber(0);
     for (const event of transferEvents) {
@@ -43,7 +42,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     const dailyAmountOfTransfers = totalTransfers.times(new BigNumber(86400)).dividedToIntegerBy(new BigNumber(timePeriodSeconds))
 
     // Staked
-    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, currentBlock.number, 100000);
+    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, 100000);
     const stakers: {[key:string]: BigNumber} = {};
     for (const event of stakeEvents) {
         const address = String(event.returnValues.stakeOwner).toLowerCase();
@@ -52,7 +51,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     }
 
     // Rewards
-    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, currentBlock.number, 100000);
+    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, 100000);
     let totalAllocatedRewards = new BigNumber(0);
     for (const event of rewardsAllocEvents) {
         totalAllocatedRewards = totalAllocatedRewards.plus(new BigNumber(event.returnValues.allocatedRewards));
@@ -86,9 +85,9 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     return {
         PosData: {
             Header: {
-                BlockNumber: currentBlock.number,
-                BlockTimestamp: currentBlock.time,
-                BlockTime: new Date(currentBlock.time * 1000).toISOString(),                
+                BlockNumber: block.number,
+                BlockTimestamp: block.time,
+                BlockTime: new Date(block.time * 1000).toISOString(),                
             },
             TokenData: {
                 Contract: resources.erc20Address,
@@ -143,9 +142,9 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
             supplyInCirculation: supplyInCirculation.toFixed(),
             totalSupply: data[Erc20TotalSupply].toFixed(),
             decimals: "18",
-            block : currentBlock.number,
-            blockTimestamp: currentBlock.time,
-            updatedAt : new Date(currentBlock.time * 1000).toISOString()
+            block : block.number,
+            blockTimestamp: block.time,
+            updatedAt : new Date(block.time * 1000).toISOString()
         }
     }
 }
@@ -293,11 +292,15 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             target: resources.delegationsAddress, 
             call: ['getTotalDelegatedStake()(uint256)'],
             returns: [[DelegationStakeTotal, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            call: ['getCurrentBlockTimestamp()(uint256)'],
+            returns: [[BlockTimestamp]]
         }
     ];
 
     const r = await aggregate(calls, config);
-    return { blockNumber: r.results.blockNumber, data: r.results.transformed};
+    return { block: multicallToBlockInfo(r), data: r.results.transformed};
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

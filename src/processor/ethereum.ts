@@ -13,7 +13,7 @@ import { aggregate } from '@makerdao/multicall';
 import { Configuration } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
-import { getBlockInfo, OrbsEthResrouces } from './eth-helper';
+import { BlockTimestamp, multicallToBlockInfo, OrbsEthResrouces } from './eth-helper';
 
 
 function bigToNumber(n: BigNumber):number {
@@ -21,10 +21,9 @@ function bigToNumber(n: BigNumber):number {
 }
 
 export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
-    const {blockNumber, data } = await read(resources, web3);
+    const { block, data } = await read(resources, web3);
    
-    const currentBlock = await getBlockInfo(blockNumber, web3); // use same one as the big read
-    const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: currentBlock.number-10000, toBlock: 'latest'});
+    const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
 
     events.sort((n1:any, n2:any) => n2.blockNumber - n1.blockNumber); // sort desc
@@ -46,8 +45,8 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
         healthLevel = HealthLevel.Red;
     }
-    if (isStaleTime(currentBlock.time, config.RootNodeStaleErrorTimeSeconds)) {
-        healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${currentBlock.number}) is from ${timeAgoText(currentBlock.time)}.`);
+    if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
+        healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
         healthLevel = HealthLevel.Red;
     }  
     const stakingRewardsTwoWeeks = 80000000*14/365;
@@ -118,11 +117,15 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             target: resources.bootstrapRewardsAddress, 
             call: ['getCertifiedCommitteeAnnualBootstrap()(uint256)'],
             returns: [[BootstrapRewardAnnual, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            call: ['getCurrentBlockTimestamp()(uint256)'],
+            returns: [[BlockTimestamp]]
         }
     ];
 
     const r = await aggregate(calls, config);
-    return { blockNumber: r.results.blockNumber, data: r.results.transformed};
+    return { block: multicallToBlockInfo(r), data: r.results.transformed};
 }
 
 export function generateErrorEthereumContractsStatus(msg:string):EthereumStatus {

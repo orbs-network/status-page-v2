@@ -10,9 +10,10 @@ export interface Configuration {
   // server settings
   Port: number;
   ProcessorPollTimeSeconds: number;
-  SlackToken: string;
-  SlackChannel: string;
-  SlackSuppressMsgs: string[];
+  MonitorSuppressMsgs: string[];
+  MonitorSlackToken: string;
+  MonitorSlackChannel: string;
+  MonitorDiscordURL: string;
   RootNodeStaleWarnTimeSeconds: number;
   RootNodeStaleErrorTimeSeconds: number;
   VCNameAdapter: any;
