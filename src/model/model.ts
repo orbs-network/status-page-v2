@@ -76,7 +76,7 @@ export interface Guardian {
   Name: string;
   Ip: string;
   Website: string;
-  EffectiveStake?: number;
+  EffectiveStake: number;
   SelfStake?: number;
   DelegatedStake?: number;
   IsCertified: boolean;
