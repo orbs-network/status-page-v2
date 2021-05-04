@@ -77,6 +77,8 @@ export interface Guardian {
   Ip: string;
   Website: string;
   EffectiveStake: number;
+  SelfStake: number;
+  DelegatedStake: number;
   IsCertified: boolean;
   OrbsAddress: string;
   NodeManagementURL: string;
