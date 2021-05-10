@@ -14,37 +14,9 @@ interface IProps {
 export const VcStatusCell = React.memo<IProps>((props) => {
   const { vc } = props;
 
-  const { bgColor, tooltipText } = useMemo<{ bgColor: string; tooltipText: string }>(() => {
-    let bgColor = '';
-    let tooltipText = '';
-
-    const nowUtc = new Date().getTime();
-    const nowUtcInSeconds = nowUtc / 1000;
-    // TODO : O.L : Improve this calculation to use a real month (e.g 29 - 29, 31-31)
-    const monthFromNow = nowUtcInSeconds + 60 * 60 * 30;
-
-    const hasExpired = vc.ExpirationTimeSeconds < nowUtcInSeconds;
-    const isExpiringInLessThanAMonth = vc.ExpirationTimeSeconds < monthFromNow;
-
-    if (hasExpired) {
-      bgColor = backgroundColorFromHealthLevel(HealthLevel.Red);
-      tooltipText = 'VC has expired';
-    } else if (isExpiringInLessThanAMonth) {
-      bgColor = backgroundColorFromHealthLevel(HealthLevel.Yellow);
-      tooltipText = 'VC expires in less than 30 days';
-    } else {
-      bgColor = backgroundColorFromHealthLevel(HealthLevel.Green);
-    }
-
-    return {
-      bgColor,
-      tooltipText,
-    };
-  }, [vc.ExpirationTimeSeconds]);
-
   return (
-    <Tooltip title={tooltipText} arrow>
-      <TableCell style={{ textAlign: 'center', backgroundColor: bgColor }}>
+    <Tooltip title={vc.SubscriptionStatusToolTip} arrow>
+      <TableCell style={{ textAlign: 'center', backgroundColor: backgroundColorFromHealthLevel(vc.SubscriptionStatus) }}>
         <Typography>{moment.unix(vc.ExpirationTimeSeconds).format('YYYY-MM-DD')}</Typography>
         {vc.IsCertified ? (
           <Tooltip title={'Certified validators only'} arrow>

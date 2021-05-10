@@ -125,16 +125,16 @@ function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {
   return _.map(rootNodeData.Payload.CurrentVirtualChains, (vcData, vcId) => {
-    const expirationTime = _.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
+    const expirationTime = 1620977777//_.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
     if (expirationTime > 0) {
-      if (getCurrentClockTime() > expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60) {
-        healthLevel = HealthLevel.Yellow;
-        healthLevelToolTip = `VirtualChain will expire in less than ${config.ExpirationWarningTimeInDays} days.`;
-      } else if (isStaleTime(expirationTime, 0)) {
+      if (isStaleTime(expirationTime, 0)) {
         healthLevel = HealthLevel.Red;
         healthLevelToolTip = 'VirtualChain expired.';
+      } else if (getCurrentClockTime() > (expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60)) {
+        healthLevel = HealthLevel.Yellow;
+        healthLevelToolTip = `VirtualChain will expire in less than ${config.ExpirationWarningTimeInDays} days.`;
       }
     }
     
