@@ -125,7 +125,7 @@ function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|
 
 function readVirtualChains(rootNodeData: any, config: Configuration): VirtualChain[] {
   return _.map(rootNodeData.Payload.CurrentVirtualChains, (vcData, vcId) => {
-    const expirationTime = 1620977777//_.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
+    const expirationTime = _.isNumber(vcData.Expiration) ? vcData.Expiration : -1;
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
     if (expirationTime > 0) {
