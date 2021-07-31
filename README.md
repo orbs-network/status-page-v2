@@ -96,6 +96,11 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
     * Token & Channel Name for a slack enviroment to allow sending alerts.
     * If token and channel exist, every `POLL_INTERVAL_SECONDS` the current state is comapre with previous and if any new field turned "Red" it will also send an alert.
 
+  * DISCORD_URL
+    * Optional
+    * Discord webhook url to allow sending alerts.
+    * If exists, every `POLL_INTERVAL_SECONDS` the current state is comapre with previous and if any new field turned "Red" it will also send an alert.
+
   * POLL_INTERVAL_SECONDS
     * Optional.
     * Time to wait between server checks. This is the heartbeat of the backend server.
