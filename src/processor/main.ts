@@ -57,7 +57,7 @@ export class Processor {
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
-      
+
       // monitoring
       this.monitors.run(this.model, newModel);
       Logger.log('Processor: finished monitoring.');
@@ -91,7 +91,7 @@ export class Processor {
     try {
       const vcStatusData = await fetchJson(urls.Status);
 
-      const versionTag = vcStatusData.Payload?.Version?.Semantic || ''; 
+      const versionTag = vcStatusData.Payload?.Version?.Semantic || '';
       updateNodeServiceUrlsWithVersion(urls, Service.VC.RepositoryPrefix, versionTag);
 
       const errMsg = vcStatusData?.Error || '';
@@ -132,6 +132,18 @@ export class Processor {
     });
     return tasks;
   }
+  ///////////////////////////////
+  private filterIgnoredServiceErrors(svcName: string, errMsg:string) : string{
+    const boyarErrs = [/^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/];
+    if(svcName === 'Boyar'){
+      for(let rx of boyarErrs){
+        if(rx.test(errMsg)){
+          return '';
+        }
+      }
+    }
+    return errMsg;
+  }
 
   private async readNodeService(node: Guardian, service: Service) {
     const urls = generateNodeServiceUrls(node.Ip, service);
@@ -141,7 +153,7 @@ export class Processor {
       const versionTag = data.Payload?.Version?.Semantic || '';
       updateNodeServiceUrlsWithVersion(urls, service.RepositoryPrefix, versionTag);
 
-      const errMsg = data?.Error || '';
+      const errMsg = this.filterIgnoredServiceErrors(service.Name, data?.Error) || '';
       const timestamp = data.Timestamp || '';
       const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
@@ -159,7 +171,7 @@ export class Processor {
     }
   }
 
-  private fillInAllRegistered(all: Guardians, committee: Guardians, standbys: Guardians,virtualChains: VirtualChain[], services: Service[]){ 
+  private fillInAllRegistered(all: Guardians, committee: Guardians, standbys: Guardians,virtualChains: VirtualChain[], services: Service[]){
     _.forOwn(all, g => {
       if (_.has(committee, g.EthAddress)) {
         const member = committee[g.EthAddress];
@@ -201,13 +213,13 @@ export class Processor {
     }
     const res = await Promise.all(txs);
     const healthMessages:string[] = _.map(_.pickBy(res, r => r !== ''), r => r);
-  
+
     if (healthMessages.length > 0) {
       return {
         Status: HealthLevel.Red,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
         StatusToolTip: healthMessages.join("\n"),
-      };   
+      };
     }
     return {
       Status: HealthLevel.Green,
@@ -226,13 +238,13 @@ export class Processor {
         healthMessages.push(`Host ${this.config.SslHosts[i]} certificate will expire in ${certChecks[i].daysRemaining} days.`);
       }
     }
-  
+
     if (healthMessages.length > 0) {
       return {
         Status: HealthLevel.Red,
         StatusMsg: `${healthMessages.length} of ${this.config.SslHosts.length} monitored certificate checks failed.`,
         StatusToolTip: healthMessages.join("\n"),
-      };   
+      };
     }
     return {
       Status: HealthLevel.Green,
