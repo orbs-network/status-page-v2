@@ -12,7 +12,7 @@
     "!dist/**/*.test.js"
   ],
   "engines": {
-    "node": ">=12.13.0"
+    "node": "16.x"
   },
   "scripts": {
     "typecheck": "tsc --noEmit --skipLibCheck",
