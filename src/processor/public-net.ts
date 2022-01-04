@@ -300,7 +300,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
-		Provider: 'ORBS',
+		Provider: 'ORBS Ltd.',
 		LastUpdatedTimestamp: Date.now()
 	},
 	{
@@ -311,7 +311,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
-		Provider: 'ORBS',
+		Provider: 'ORBS Ltd.',
 		LastUpdatedTimestamp: Date.now()
 	},
 	{
@@ -322,7 +322,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
-		Provider: 'ORBS',
+		Provider: 'ORBS Ltd.',
 		LastUpdatedTimestamp: Date.now()
 	},
 	{
@@ -333,7 +333,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
-		Provider: 'ORBS',
+		Provider: 'ORBS Ltd.',
 		LastUpdatedTimestamp: Date.now()
 	},
 	{
@@ -344,7 +344,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
-		Provider: 'ORBS',
+		Provider: 'ORBS Ltd.',
 		LastUpdatedTimestamp: Date.now()
 	}
 	]
