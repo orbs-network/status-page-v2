@@ -275,19 +275,28 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 
 	// TODO: first draft. add: IDR, SGD, TH
   	const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
-  	const data = await fetchJson(url);
+  	const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC'
+  	const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC'
+  	const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC'
 
-	const orbsKrw = data[0]['trade_price'];
-	const orbsUsdt = new BigNumber(data[1]['trade_price']).multipliedBy(data[2]['trade_price']).toNumber();
+	const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any)=> v.trade_price);
+  	// const data = await fetchJson(url);
+  	const idrBtc = (await fetchJson(idrUrl))[0].trade_price;
+  	const sgdBtc = (await fetchJson(sgdUrl))[0].trade_price;
+  	const thbBtc = (await fetchJson(thbUrl))[0].trade_price;
+
+	const usdtOrbs = new BigNumber(usdtBtc).multipliedBy(btcOrbs).toNumber();
+	const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
+	const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
+	const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
 	const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18)
-	// console.log(data)
 
 	return [
 	{
 		Symbol: 'ORBS',
 		CurrencyCode: 'KRW',
-		Price: orbsKrw,
-		MarketCap: normCirculatingSupply.multipliedBy(orbsKrw).toNumber(),
+		Price: krwOrbs,
+		MarketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
@@ -297,8 +306,41 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 	{
 		Symbol: 'ORBS',
 		CurrencyCode: 'USDT',
-		Price: orbsUsdt,
-		MarketCap: normCirculatingSupply.multipliedBy(orbsUsdt).toNumber(),
+		Price: usdtOrbs,
+		MarketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
+		AccTradePrice24h: null,
+		CirculatingSupply: Number(normCirculatingSupply),
+		MaxSupply: 10000000000,
+		Provider: 'ORBS',
+		LastUpdatedTimestamp: Date.now()
+	},
+	{
+		Symbol: 'ORBS',
+		CurrencyCode: 'IDR',
+		Price: isdrOrbs,
+		MarketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
+		AccTradePrice24h: null,
+		CirculatingSupply: Number(normCirculatingSupply),
+		MaxSupply: 10000000000,
+		Provider: 'ORBS',
+		LastUpdatedTimestamp: Date.now()
+	},
+	{
+		Symbol: 'ORBS',
+		CurrencyCode: 'SGD',
+		Price: sgdOrbs,
+		MarketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
+		AccTradePrice24h: null,
+		CirculatingSupply: Number(normCirculatingSupply),
+		MaxSupply: 10000000000,
+		Provider: 'ORBS',
+		LastUpdatedTimestamp: Date.now()
+	},
+	{
+		Symbol: 'ORBS',
+		CurrencyCode: 'THB',
+		Price: thbOrbs,
+		MarketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
 		AccTradePrice24h: null,
 		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
@@ -307,3 +349,6 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 	}
 	]
 }
+
+
+getUpbitInfo(new BigNumber(2876767038.8889003).multipliedBy(1e18).toFixed()).then(r => console.log(r))
