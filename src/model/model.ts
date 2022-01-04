@@ -17,6 +17,7 @@ export class Model {
   AllRegisteredNodes: Guardians = {};
   SupplyData?: SupplyStatus = undefined; // only public-network
   PoSData?: PoSStatus = undefined; // only public-network
+  Exchange: any = {};
 }
 
 export enum StatusName {
@@ -246,7 +247,7 @@ export interface TokenData {
   TotalSupply: string;
   SupplyInCirculation: string;
   DailyActivityNumberOfTransfers: string;
-  DailyActivityTokenTransferred: string;  
+  DailyActivityTokenTransferred: string;
 }
 
 export interface StakedTokenData {
@@ -255,7 +256,7 @@ export interface StakedTokenData {
   StakedTokens: string;
   UnstakedTokens: string;
   NumberOfAllPastStakers: number;
-  NumberOfActiveStakers: number;  
+  NumberOfActiveStakers: number;
 }
 
 export interface RewardsAndFeeData {
@@ -288,4 +289,16 @@ export interface CommitteeData {
 
 export interface PoSV2General {
   TotalDelegatedStake: string;
+}
+
+export interface ExchangeEntry {
+  Symbol: string,
+  CurrencyCode: string,
+  Price: number,
+  MarketCap: number,
+  AccTradePrice24h: null,
+  CirculatingSupply: number,
+  MaxSupply: number,
+  Provider: string,
+  LastUpdatedTimestamp: number
 }
