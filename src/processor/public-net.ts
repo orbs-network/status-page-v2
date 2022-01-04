@@ -279,6 +279,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 
 	const orbsKrw = data[0]['trade_price'];
 	const orbsUsdt = new BigNumber(data[1]['trade_price']).multipliedBy(data[2]['trade_price']).toNumber();
+	const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18)
 	// console.log(data)
 
 	return [
@@ -286,9 +287,9 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		Symbol: 'ORBS',
 		CurrencyCode: 'KRW',
 		Price: orbsKrw,
-		MarketCap: new BigNumber(circulatingSupply).multipliedBy(orbsKrw).toNumber(),
+		MarketCap: normCirculatingSupply.multipliedBy(orbsKrw).toNumber(),
 		AccTradePrice24h: null,
-		CirculatingSupply: Number(circulatingSupply),
+		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
 		Provider: 'ORBS',
 		LastUpdatedTimestamp: Date.now()
@@ -297,9 +298,9 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 		Symbol: 'ORBS',
 		CurrencyCode: 'USDT',
 		Price: orbsUsdt,
-		MarketCap: new BigNumber(circulatingSupply).multipliedBy(orbsUsdt).toNumber(),
+		MarketCap: normCirculatingSupply.multipliedBy(orbsUsdt).toNumber(),
 		AccTradePrice24h: null,
-		CirculatingSupply: Number(circulatingSupply),
+		CirculatingSupply: Number(normCirculatingSupply),
 		MaxSupply: 10000000000,
 		Provider: 'ORBS',
 		LastUpdatedTimestamp: Date.now()
