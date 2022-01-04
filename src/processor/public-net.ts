@@ -10,11 +10,12 @@ import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName } from '../model/model';
+import {Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry} from '../model/model';
 import { getResources, getWeb3 } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
 import { getPoSStatus } from './stats';
+import BigNumber from "bignumber.js";
 
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
@@ -83,14 +84,17 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     try {
       const web3 = getWeb3(config.EthereumEndpoint);
       const resources = await getResources(rootNodeData, web3);
-   
+
       const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
-      model.Statuses[StatusName.EthereumContracts] = 
+      model.Statuses[StatusName.EthereumContracts] =
         await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
 
       const pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;
       model.PoSData = pos.PosData;
+
+      model.Exchange.Upbit = await getUpbitInfo(pos.SupplyData.supplyInCirculation);
+
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
@@ -137,7 +141,7 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
         healthLevelToolTip = `VirtualChain will expire in less than ${config.ExpirationWarningTimeInDays} days.`;
       }
     }
-    
+
     return {
       Id: vcId,
       Name: vcName(vcId, vcData.Name, config),
@@ -251,12 +255,12 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
     let result: string[] = [];
     let foundRed = false;
     _.map(rep.NodeVirtualChainReputations, (value, key) => {
-      if (value !== 0) { 
+      if (value !== 0) {
         if (rep.NodeVirtualChainBadReputations[key] !== 0) {
           foundRed = true;
           result.push(`VC '${key}': reputation issue severity ${value} started ${timeAgoText(rep.NodeVirtualChainBadReputations[key])}`);
         } else {
-          result.push(`VC '${key}': reputation issue severity ${value}`);          
+          result.push(`VC '${key}': reputation issue severity ${value}`);
         }
       }
     });
@@ -265,4 +269,40 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
       rep.ReputationToolTip = result.join(', ');
     }
   });
+}
+
+async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
+
+	// TODO: first draft. add: IDR, SGD, TH
+  	const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
+  	const data = await fetchJson(url);
+
+	const orbsKrw = data[0]['trade_price'];
+	const orbsUsdt = new BigNumber(data[1]['trade_price']).multipliedBy(data[2]['trade_price']).toNumber();
+	// console.log(data)
+
+	return [
+	{
+		Symbol: 'ORBS',
+		CurrencyCode: 'KRW',
+		Price: orbsKrw,
+		MarketCap: new BigNumber(circulatingSupply).multipliedBy(orbsKrw).toNumber(),
+		AccTradePrice24h: null,
+		CirculatingSupply: Number(circulatingSupply),
+		MaxSupply: 10000000000,
+		Provider: 'ORBS',
+		LastUpdatedTimestamp: Date.now()
+	},
+	{
+		Symbol: 'ORBS',
+		CurrencyCode: 'USDT',
+		Price: orbsUsdt,
+		MarketCap: new BigNumber(circulatingSupply).multipliedBy(orbsUsdt).toNumber(),
+		AccTradePrice24h: null,
+		CirculatingSupply: Number(circulatingSupply),
+		MaxSupply: 10000000000,
+		Provider: 'ORBS',
+		LastUpdatedTimestamp: Date.now()
+	}
+	]
 }
