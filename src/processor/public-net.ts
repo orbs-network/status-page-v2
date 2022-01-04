@@ -349,6 +349,3 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 	}
 	]
 }
-
-
-getUpbitInfo(new BigNumber(2876767038.8889003).multipliedBy(1e18).toFixed()).then(r => console.log(r))
