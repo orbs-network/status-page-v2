@@ -15,6 +15,7 @@ export const testModel:Model = {
       "StatusToolTip": "OK"
     }
   },
+  "Exchanges": {},
   "VirtualChains": [
     {
       "Id": "1000005",

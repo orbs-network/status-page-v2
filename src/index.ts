@@ -43,9 +43,9 @@ export function serve(config: Configuration) {
     response.status(200).json(body.PoSData);
   });
 
-  app.get('/exchange/upbit', (_request, response) => {
+  app.get('/exchanges/upbit', (_request, response) => {
     const body = processor.getModel();
-    response.status(200).json(body.Exchange.Upbit);
+    response.status(200).json(body.Exchanges.Upbit);
   });
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {

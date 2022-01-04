@@ -93,7 +93,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.SupplyData = pos.SupplyData;
       model.PoSData = pos.PosData;
 
-      model.Exchange.Upbit = await getUpbitInfo(pos.SupplyData.supplyInCirculation);
+      model.Exchanges.Upbit = await getUpbitInfo(pos.SupplyData.supplyInCirculation);
 
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);

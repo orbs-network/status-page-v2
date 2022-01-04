@@ -17,7 +17,7 @@ export class Model {
   AllRegisteredNodes: Guardians = {};
   SupplyData?: SupplyStatus = undefined; // only public-network
   PoSData?: PoSStatus = undefined; // only public-network
-  Exchange: any = {};
+  Exchanges?: any = {};
 }
 
 export enum StatusName {
