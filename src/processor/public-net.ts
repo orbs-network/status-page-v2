@@ -21,6 +21,8 @@ import BigNumber from "bignumber.js";
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
 
+let validSupplyInCirculation = "";
+
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
   for (const rootNodeEndpoint of rootNodeEndpoints) {
@@ -96,6 +98,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     try {
       const pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;
+      validSupplyInCirculation = model.SupplyData.supplyInCirculation;
       model.PoSData = pos.PosData;
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Pos Data: ${e.stack}`);
@@ -103,10 +106,10 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     }
   }
   // calc exchange data regardless if contract fetch was successfull
-  if (model.SupplyData?.supplyInCirculation) {
-    model.Exchanges.Upbit = await getUpbitInfo(model.SupplyData.supplyInCirculation);
+  if (validSupplyInCirculation.length) {
+    model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
   } else {
-    model.Exchanges.Upbit = { "error": "supplyData is not fetched yet" };
+    model.Exchanges.Upbit = { "error": "no valid SupplyInCirculation fetched yet" };
   }
 }
 
