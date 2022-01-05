@@ -10,7 +10,7 @@ import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import {Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry} from '../model/model';
+import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
 import { getResources, getWeb3 } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
@@ -23,12 +23,12 @@ const EthWriterStatusSuffix = '/services/ethereum-writer/status';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
-  for(const rootNodeEndpoint of rootNodeEndpoints) {
-      try {
-          return await readData(model, rootNodeEndpoint, config);
-      } catch (e) {
-          Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
-      }
+  for (const rootNodeEndpoint of rootNodeEndpoints) {
+    try {
+      return await readData(model, rootNodeEndpoint, config);
+    } catch (e) {
+      Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
+    }
   }
 
   throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`)
@@ -38,7 +38,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   const rootNodeData = await fetchJson(`${rootNodeEndpoint}${ManagementStatusSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
-  if (_.size(virtualChainList) === 0 ) {
+  if (_.size(virtualChainList) === 0) {
     Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
   }
 
@@ -60,7 +60,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   const guardians = readGuardians(rootNodeData);
   const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
   committeeMembers = _.pick(guardians, committeeMembersAddresses);
-  if (_.size(committeeMembers) === 0 ) {
+  if (_.size(committeeMembers) === 0) {
     Logger.error(`Could not read a valid Committee, current network seems empty.`);
   }
   const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
@@ -78,36 +78,44 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.Services = services;
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
-  model.AllRegisteredNodes = _.mapValues(guardians, g => {return copyGuardianForAllRegistered(g)});
+  model.AllRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
 
   if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
+    const web3 = getWeb3(config.EthereumEndpoint);
+    const resources = await getResources(rootNodeData, web3);
+    ///////////////////////
     try {
-      const web3 = getWeb3(config.EthereumEndpoint);
-      const resources = await getResources(rootNodeData, web3);
-
       const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
       model.Statuses[StatusName.EthereumContracts] =
         await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
-
-      const pos = await getPoSStatus(model, resources, web3);
-      model.SupplyData = pos.SupplyData;
-      model.PoSData = pos.PosData;
-
-      model.Exchanges.Upbit = await getUpbitInfo(pos.SupplyData.supplyInCirculation);
-
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
+    ///////////////////////
+    try {
+      const pos = await getPoSStatus(model, resources, web3);
+      model.SupplyData = pos.SupplyData;
+      model.PoSData = pos.PosData;
+    } catch (e) {
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Pos Data: ${e.stack}`);
+      Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
+    }
+  }
+  // calc exchange data regardless if contract fetch was successfull
+  if (model.SupplyData?.supplyInCirculation) {
+    model.Exchanges.Upbit = await getUpbitInfo(model.SupplyData.supplyInCirculation);
+  } else {
+    model.Exchanges.Upbit = { "error": "supplyData is not fetched yet" };
   }
 }
 
-function generateRootNodeStatus(rootNodeEndpoint:string, currentRefTime: string|number, config:Configuration) : GenStatus {
+function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string | number, config: Configuration): GenStatus {
   let rootNodeStatus = HealthLevel.Green;
   let rootNodeStatusMsg = 'Status Page: OK';
   let rootNodeStatusToolTip = 'Network Information Up-to-date';
   if (isStaleTime(currentRefTime, config.RootNodeStaleWarnTimeSeconds)) {
-    const timeMsg = `Status information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime): 'unknown time'}`;
+    const timeMsg = `Status information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime) : 'unknown time'}`;
     Logger.log(`${timeMsg}. Service might be syncing or ethereum outage.`);
     if (isStaleTime(currentRefTime, config.RootNodeStaleErrorTimeSeconds)) {
       rootNodeStatus = HealthLevel.Red;
@@ -156,10 +164,10 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
   });
 }
 
-function vcName(vcId:string, vcName:string, config:Configuration) {
+function vcName(vcId: string, vcName: string, config: Configuration) {
   if (_.has(config.VCNameAdapter, vcId)) {
     return config.VCNameAdapter[vcId];
-  } else if (_.isString(vcName) ) {
+  } else if (_.isString(vcName)) {
     return vcName;
   }
   return '';
@@ -194,7 +202,7 @@ function readGuardians(rootNodeData: any): Guardians {
 function copyGuardianForAllRegistered(guardianData: Guardian): Guardian {
   return {
     EthAddress: guardianData.EthAddress,
-    Name: guardianData.Name ,
+    Name: guardianData.Name,
     Ip: guardianData.Ip,
     Website: guardianData.Website,
     EffectiveStake: guardianData.EffectiveStake,
@@ -273,79 +281,79 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
 
 async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
 
-	// TODO: first draft. add: IDR, SGD, TH
-  	const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
-  	const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC'
-  	const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC'
-  	const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC'
+  // TODO: first draft. add: IDR, SGD, TH
+  const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
+  const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC'
+  const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC'
+  const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC'
 
-	const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any)=> v.trade_price);
-  	// const data = await fetchJson(url);
-  	const idrBtc = (await fetchJson(idrUrl))[0].trade_price;
-  	const sgdBtc = (await fetchJson(sgdUrl))[0].trade_price;
-  	const thbBtc = (await fetchJson(thbUrl))[0].trade_price;
+  const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any) => v.trade_price);
+  // const data = await fetchJson(url);
+  const idrBtc = (await fetchJson(idrUrl))[0].trade_price;
+  const sgdBtc = (await fetchJson(sgdUrl))[0].trade_price;
+  const thbBtc = (await fetchJson(thbUrl))[0].trade_price;
 
-	const usdtOrbs = new BigNumber(usdtBtc).multipliedBy(btcOrbs).toNumber();
-	const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
-	const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
-	const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
-	const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18)
+  const usdtOrbs = new BigNumber(usdtBtc).multipliedBy(btcOrbs).toNumber();
+  const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
+  const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
+  const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
+  const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18)
 
-	return [
-	{
-		Symbol: 'ORBS',
-		CurrencyCode: 'KRW',
-		Price: krwOrbs,
-		MarketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
-		AccTradePrice24h: null,
-		CirculatingSupply: Number(normCirculatingSupply),
-		MaxSupply: 10000000000,
-		Provider: 'ORBS Ltd.',
-		LastUpdatedTimestamp: Date.now()
-	},
-	{
-		Symbol: 'ORBS',
-		CurrencyCode: 'USDT',
-		Price: usdtOrbs,
-		MarketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
-		AccTradePrice24h: null,
-		CirculatingSupply: Number(normCirculatingSupply),
-		MaxSupply: 10000000000,
-		Provider: 'ORBS Ltd.',
-		LastUpdatedTimestamp: Date.now()
-	},
-	{
-		Symbol: 'ORBS',
-		CurrencyCode: 'IDR',
-		Price: isdrOrbs,
-		MarketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
-		AccTradePrice24h: null,
-		CirculatingSupply: Number(normCirculatingSupply),
-		MaxSupply: 10000000000,
-		Provider: 'ORBS Ltd.',
-		LastUpdatedTimestamp: Date.now()
-	},
-	{
-		Symbol: 'ORBS',
-		CurrencyCode: 'SGD',
-		Price: sgdOrbs,
-		MarketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
-		AccTradePrice24h: null,
-		CirculatingSupply: Number(normCirculatingSupply),
-		MaxSupply: 10000000000,
-		Provider: 'ORBS Ltd.',
-		LastUpdatedTimestamp: Date.now()
-	},
-	{
-		Symbol: 'ORBS',
-		CurrencyCode: 'THB',
-		Price: thbOrbs,
-		MarketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
-		AccTradePrice24h: null,
-		CirculatingSupply: Number(normCirculatingSupply),
-		MaxSupply: 10000000000,
-		Provider: 'ORBS Ltd.',
-		LastUpdatedTimestamp: Date.now()
-	}
-	]
+  return [
+    {
+      Symbol: 'ORBS',
+      CurrencyCode: 'KRW',
+      Price: krwOrbs,
+      MarketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
+      AccTradePrice24h: null,
+      CirculatingSupply: Number(normCirculatingSupply),
+      MaxSupply: 10000000000,
+      Provider: 'ORBS Ltd.',
+      LastUpdatedTimestamp: Date.now()
+    },
+    {
+      Symbol: 'ORBS',
+      CurrencyCode: 'USDT',
+      Price: usdtOrbs,
+      MarketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
+      AccTradePrice24h: null,
+      CirculatingSupply: Number(normCirculatingSupply),
+      MaxSupply: 10000000000,
+      Provider: 'ORBS Ltd.',
+      LastUpdatedTimestamp: Date.now()
+    },
+    {
+      Symbol: 'ORBS',
+      CurrencyCode: 'IDR',
+      Price: isdrOrbs,
+      MarketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
+      AccTradePrice24h: null,
+      CirculatingSupply: Number(normCirculatingSupply),
+      MaxSupply: 10000000000,
+      Provider: 'ORBS Ltd.',
+      LastUpdatedTimestamp: Date.now()
+    },
+    {
+      Symbol: 'ORBS',
+      CurrencyCode: 'SGD',
+      Price: sgdOrbs,
+      MarketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
+      AccTradePrice24h: null,
+      CirculatingSupply: Number(normCirculatingSupply),
+      MaxSupply: 10000000000,
+      Provider: 'ORBS Ltd.',
+      LastUpdatedTimestamp: Date.now()
+    },
+    {
+      Symbol: 'ORBS',
+      CurrencyCode: 'THB',
+      Price: thbOrbs,
+      MarketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
+      AccTradePrice24h: null,
+      CirculatingSupply: Number(normCirculatingSupply),
+      MaxSupply: 10000000000,
+      Provider: 'ORBS Ltd.',
+      LastUpdatedTimestamp: Date.now()
+    }
+  ]
 }
