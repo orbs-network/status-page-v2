@@ -12,7 +12,7 @@ import { errorString } from './helpers';
 export class TaskLoop {
   private handle: NodeJS.Timeout | undefined;
   private started = false;
-  constructor(private task: () => Promise<unknown>, private pause: number) {}
+  constructor(private task: () => Promise<unknown>, private pause: number) { }
 
   runTask = () => {
     this.task().then(
@@ -33,6 +33,7 @@ export class TaskLoop {
   start = () => {
     if (!this.started) {
       this.started = true;
+      this.task(); // first call (yuval)
       this.handle = setTimeout(this.runTask, 0);
     }
   };

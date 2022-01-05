@@ -24,7 +24,7 @@ export function serve(config: Configuration) {
   app.use(express.static(path.join(__dirname, './status-page-client/build')));
 
   // Serves index file of client
-  app.get('/', (_,res) => {
+  app.get('/', (_, res) => {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
   });
 
@@ -43,7 +43,7 @@ export function serve(config: Configuration) {
     response.status(200).json(body.PoSData);
   });
 
-  app.get('/exchanges/upbit', (_request, response) => {
+  app.get('/exchanges/data', (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body.Exchanges.Upbit);
   });
