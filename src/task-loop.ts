@@ -33,7 +33,6 @@ export class TaskLoop {
   start = () => {
     if (!this.started) {
       this.started = true;
-      this.task(); // first call (yuval)
       this.handle = setTimeout(this.runTask, 0);
     }
   };
