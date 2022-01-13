@@ -370,5 +370,5 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 
 
 function getCoinmarketcapInfo(totalSupply: string, decimals: string): number {
-	return new BigNumber(totalSupply).dividedBy(decimals).toNumber();
+	return new BigNumber(totalSupply).dividedBy(new BigNumber(10).exponentiatedBy(decimals)).toNumber();
 }
