@@ -48,6 +48,11 @@ export function serve(config: Configuration) {
     response.status(200).json(body.Exchanges.Upbit);
   });
 
+  app.get('/exchanges/coinmarketcap', (_request, response) => {
+    const body = processor.getModel();
+    response.status(200).json(body.SupplyData?.totalSupply);
+  });
+
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
       Logger.error(`Error response to ${req.url}: ${errorString(error)}.`);

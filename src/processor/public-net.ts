@@ -284,7 +284,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
 
 async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
 
-  // TODO: first draft. add: IDR, SGD, TH
+  // TODO: first draft
   const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
   const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC'
   const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC'
