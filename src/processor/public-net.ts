@@ -94,12 +94,18 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
+
+    model.Exchanges.Coinmarketcap = null;
+
     ///////////////////////
     try {
       const pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;
       validSupplyInCirculation = model.SupplyData.supplyInCirculation;
       model.PoSData = pos.PosData;
+
+	  model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
+
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Pos Data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
@@ -111,6 +117,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   } else {
     model.Exchanges.Upbit = { "error": "no valid SupplyInCirculation fetched yet" };
   }
+
 }
 
 function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string | number, config: Configuration): GenStatus {
@@ -359,4 +366,9 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       LastUpdatedTimestamp: Date.now()
     }
   ]
+}
+
+
+function getCoinmarketcapInfo(totalSupply: string, decimals: string): number {
+	return new BigNumber(totalSupply).dividedBy(decimals).toNumber();
 }

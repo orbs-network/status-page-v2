@@ -50,7 +50,7 @@ export function serve(config: Configuration) {
 
   app.get('/exchanges/coinmarketcap', (_request, response) => {
     const body = processor.getModel();
-    response.status(200).json(Number(body.SupplyData?.totalSupply));
+    response.status(200).json(body.Exchanges.Coinmarketcap);
   });
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
