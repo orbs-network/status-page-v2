@@ -311,59 +311,59 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
 
   return [
     {
-      Symbol: 'ORBS',
-      CurrencyCode: 'KRW',
-      Price: krwOrbs,
-      MarketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
-      AccTradePrice24h: null,
-      CirculatingSupply: Number(normCirculatingSupply),
-      MaxSupply: 10000000000,
-      Provider: 'ORBS Ltd.',
-      LastUpdatedTimestamp: Date.now()
+      symbol: 'ORBS',
+      currencyCode: 'KRW',
+      price: krwOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
     },
     {
-      Symbol: 'ORBS',
-      CurrencyCode: 'USDT',
-      Price: usdtOrbs,
-      MarketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
-      AccTradePrice24h: null,
-      CirculatingSupply: Number(normCirculatingSupply),
-      MaxSupply: 10000000000,
-      Provider: 'ORBS Ltd.',
-      LastUpdatedTimestamp: Date.now()
+      symbol: 'ORBS',
+      currencyCode: 'USDT',
+      price: usdtOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
     },
     {
-      Symbol: 'ORBS',
-      CurrencyCode: 'IDR',
-      Price: isdrOrbs,
-      MarketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
-      AccTradePrice24h: null,
-      CirculatingSupply: Number(normCirculatingSupply),
-      MaxSupply: 10000000000,
-      Provider: 'ORBS Ltd.',
-      LastUpdatedTimestamp: Date.now()
+      symbol: 'ORBS',
+      currencyCode: 'IDR',
+      price: isdrOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
     },
     {
-      Symbol: 'ORBS',
-      CurrencyCode: 'SGD',
-      Price: sgdOrbs,
-      MarketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
-      AccTradePrice24h: null,
-      CirculatingSupply: Number(normCirculatingSupply),
-      MaxSupply: 10000000000,
-      Provider: 'ORBS Ltd.',
-      LastUpdatedTimestamp: Date.now()
+      symbol: 'ORBS',
+      currencyCode: 'SGD',
+      price: sgdOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
     },
     {
-      Symbol: 'ORBS',
-      CurrencyCode: 'THB',
-      Price: thbOrbs,
-      MarketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
-      AccTradePrice24h: null,
-      CirculatingSupply: Number(normCirculatingSupply),
-      MaxSupply: 10000000000,
-      Provider: 'ORBS Ltd.',
-      LastUpdatedTimestamp: Date.now()
+      symbol: 'ORBS',
+      currencyCode: 'THB',
+      price: thbOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
     }
   ]
 }

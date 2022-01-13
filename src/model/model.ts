@@ -292,13 +292,13 @@ export interface PoSV2General {
 }
 
 export interface ExchangeEntry {
-  Symbol: string,
-  CurrencyCode: string,
-  Price: number,
-  MarketCap: number,
-  AccTradePrice24h: null,
-  CirculatingSupply: number,
-  MaxSupply: number,
-  Provider: string,
-  LastUpdatedTimestamp: number
+  symbol: string,
+  currencyCode: string,
+  price: number,
+  marketCap: number,
+  accTradePrice24h: null,
+  circulatingSupply: number,
+  maxSupply: number,
+  provider: string,
+  lastUpdatedTimestamp: number
 }
