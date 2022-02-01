@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { TableBody } from '@material-ui/core';
 import { ValidatorRow } from './ValidatorRow/ValidatorRow';
 import { VirtualChain, Guardian, Service } from '../../../../model/model';
+import _ from 'lodash';
 
 interface IProps {
   vcs: VirtualChain[];
@@ -24,7 +25,7 @@ export const StatusTableBody = React.memo<IProps>((props) => {
   }, [vcs]);
 
   const allValidators = useMemo(() => {
-    return [...committeeValidators, ...standByValidators];
+    return _.unionBy(committeeValidators, standByValidators, 'OrbsAddress');
   }, [committeeValidators, standByValidators]);
 
   const validatorRows = useMemo(() => {
