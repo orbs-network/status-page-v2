@@ -27,13 +27,14 @@ interface IProps {
 }
 
 export const StatusRow = React.memo<IProps>((props) => {
-  const { rootStatus, ethereumStatus } = props;
+  const { rootStatus, ethereumStatus, maticStatus } = props;
 
   const classes = useStyles();
   return (
       <div className={classes.headerCell}>
         <RootNodeStatusCell rootStatus={rootStatus} />
         <POSContractsStatus ethereumStatus={ethereumStatus} />
+        <POSContractsStatus ethereumStatus={maticStatus}/>
      </div>
  );
 });
