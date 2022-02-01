@@ -66,6 +66,8 @@ export class Service {
   static EthereumWriter = new Service('EthereumWriter', 'ethereum-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
   static Logger = new Service('Logger', 'logs-service', 'https://github.com/orbs-network/logs-service/tree/');
   static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
+  static MaticReader = new Service('MaticReader', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
+  static MaticWriter = new Service('MaticWriter', 'matic-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
 }
 
 export interface Guardians {

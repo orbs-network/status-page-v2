@@ -55,6 +55,8 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     Service.Logger,
     Service.Management,
     Service.EthereumWriter,
+    Service.MaticReader,
+    Service.MaticWriter,
   ];
 
   let committeeMembers = {};
