@@ -31,7 +31,7 @@ export async function updateModel(model: Model, config: Configuration) {
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
       await readData(model, rootNodeEndpoint, config);
-      return await readDataMatic(model, maticRootNodeEndpoint);
+      return await readDataMatic(model, maticRootNodeEndpoint, config);
     } catch (e) {
       Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
     }
@@ -97,7 +97,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.Statuses[StatusName.EthereumContracts] =
         await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
     } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
 
@@ -113,7 +113,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 	  model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
 
     } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Pos Data: ${e.stack}`);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Pos Data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
   }
@@ -125,7 +125,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   }
 }
 
-async function readDataMatic(model: Model, rootNodeEndpoint: string) {
+async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Configuration) {
   const rootNodeData = await fetchJson(`${rootNodeEndpoint}${MaticReaderStatusSuffix}`);
 
   let committeeMembers = model.CommitteeNodes;
@@ -160,7 +160,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string) {
 
   const allRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
 
-	Object.keys(allRegisteredNodes).forEach( addr => {
+  Object.keys(allRegisteredNodes).forEach( addr => {
 
 		if (!(addr in model.AllRegisteredNodes)) {
 			model.AllRegisteredNodes[addr] = allRegisteredNodes[addr]
@@ -168,7 +168,22 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string) {
 		else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
 			model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network)
 		}
-    });
+  });
+
+  if (config.MaticEndpoint && config.MaticEndpoint !== '') {
+	  const web3 = getWeb3(config.MaticEndpoint);
+	  const resources = await getResources(rootNodeData, web3);
+	  ///////////////////////
+	  try {
+		  const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, (g) => g.IsCertified))
+		  model.Statuses[StatusName.MaticContracts] =
+			  await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
+	  } catch (e) {
+		  model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
+		  Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
+	  }
+  }
+
 }
 
 function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string | number, config: Configuration): GenStatus {

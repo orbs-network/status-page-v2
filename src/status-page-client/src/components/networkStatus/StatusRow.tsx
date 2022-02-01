@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
+    maticStatus: EthereumStatus | undefined
     ethereumStatus: EthereumStatus | undefined
     rootStatus: GenStatus | undefined
 }

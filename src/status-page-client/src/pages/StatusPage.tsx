@@ -44,7 +44,8 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
     <Page>
       <StatusRow
         rootStatus={statusStore?.statusModel?.Statuses["Root Node Health"]}
-        ethereumStatus={statusStore?.statusModel?.Statuses["PoS Contracts Health"] as EthereumStatus }
+        ethereumStatus={statusStore?.statusModel?.Statuses["Ethereum Contracts Health"] as EthereumStatus }
+        maticStatus={statusStore?.statusModel?.Statuses["Matic Contracts Health"] as EthereumStatus }
       />
       <br/>
       <StatusTable

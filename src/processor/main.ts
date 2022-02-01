@@ -114,7 +114,7 @@ export class Processor {
         vcStatusData.Payload?.Management?.Protocol?.Current || 0,
       );
     } catch (err) {
-      Logger.error(`Error while attemtping to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
+      Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Red, `HTTP gateway for node may be down, status endpoint does not respond`);
     }
   }
@@ -166,7 +166,7 @@ export class Processor {
         versionTag,
       );
     } catch (err) {
-      Logger.error(`Error while attemtping to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
+      Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
   }

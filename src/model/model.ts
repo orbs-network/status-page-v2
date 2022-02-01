@@ -22,7 +22,8 @@ export class Model {
 
 export enum StatusName {
   RootNode = 'Root Node Health',
-  EthereumContracts = 'PoS Contracts Health',
+  EthereumContracts = 'Ethereum Contracts Health',
+  MaticContracts = 'Matic Contracts Health',
   PingUrls = 'Monitored URLs Health',
   Certs = 'Monitored Certs Health'
 }
