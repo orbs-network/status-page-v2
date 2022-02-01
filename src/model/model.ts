@@ -74,6 +74,7 @@ export interface Guardians {
 
 export interface Guardian {
   EthAddress: string;
+  Network: string[];
   Name: string;
   Ip: string;
   Website: string;

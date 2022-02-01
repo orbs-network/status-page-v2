@@ -20,14 +20,18 @@ import BigNumber from "bignumber.js";
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
+const MaticReaderStatusSuffix = '/services/matic-reader/status';
 
 let validSupplyInCirculation = "";
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
+  const maticRootNodeEndpoint = config.MaticRootNodeEndpoint; // TODO: fixme only for debug remove after matic pos launch, should be the same endpoint for ethereum and matic
+
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
-      return await readData(model, rootNodeEndpoint, config);
+      await readData(model, rootNodeEndpoint, config);
+      return await readDataMatic(model, maticRootNodeEndpoint);
     } catch (e) {
       Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
     }
@@ -59,19 +63,19 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   const currentRefTime = rootNodeData.Payload?.CurrentRefTime || 0;
   model.Statuses[StatusName.RootNode] = generateRootNodeStatus(rootNodeEndpoint, currentRefTime, config);
 
-  const guardians = readGuardians(rootNodeData);
+  const guardians = readGuardians(rootNodeData, 'Ethereum');
   const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
   committeeMembers = _.pick(guardians, committeeMembersAddresses);
   if (_.size(committeeMembers) === 0) {
-    Logger.error(`Could not read a valid Committee, current network seems empty.`);
+    Logger.error(`Could not read a valid Ethereum Committee, current network seems empty.`);
   }
   const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
   try {
-    calcReputation(`${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+    await calcReputation(`${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
   } catch (e) {
-    Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
+    Logger.error(`Error while attempting to fetch ethereum reputation data. skipping: ${e}`);
   }
 
   model.TimeSeconds = getCurrentClockTime();
@@ -117,7 +121,52 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   } else {
     model.Exchanges.Upbit = { "error": "no valid SupplyInCirculation fetched yet" };
   }
+}
 
+async function readDataMatic(model: Model, rootNodeEndpoint: string) {
+  const rootNodeData = await fetchJson(`${rootNodeEndpoint}${MaticReaderStatusSuffix}`);
+
+  let committeeMembers = model.CommitteeNodes;
+  let standByMembers = model.StandByNodes;
+
+  const guardians = readGuardians(rootNodeData, 'Matic');
+  const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
+  committeeMembers = _.pick(guardians, committeeMembersAddresses);
+  if (_.size(committeeMembers) === 0) {
+    Logger.error(`Could not read a valid Matic Committee, current network seems empty.`);
+  }
+  const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
+  standByMembers = _.pick(guardians, standbyMembersAddresses);
+
+  committeeMembersAddresses.forEach( addr => {
+  	if (!(addr in model.CommitteeNodes)) {
+  		model.CommitteeNodes[addr] = committeeMembers[addr];
+  	}
+  	else if (model.CommitteeNodes[addr].OrbsAddress === committeeMembers[addr].OrbsAddress) {
+  	  model.CommitteeNodes[addr].Network = model.CommitteeNodes[addr].Network.concat(committeeMembers[addr].Network)
+  	}
+  });
+
+  standbyMembersAddresses.forEach( addr => {
+  	if (!(addr in model.StandByNodes)) {
+  		model.StandByNodes[addr] = standByMembers[addr];
+  	}
+  	else if (model.StandByNodes[addr].OrbsAddress === standByMembers[addr].OrbsAddress) {
+  	  model.StandByNodes[addr].Network = model.StandByNodes[addr].Network.concat(standByMembers[addr].Network)
+  	}
+  });
+
+  const allRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
+
+	Object.keys(allRegisteredNodes).forEach( addr => {
+
+		if (!(addr in model.AllRegisteredNodes)) {
+			model.AllRegisteredNodes[addr] = allRegisteredNodes[addr]
+		}
+		else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
+			model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network)
+		}
+    });
 }
 
 function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string | number, config: Configuration): GenStatus {
@@ -183,11 +232,12 @@ function vcName(vcId: string, vcName: string, config: Configuration) {
   return '';
 }
 
-function readGuardians(rootNodeData: any): Guardians {
+function readGuardians(rootNodeData: any, network: string): Guardians {
   return _.mapValues(rootNodeData.Payload.Guardians, (guardianData) => {
     const ip = _.isString(guardianData.Ip) ? guardianData.Ip : '';
     return {
       EthAddress: guardianData.EthAddress,
+      Network: [network],
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
       Ip: ip,
       Website: _.isString(guardianData.Website) ? guardianData.Website : '',
@@ -212,6 +262,7 @@ function readGuardians(rootNodeData: any): Guardians {
 function copyGuardianForAllRegistered(guardianData: Guardian): Guardian {
   return {
     EthAddress: guardianData.EthAddress,
+    Network: guardianData.Network,
     Name: guardianData.Name,
     Ip: guardianData.Ip,
     Website: guardianData.Website,
@@ -270,7 +321,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
 
   _.map(committeeMembers, (node) => {
     const rep = node.NodeReputation;
-    let result: string[] = [];
+    const result: string[] = [];
     let foundRed = false;
     _.map(rep.NodeVirtualChainReputations, (value, key) => {
       if (value !== 0) {

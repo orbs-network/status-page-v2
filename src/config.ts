@@ -26,6 +26,7 @@ export interface Configuration {
   // network
   NetworkType: NetworkType;
   RootNodeEndpoints: string[];
+  MaticRootNodeEndpoint: string;
   // ethereum
   EthereumEndpoint: string;
   MaxTimeSinceLastEvent: number;

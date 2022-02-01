@@ -45,7 +45,7 @@ async function readData(model: Model, rootNodeEndpoint: string) {
   ];
 
   const vcMgmtData = await fetchJson(`${rootNodeEndpoint}/${Service.VC.ServiceUrlName}/${virtualChainList[0].Id}${URLs.StatusSuffix}`);
-  const guardians = _.keyBy(readGuardians(vcMgmtData), (o) => o.EthAddress);
+  const guardians = _.keyBy(readGuardians(vcMgmtData, 'Ethereum'), (o) => o.EthAddress);
 
   model.TimeSeconds = getCurrentClockTime();
   model.Timestamp = new Date().toISOString();
@@ -72,7 +72,7 @@ function readVirtualChains(rootNodeData: any): VirtualChain[] {
   });
 }
 
-function readGuardians(mgmtData: any): Guardians {
+function readGuardians(mgmtData: any, network: 'Ethereum'): Guardians {
   const topology = mgmtData.Payload.Management?.Topology || {};
   if (_.size(topology) === 0 ) {
       Logger.error(`Could not read a valid Topology, current network seems empty.`);
@@ -81,6 +81,7 @@ function readGuardians(mgmtData: any): Guardians {
     const ip = _.isString(guardianData.Endpoint) ? guardianData.Endpoint : '';
     return {
       EthAddress: guardianData.Address,
+      Network: [network],
       Name: _.isString(guardianData.Name) ? guardianData.Name : '',
       Ip: ip,
       Website: '',
