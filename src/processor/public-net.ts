@@ -179,7 +179,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
 		  model.Statuses[StatusName.MaticContracts] =
 			  await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
 	  } catch (e) {
-		  model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
+		  model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
 		  Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
 	  }
   }

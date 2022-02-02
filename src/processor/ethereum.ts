@@ -22,7 +22,7 @@ function bigToNumber(n: BigNumber):number {
 
 export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
     const { block, data } = await read(resources, web3);
-   
+
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
 
@@ -48,7 +48,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
     if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
         healthLevel = HealthLevel.Red;
-    }  
+    }
     const stakingRewardsTwoWeeks = 80000000*14/365;
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
@@ -89,32 +89,39 @@ const BootstrapRewardAnnual = 'BootstrapRewardAnnual';
 const BootstrapRewardLastWithdraw = 'BootstrapRewardLastWithdraw';
 // Function depends on version 0.11.0 of makderdao/multicall only on 'latest' block
 const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
+const MaticMulticallContractAddress = '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
+const CHAINID = {'MAINNET': 1, 'MATIC': 137}
+
 export async function read(resources:OrbsEthResrouces, web3:any) {
-    const config = { web3, multicallAddress: MulticallContractAddress};
+	let config;
+	if (await web3.eth.getChainId() === CHAINID.MAINNET)
+    	config = { web3, multicallAddress: MulticallContractAddress};
+	else if (await web3.eth.getChainId() === CHAINID.MATIC)
+    	config = { web3, multicallAddress: MaticMulticallContractAddress};
 
     const calls: any[] = [
         {
-            target: resources.stakingRewardsWalletAddress, 
+            target: resources.stakingRewardsWalletAddress,
             call: ['getBalance()(uint256)'],
             returns: [[StakeRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.stakingRewardsAddress, 
+            target: resources.stakingRewardsAddress,
             call: ['getStakingRewardsWalletAllocatedTokens()(uint256)'],
             returns: [[StakeRewardAllocated, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsWalletAddress, 
+            target: resources.bootstrapRewardsWalletAddress,
             call: ['getBalance()(uint256)'],
             returns: [[BootstrapRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsWalletAddress, 
+            target: resources.bootstrapRewardsWalletAddress,
             call: ['lastWithdrawal()(uint256)'],
             returns: [[BootstrapRewardLastWithdraw, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsAddress, 
+            target: resources.bootstrapRewardsAddress,
             call: ['getCertifiedCommitteeAnnualBootstrap()(uint256)'],
             returns: [[BootstrapRewardAnnual, (v: BigNumber.Value) => new BigNumber(v)]]
         },
