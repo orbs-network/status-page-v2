@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import { HEADER_HEIGHT_REM } from './theme/Theme';
 import { Route, Switch } from 'react-router-dom';
@@ -6,7 +6,6 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Header } from './components/structure/header/Header';
 import { StatusPage } from './pages/StatusPage';
 import { Maintenance } from './pages/Maintenance';
-import { useEffect, useState } from 'react-transition-group/node_modules/@types/react';
 
 const useStyles = makeStyles((theme) => ({
   appMain: {
@@ -34,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 
 const App = React.memo(() => {
   const classes = useStyles();
-  const [underMaitenance, setUnderMaitenance] = useState(false);
+  const [underMaitenance, setUnderMaitenance] = useState(true);
 
   useEffect(() => {
     const get = async () => {
