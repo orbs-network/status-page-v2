@@ -261,9 +261,9 @@ export class Processor {
 	try {
 		for (const memberData of Object.values(committee)) {
 			countErrors += Number(
-				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === 'Red')).length +
-				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === 'Red')).length +
-				Number(memberData.NodeReputation.ReputationStatus === 'Red') > 0);
+				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Red)).length +
+				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Red)).length +
+				Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Red) > 0);
 
 			if (countErrors >= MinErrorsForCriticalAlert) return true;
 		}
