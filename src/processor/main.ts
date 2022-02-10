@@ -20,6 +20,7 @@ import { Monitors } from '../monitors/main';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 3000;
+const MinErrorsForCriticalAlert = 6;
 
 export class Processor {
   private model = new Model();
@@ -46,7 +47,7 @@ export class Processor {
       }
       Logger.log('Processor: finished discovering nodes to query.');
 
-      // read all the different url-generated datas
+      // read all the different url-generated data
       const tasks: Promise<any>[] = [];
       tasks.push(...this.readNodesVirtualChains(newModel.CommitteeNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesVirtualChains(newModel.StandByNodes, newModel.VirtualChains));
@@ -54,6 +55,7 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
+      if (this.shouldSetCriticalAlert(newModel.CommitteeNodes)) newModel.CriticalAlert = true;
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
@@ -114,7 +116,7 @@ export class Processor {
         vcStatusData.Payload?.Management?.Protocol?.Current || 0,
       );
     } catch (err) {
-      Logger.error(`Error while attemtping to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
+      Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Red, `HTTP gateway for node may be down, status endpoint does not respond`);
     }
   }
@@ -166,7 +168,7 @@ export class Processor {
         versionTag,
       );
     } catch (err) {
-      Logger.error(`Error while attemtping to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
+      Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
   }
@@ -252,6 +254,28 @@ export class Processor {
       StatusToolTip: "OK",
     };
   }
+
+  public shouldSetCriticalAlert(committee: Guardians) {
+
+	let countErrors = 0;
+	try {
+		for (const memberData of Object.values(committee)) {
+			countErrors += Number(
+				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === 'Red')).length +
+				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === 'Red')).length +
+				Number(memberData.NodeReputation.ReputationStatus === 'Red') > 0);
+
+			if (countErrors >= MinErrorsForCriticalAlert) return true;
+		}
+
+	} catch (err) {
+		console.log(`failed to `)
+		return true;
+	}
+
+	return false
+  }
+
 }
 
 async function pingOneUrl(url:string, threshhold: number): Promise<string> {

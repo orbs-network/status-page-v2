@@ -69,9 +69,9 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
   try {
-    calcReputation(`${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
+    await calcReputation(`${rootNodeEndpoint}${EthWriterStatusSuffix}`, committeeMembers);
   } catch (e) {
-    Logger.error(`Error while attemtping to fetch ethereum reputation data. skipping: ${e}`);
+    Logger.error(`Error while attempting to fetch ethereum reputation data. skipping: ${e}`);
   }
 
   model.TimeSeconds = getCurrentClockTime();
@@ -91,7 +91,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.Statuses[StatusName.EthereumContracts] =
         await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
     } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Ethereum status data: ${e.stack}`);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
 
@@ -107,7 +107,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 	  model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
 
     } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attemtping to fetch Pos Data: ${e.stack}`);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Pos Data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
   }
