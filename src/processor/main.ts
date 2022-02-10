@@ -117,7 +117,7 @@ export class Processor {
       );
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Red, `HTTP gateway for node may be down, status endpoint does not respond`);
+      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Yellow, `HTTP gateway for node may be down, status endpoint does not respond`);
     }
   }
 
@@ -169,7 +169,7 @@ export class Processor {
       );
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
+      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Yellow, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
   }
 
@@ -194,14 +194,14 @@ export class Processor {
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
     if (errMsg !== '') {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = errMsg;
     } else if (timestamp === '') {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = 'Missing timestamp field. Information may be stale information.';
     }
     else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = `Information is stale, was updated ${timeAgoText(timestamp)}`;
     }
     return { healthLevel, healthLevelToolTip };
@@ -218,7 +218,7 @@ export class Processor {
 
     if (healthMessages.length > 0) {
       return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
         StatusToolTip: healthMessages.join("\n"),
       };
@@ -243,7 +243,7 @@ export class Processor {
 
     if (healthMessages.length > 0) {
       return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.SslHosts.length} monitored certificate checks failed.`,
         StatusToolTip: healthMessages.join("\n"),
       };
@@ -261,9 +261,9 @@ export class Processor {
 	try {
 		for (const memberData of Object.values(committee)) {
 			countErrors += Number(
-				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Red)).length +
-				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Red)).length +
-				Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Red) > 0);
+				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Yellow)).length +
+				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Yellow)).length +
+				Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Yellow) > 0);
 
 			if (countErrors >= MinErrorsForCriticalAlert) return true;
 		}

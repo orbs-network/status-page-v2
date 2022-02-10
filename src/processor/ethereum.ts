@@ -22,7 +22,7 @@ function bigToNumber(n: BigNumber):number {
 
 export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
     const { block, data } = await read(resources, web3);
-   
+
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
 
@@ -43,18 +43,18 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
     }
     if (lastEventTime + (config.MaxTimeSinceLastEvent*3) < getCurrentClockTime() ) {
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
-        healthLevel = HealthLevel.Red;
-    }  
+        healthLevel = HealthLevel.Yellow;
+    }
     const stakingRewardsTwoWeeks = 80000000*14/365;
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
     if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
         healthMessages.push(`Staking rewards: ORBS wallet balance (${stakingRewardsBalance.toFixed(3)}) minus allocated (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}) all numbers in ORBS.`);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     const bootstrapRewardsTwoWeeks = 3000*22*14/365;
     const bootstrapRewardsWallet = bigToNumber(data[BootstrapRewardWallet]);
@@ -63,7 +63,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
 
     if ((bootstrapRewardsWallet - bootstrapAllocatedToken) < bootstrapRewardsTwoWeeks) {
         healthMessages.push(`Bootstrap rewards: DAI wallet balance (${bootstrapRewardsWallet.toFixed(3)}) minus allocated (${bootstrapAllocatedToken.toFixed(3)}) is below the 2 week threshold (${bootstrapRewardsTwoWeeks.toFixed(3)}) all numbers are in DAI.`);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
     const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
@@ -94,27 +94,27 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
 
     const calls: any[] = [
         {
-            target: resources.stakingRewardsWalletAddress, 
+            target: resources.stakingRewardsWalletAddress,
             call: ['getBalance()(uint256)'],
             returns: [[StakeRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.stakingRewardsAddress, 
+            target: resources.stakingRewardsAddress,
             call: ['getStakingRewardsWalletAllocatedTokens()(uint256)'],
             returns: [[StakeRewardAllocated, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsWalletAddress, 
+            target: resources.bootstrapRewardsWalletAddress,
             call: ['getBalance()(uint256)'],
             returns: [[BootstrapRewardWallet, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsWalletAddress, 
+            target: resources.bootstrapRewardsWalletAddress,
             call: ['lastWithdrawal()(uint256)'],
             returns: [[BootstrapRewardLastWithdraw, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
-            target: resources.bootstrapRewardsAddress, 
+            target: resources.bootstrapRewardsAddress,
             call: ['getCertifiedCommitteeAnnualBootstrap()(uint256)'],
             returns: [[BootstrapRewardAnnual, (v: BigNumber.Value) => new BigNumber(v)]]
         },
@@ -130,7 +130,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
 
 export function generateErrorEthereumContractsStatus(msg:string):EthereumStatus {
     return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `PoS Contracts status: Ethereum Error Detected`,
         StatusToolTip: msg,
     }

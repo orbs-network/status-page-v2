@@ -128,7 +128,7 @@ function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string
     const timeMsg = `Status information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime) : 'unknown time'}`;
     Logger.log(`${timeMsg}. Service might be syncing or ethereum outage.`);
     if (isStaleTime(currentRefTime, config.RootNodeStaleErrorTimeSeconds)) {
-      rootNodeStatus = HealthLevel.Red;
+      rootNodeStatus = HealthLevel.Yellow;
       rootNodeStatusMsg = 'Status Page: Issues Detected'
       rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Consider replacing root node (IP:${rootNodeEndpoint}).`;
     } else {
@@ -152,7 +152,7 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
     let healthLevelToolTip = '';
     if (expirationTime > 0) {
       if (isStaleTime(expirationTime, 0)) {
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
         healthLevelToolTip = 'VirtualChain expired.';
       } else if (getCurrentClockTime() > (expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60)) {
         healthLevel = HealthLevel.Yellow;
@@ -283,7 +283,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
       }
     });
     if (result.length > 0) {
-      rep.ReputationStatus = foundRed ? HealthLevel.Red : HealthLevel.Yellow;
+      rep.ReputationStatus = foundRed ? HealthLevel.Yellow : HealthLevel.Yellow;
       rep.ReputationToolTip = result.join(', ');
     }
   });

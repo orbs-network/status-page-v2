@@ -1274,7 +1274,7 @@ export const testModel:Model = {
         },
         "EthereumWriter": {
           "StatusMsg": "EthSyncStatus = operational, VcSyncStatus = in-sync, EtherBalance = 0.045787 ETH, TxFeesIn10Days = 0.000000 ETH",
-          "Status": HealthLevel.Red,
+          "Status": HealthLevel.Yellow,
           "StatusToolTip": "Eth balance below 0.1: 0.045787 ETH.",
           "Timestamp": "2020-11-30T09:54:25.037Z",
           "Version": "v1.2.3",
@@ -1873,7 +1873,7 @@ export const testModel:Model = {
       "NodeServices": {
         "EthereumWriter": {
           "StatusMsg": "EthSyncStatus = operational, VcSyncStatus = in-sync, EtherBalance = 0.083753 ETH, TxFeesIn10Days = 0.000000 ETH",
-          "Status": HealthLevel.Red,
+          "Status": HealthLevel.Yellow,
           "StatusToolTip": "Eth balance below 0.1: 0.083753 ETH.",
           "Timestamp": "2020-11-30T09:54:21.612Z",
           "Version": "v1.2.3",
@@ -3048,7 +3048,7 @@ export const testModel:Model = {
         },
         "EthereumWriter": {
           "StatusMsg": "EthSyncStatus = operational, VcSyncStatus = in-sync, EtherBalance = 0.045787 ETH, TxFeesIn10Days = 0.000000 ETH",
-          "Status": HealthLevel.Red,
+          "Status": HealthLevel.Yellow,
           "StatusToolTip": "Eth balance below 0.1: 0.045787 ETH.",
           "Timestamp": "2020-11-30T09:54:25.037Z",
           "Version": "v1.2.3",
@@ -3286,7 +3286,7 @@ export const testModel:Model = {
         },
         "EthereumWriter": {
           "StatusMsg": "EthSyncStatus = operational, VcSyncStatus = in-sync, EtherBalance = 0.083753 ETH, TxFeesIn10Days = 0.000000 ETH",
-          "Status": HealthLevel.Red,
+          "Status": HealthLevel.Yellow,
           "StatusToolTip": "Eth balance below 0.1: 0.083753 ETH.",
           "Timestamp": "2020-11-30T09:54:21.612Z",
           "Version": "v1.2.3",
