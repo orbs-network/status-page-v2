@@ -2,6 +2,7 @@ import { HealthLevel, Model } from "./model/model";
 
 export const testModel:Model = {
   "TimeSeconds": 1606730097,
+  "CriticalAlert": false,
   "Timestamp": "2020-11-30T09:54:56.659Z",
   "Statuses" : {
     "Root Node Health": {
