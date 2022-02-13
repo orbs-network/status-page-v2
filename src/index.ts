@@ -55,7 +55,7 @@ export function serve(config: Configuration) {
       const result = await res.json();
       response.status(200).json(result);
     } catch (error) {
-      response.status(200).json(undefined);
+      response.status(500).json(undefined);
     }
   });
 
