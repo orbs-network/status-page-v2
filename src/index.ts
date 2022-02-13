@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 /**
  * Copyright 2020 the orbs-network/status-page-v2 authors
  * This file is part of the orbs-network/status-page-v2 library in the Orbs project.
@@ -5,6 +7,7 @@
  * This source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree.
  * The above notice should be included in all copies or substantial portions of the software.
  */
+import fetch from 'node-fetch';
 
 import { Configuration } from './config';
 import express, { Request, Response, NextFunction } from 'express';
@@ -13,6 +16,7 @@ import { TaskLoop } from './task-loop';
 import * as Logger from './logger';
 import { Processor } from './processor/main';
 import * as path from 'path';
+const cors = require('cors');
 
 export function serve(config: Configuration) {
   const processor = new Processor(config);
@@ -22,7 +26,7 @@ export function serve(config: Configuration) {
 
   // Serves static files for the client
   app.use(express.static(path.join(__dirname, './status-page-client/build')));
-
+  app.use(cors());
   // Serves index file of client
   app.get('/', (_, res) => {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
@@ -41,6 +45,18 @@ export function serve(config: Configuration) {
   app.get('/posdata', (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body.PoSData);
+  });
+  app.get('/maitenance', async (_request, response) => {
+    const settings = { method: 'Get' };
+
+    try {
+      const res = await fetch(config.MaitenanceStatusUrl, settings);
+
+      const result = await res.json();
+      response.status(200).json(result);
+    } catch (error) {
+      response.status(200).json(undefined);
+    }
   });
 
   app.get('/exchanges/data', (_request, response) => {
@@ -67,10 +83,8 @@ export function serve(config: Configuration) {
   const processorTask = new TaskLoop(() => processor.run(), config.ProcessorPollTimeSeconds * 1000);
   processorTask.start();
 
-  const port = config.Port
-  const server = app.listen(port, '0.0.0.0', () =>
-    Logger.log(`Status service listening on port ${port}!`)
-  );
+  const port = config.Port;
+  const server = app.listen(port, '0.0.0.0', () => Logger.log(`Status service listening on port ${port}!`));
   server.on('close', () => {
     processorTask.stop();
   });

@@ -1,11 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import './App.css';
-import { HEADER_HEIGHT_REM } from './theme/Theme';
+import React, { useEffect, useState } from 'react';
+import './style.css';
+import { HEADER_HEIGHT_REM } from '../theme/Theme';
 import { Route, Switch } from 'react-router-dom';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import { Header } from './components/structure/header/Header';
-import { StatusPage } from './pages/StatusPage';
-import { Maintenance } from './pages/Maintenance';
+import { Header } from '../components/structure/header/Header';
+import { StatusPage } from '../pages/StatusPage';
+import { Maintenance } from '../pages/Maintenance';
+import useLogic from './useLogic';
+import LoadingPage from '../pages/LoadingPage';
 
 const useStyles = makeStyles((theme) => ({
   appMain: {
@@ -33,18 +35,14 @@ const useStyles = makeStyles((theme) => ({
 
 const App = React.memo(() => {
   const classes = useStyles();
-  const [underMaitenance, setUnderMaitenance] = useState(true);
+  const { underMaitenance, isLoading } = useLogic();
 
-  useEffect(() => {
-    const get = async () => {
-      const response = await fetch('');
-      const data = await response.json();
-      if (data) {
-        setUnderMaitenance(true);
-      }
-    };
-    get();
-  }, []);
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+  if (underMaitenance) {
+    return <Maintenance />;
+  }
 
   return (
     <>
@@ -52,7 +50,9 @@ const App = React.memo(() => {
       <div className={classes.headerSeparator} />
       <div className={classes.mainWrapper}>
         <main className={classes.appMain}>
-          <Switch>{underMaitenance ? <Route exact path="/" component={Maintenance} /> : <Route exact path="/" component={StatusPage} />}</Switch>
+          <Switch>
+            <Route exact path="/" component={StatusPage} />
+          </Switch>
         </main>
       </div>
     </>

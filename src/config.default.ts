@@ -23,10 +23,14 @@ export const defaultConfiguration: Configuration = {
   RootNodeStaleErrorTimeSeconds: Number(process.env.ROOT_NODE_STALE_ERROR_TIME_SECONDS) || 43200,
 
   ExpirationWarningTimeInDays: Number(process.env.VC_EXPIRATION_WARN_DAYS) || 30,
-  VCNameAdapter: JSON.parse(String(process.env.VC_NAME_OVERRIDE || "{}")),
+  VCNameAdapter: JSON.parse(String(process.env.VC_NAME_OVERRIDE || '{}')),
 
   PingUrlEndpoints: process.env.PING_URL_ENDPOINTS ? String(process.env.PING_URL_ENDPOINTS).split(',') : [],
-  PingUrlTimeoutsMillis: process.env.PING_URL_TIMEOUTS_MILLIS ? String(process.env.PING_URL_TIMEOUTS_MILLIS).split(',').map(el => Number(el)) : [],
+  PingUrlTimeoutsMillis: process.env.PING_URL_TIMEOUTS_MILLIS
+    ? String(process.env.PING_URL_TIMEOUTS_MILLIS)
+        .split(',')
+        .map((el) => Number(el))
+    : [],
   SslHosts: process.env.SSL_HOSTS ? String(process.env.SSL_HOSTS).split(',') : [],
 
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
@@ -34,4 +38,5 @@ export const defaultConfiguration: Configuration = {
 
   EthereumEndpoint: String(process.env.ETHEREUM_ENDPOINT),
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
+  MaitenanceStatusUrl: process.env.MAITENANCE_STATUS_URL ? String(process.env.MAITENANCE_STATUS_URL) : '',
 };
