@@ -49,14 +49,9 @@ export function serve(config: Configuration) {
   app.get('/maitenance', async (_request, response) => {
     const settings = { method: 'Get' };
 
-    try {
-      const res = await fetch(config.MaitenanceStatusUrl, settings);
-
-      const result = await res.json();
-      response.status(200).json(result);
-    } catch (error) {
-      response.status(500).json(undefined);
-    }
+    const res = await fetch(config.MaitenanceStatusUrl, settings);
+    const result = await res.json();
+    response.status(200).json(result);
   });
 
   app.get('/exchanges/data', (_request, response) => {
