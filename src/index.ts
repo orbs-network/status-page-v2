@@ -16,7 +16,6 @@ import { TaskLoop } from './task-loop';
 import * as Logger from './logger';
 import { Processor } from './processor/main';
 import * as path from 'path';
-const cors = require('cors');
 
 export function serve(config: Configuration) {
   const processor = new Processor(config);
@@ -26,7 +25,6 @@ export function serve(config: Configuration) {
 
   // Serves static files for the client
   app.use(express.static(path.join(__dirname, './status-page-client/build')));
-  app.use(cors());
   // Serves index file of client
   app.get('/', (_, res) => {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
@@ -47,9 +45,7 @@ export function serve(config: Configuration) {
     response.status(200).json(body.PoSData);
   });
   app.get('/maitenance', async (_request, response) => {
-    const settings = { method: 'Get' };
-
-    const res = await fetch(config.MaitenanceStatusUrl, settings);
+    const res = await fetch(config.MaitenanceStatusUrl);
     const result = await res.json();
     response.status(200).json(result);
   });

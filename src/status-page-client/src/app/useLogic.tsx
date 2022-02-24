@@ -10,9 +10,7 @@ const checkIfUnderMaitenance = async () => {
       },
     });
     const data = await response.json();
-    if (data && data.upgrade) {
-      return true;
-    }
+    return data.upgrade
   } catch (error) {
     return false;
   }
@@ -25,6 +23,7 @@ function useLogic() {
   useEffect(() => {
     const get = async () => {
       const result = await checkIfUnderMaitenance();
+      
       if (result) {
         setUnderMaitenance(true);
       }
