@@ -1,5 +1,5 @@
 import React from 'react';
-import App from './App';
+import App from './app';
 import { configureMobx, getStores } from './store/storesInitialization';
 import { Provider } from 'mobx-react';
 import { BrowserRouter as Router } from 'react-router-dom';

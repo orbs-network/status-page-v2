@@ -29,6 +29,7 @@ export interface Configuration {
   // ethereum
   EthereumEndpoint: string;
   MaxTimeSinceLastEvent: number;
+  MaitenanceStatusUrl: string;
 }
 
 export enum NetworkType {
