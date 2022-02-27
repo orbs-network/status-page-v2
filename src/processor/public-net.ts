@@ -11,7 +11,7 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
-import { getResources, getWeb3 } from './eth-helper';
+import { getResources, getWeb3Provider } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
 import { getPoSStatus } from './stats';
@@ -82,8 +82,10 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.StandByNodes = standByMembers;
   model.AllRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
 
-  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
-    const web3 = getWeb3(config.EthereumEndpoint);
+  const web3 = await getWeb3Provider(config.EthereumEndpoints);
+
+  if (web3) {
+
     const resources = await getResources(rootNodeData, web3);
     ///////////////////////
     try {

@@ -53,12 +53,32 @@ export function getWeb3(ethereumEndpoint: string) {
     return web3;
 }
 
+export async function getWeb3Provider(ethereumEndpoints: string[]) {
+
+  if (ethereumEndpoints.length === 0) return null;
+
+  for (const ethereumEndpoint of ethereumEndpoints) {
+
+  	try {
+
+	  const web3 = getWeb3(ethereumEndpoint);
+	  await web3.eth.getBlockNumber();
+	  return web3
+
+  	} catch (err) {
+  	  console.log(`Failed to fetch block number from node ${ethereumEndpoint}`)
+  	}
+  }
+
+  return null
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getResources(nodeData:any, web3:any) : Promise<OrbsEthResrouces>{
-    if (!_.isObject(nodeData?.Payload?.CurrentContractAddress)) { 
+    if (!_.isObject(nodeData?.Payload?.CurrentContractAddress)) {
         throw new Error(`NodeData does not contain current contract addresses`);
     }
-        
+
     const stakingAddress = String(nodeData.Payload.CurrentContractAddress["staking"]);
     const stakingRewardsWalletAddress = String(nodeData.Payload.CurrentContractAddress["stakingRewardsWallet"]);
     const bootstrapRewardsWalletAddress = String(nodeData.Payload.CurrentContractAddress["bootstrapRewardsWallet"]);
@@ -98,7 +118,7 @@ export interface BlockInfo {
     time: number;
     number: number;
 }
-  
+
 export async function getBlockInfo(blockToFetch: string | number, web3:Web3): Promise<BlockInfo> {
     let block = await web3.eth.getBlock(blockToFetch);
     if (block === null || block === undefined || block.timestamp === null) {
@@ -111,7 +131,7 @@ export async function getBlockInfo(blockToFetch: string | number, web3:Web3): Pr
 export const BlockTimestamp = 'BlockTimestamp';
 export function multicallToBlockInfo(multiCallRes: any): BlockInfo {
     return {
-        number: multiCallRes.results.blockNumber.toNumber(), 
+        number: multiCallRes.results.blockNumber.toNumber(),
         time: multiCallRes.results.transformed[BlockTimestamp].toNumber()
     };
 }

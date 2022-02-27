@@ -305,10 +305,7 @@ export class Processor {
 
 	} catch (err) {
 		console.log(`failed to update virtual chains colors`)
-		return true;
 	}
-
-	return false
   }
 
 }

@@ -27,7 +27,7 @@ export interface Configuration {
   NetworkType: NetworkType;
   RootNodeEndpoints: string[];
   // ethereum
-  EthereumEndpoint: string;
+  EthereumEndpoints: string[];
   MaxTimeSinceLastEvent: number;
 }
 
@@ -70,7 +70,7 @@ export function validateConfiguration(config: Configuration) {
   if (config.PingUrlTimeoutsMillis.length !== 0 && config.PingUrlTimeoutsMillis.length !== config.PingUrlEndpoints.length) {
     throw new Error(`PingUrlTimeoutsMillis when not empty has to be same length as PingUrlEndpoints.`);
   }
-  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
+  if (config.EthereumEndpoints.length !== 0) {
     if (typeof config.MaxTimeSinceLastEvent != 'number') {
       throw new Error(`MaxTimeSinceLastEvent is not a number.`);
     }
