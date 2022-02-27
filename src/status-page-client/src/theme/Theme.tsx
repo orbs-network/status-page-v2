@@ -1,5 +1,5 @@
 import responsiveFontSizes from '@material-ui/core/styles/responsiveFontSizes';
-import {createTheme} from '@material-ui/core/styles';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
 // const COLOR1 = '#0D0D0D'; // dark gray
 // const COLOR2 = '#6ec6d8'; // bluish
@@ -12,7 +12,7 @@ import {createTheme} from '@material-ui/core/styles';
 export const HEADER_HEIGHT_REM = 6;
 
 export const baseTheme = responsiveFontSizes(
-  createTheme({
+  createMuiTheme({
     palette: {
       // TODO : Adjust all styles after structure is done
       type: 'dark',
