@@ -9,14 +9,27 @@
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import sslChecker from 'ssl-checker';
-import { Configuration, NetworkType } from '../config';
-import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
+import {Configuration, NetworkType} from '../config';
+import {fetchJson, isStaleTime, timeAgoText} from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, GenStatus, StatusName } from '../model/model';
+import {
+	GenStatus,
+	Guardian,
+	Guardians,
+	HealthLevel,
+	Model,
+	nodeServiceBuilder,
+	nodeServiceCopy,
+	nodeVirtualChainBuilder,
+	nodeVirtualChainCopy,
+	Service,
+	StatusName,
+	VirtualChain
+} from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
-import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
-import { Monitors } from '../monitors/main';
+import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion} from './url-generator';
+import {Monitors} from '../monitors/main';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 3000;
@@ -55,7 +68,8 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
-      if (this.shouldSetCriticalAlert(newModel.CommitteeNodes)) newModel.CriticalAlert = true;
+      if (this.shouldSetCriticalAlert(newModel.AllRegisteredNodes)) newModel.CriticalAlert = true;
+      this.updateVCsColors(newModel.AllRegisteredNodes);
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
@@ -255,11 +269,11 @@ export class Processor {
     };
   }
 
-  public shouldSetCriticalAlert(committee: Guardians) {
+  public shouldSetCriticalAlert(guardians: Guardians) {
 
 	let countErrors = 0;
 	try {
-		for (const memberData of Object.values(committee)) {
+		for (const memberData of Object.values(guardians)) {
 			countErrors += Number(
 				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Yellow)).length +
 				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Yellow)).length +
@@ -269,7 +283,28 @@ export class Processor {
 		}
 
 	} catch (err) {
-		console.log(`failed to `)
+		console.log(`failed to update critical alert`)
+		return true;
+	}
+
+	return false
+  }
+
+  public updateVCsColors(guardians: Guardians) {
+
+	try {
+
+		for (const memberData of Object.values(guardians)) {
+			if (_.filter(memberData.NodeVirtualChains, nodeVirtualChain => ([HealthLevel.Yellow, HealthLevel.Red].includes(nodeVirtualChain.Status))).length === Object.keys(memberData.NodeVirtualChains).length &&
+			[HealthLevel.Yellow, HealthLevel.Red].includes(memberData.NodeServices.Management.Status)) {
+				for (const nodeVC of Object.values(memberData.NodeVirtualChains)) {
+					nodeVC.Status = HealthLevel.Green
+				}
+			}
+		}
+
+	} catch (err) {
+		console.log(`failed to update virtual chains colors`)
 		return true;
 	}
 
