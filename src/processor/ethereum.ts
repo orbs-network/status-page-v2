@@ -43,18 +43,18 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
     }
     if (lastEventTime + (config.MaxTimeSinceLastEvent*3) < getCurrentClockTime() ) {
         healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     const stakingRewardsTwoWeeks = 80000000*14/365;
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
     if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
         healthMessages.push(`Staking rewards: ORBS wallet balance (${stakingRewardsBalance.toFixed(3)}) minus allocated (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}) all numbers in ORBS.`);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     const bootstrapRewardsTwoWeeks = 3000*22*14/365;
     const bootstrapRewardsWallet = bigToNumber(data[BootstrapRewardWallet]);
@@ -63,7 +63,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
 
     if ((bootstrapRewardsWallet - bootstrapAllocatedToken) < bootstrapRewardsTwoWeeks) {
         healthMessages.push(`Bootstrap rewards: DAI wallet balance (${bootstrapRewardsWallet.toFixed(3)}) minus allocated (${bootstrapAllocatedToken.toFixed(3)}) is below the 2 week threshold (${bootstrapRewardsTwoWeeks.toFixed(3)}) all numbers are in DAI.`);
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
     const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
@@ -137,7 +137,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
 
 export function generateErrorEthereumContractsStatus(msg:string):EthereumStatus {
     return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `PoS Contracts status: Ethereum Error Detected`,
         StatusToolTip: msg,
     }

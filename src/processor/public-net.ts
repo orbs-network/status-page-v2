@@ -11,7 +11,7 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
-import { getResources, getWeb3 } from './eth-helper';
+import { getResources, getWeb3Provider } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
 import { getPoSStatus } from './stats';
@@ -88,8 +88,10 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.StandByNodes = standByMembers;
   model.AllRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
 
-  if (config.EthereumEndpoint && config.EthereumEndpoint !== '') {
-    const web3 = getWeb3(config.EthereumEndpoint);
+  const web3 = await getWeb3Provider(config.EthereumEndpoints);
+
+  if (web3) {
+
     const resources = await getResources(rootNodeData, web3);
     ///////////////////////
     try {
@@ -194,7 +196,7 @@ function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string
     const timeMsg = `Status information is from ${currentRefTime > 0 ? timeAgoText(currentRefTime) : 'unknown time'}`;
     Logger.log(`${timeMsg}. Service might be syncing or ethereum outage.`);
     if (isStaleTime(currentRefTime, config.RootNodeStaleErrorTimeSeconds)) {
-      rootNodeStatus = HealthLevel.Red;
+      rootNodeStatus = HealthLevel.Yellow;
       rootNodeStatusMsg = 'Status Page: Issues Detected'
       rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Consider replacing root node (IP:${rootNodeEndpoint}).`;
     } else {
@@ -218,7 +220,7 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
     let healthLevelToolTip = '';
     if (expirationTime > 0) {
       if (isStaleTime(expirationTime, 0)) {
-        healthLevel = HealthLevel.Red;
+        healthLevel = HealthLevel.Yellow;
         healthLevelToolTip = 'VirtualChain expired.';
       } else if (getCurrentClockTime() > (expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60)) {
         healthLevel = HealthLevel.Yellow;
@@ -351,7 +353,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
       }
     });
     if (result.length > 0) {
-      rep.ReputationStatus = foundRed ? HealthLevel.Red : HealthLevel.Yellow;
+      rep.ReputationStatus = foundRed ? HealthLevel.Yellow : HealthLevel.Yellow;
       rep.ReputationToolTip = result.join(', ');
     }
   });

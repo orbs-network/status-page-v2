@@ -9,17 +9,31 @@
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import sslChecker from 'ssl-checker';
-import { Configuration, NetworkType } from '../config';
-import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
+import {Configuration, NetworkType} from '../config';
+import {fetchJson, isStaleTime, timeAgoText} from '../helpers';
 import * as Logger from '../logger';
-import { Model, VirtualChain, Service, Guardians, Guardian, HealthLevel, nodeServiceBuilder, nodeVirtualChainBuilder, nodeVirtualChainCopy, nodeServiceCopy, GenStatus, StatusName } from '../model/model';
+import {
+	GenStatus,
+	Guardian,
+	Guardians,
+	HealthLevel,
+	Model,
+	nodeServiceBuilder,
+	nodeServiceCopy,
+	nodeVirtualChainBuilder,
+	nodeVirtualChainCopy,
+	Service,
+	StatusName,
+	VirtualChain
+} from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
-import { generateNodeVirtualChainUrls, generateNodeServiceUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
-import { Monitors } from '../monitors/main';
+import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion} from './url-generator';
+import {Monitors} from '../monitors/main';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 3000;
+const MinErrorsForCriticalAlert = 6;
 
 export class Processor {
   private model = new Model();
@@ -46,7 +60,7 @@ export class Processor {
       }
       Logger.log('Processor: finished discovering nodes to query.');
 
-      // read all the different url-generated datas
+      // read all the different url-generated data
       const tasks: Promise<any>[] = [];
       tasks.push(...this.readNodesVirtualChains(newModel.CommitteeNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesVirtualChains(newModel.StandByNodes, newModel.VirtualChains));
@@ -54,6 +68,8 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
+      if (this.shouldSetCriticalAlert(newModel.AllRegisteredNodes)) newModel.CriticalAlert = true;
+      this.updateVCsColors(newModel.AllRegisteredNodes);
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
@@ -115,7 +131,7 @@ export class Processor {
       );
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Red, `HTTP gateway for node may be down, status endpoint does not respond`);
+      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Yellow, `HTTP gateway for node may be down, status endpoint does not respond`);
     }
   }
 
@@ -167,7 +183,7 @@ export class Processor {
       );
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Red, `HTTP gateway for service may be down, status endpoint does not respond`);
+      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Yellow, `HTTP gateway for service may be down, status endpoint does not respond`);
     }
   }
 
@@ -192,14 +208,14 @@ export class Processor {
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
     if (errMsg !== '') {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = errMsg;
     } else if (timestamp === '') {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = 'Missing timestamp field. Information may be stale information.';
     }
     else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
-      healthLevel = HealthLevel.Red;
+      healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = `Information is stale, was updated ${timeAgoText(timestamp)}`;
     }
     return { healthLevel, healthLevelToolTip };
@@ -216,7 +232,7 @@ export class Processor {
 
     if (healthMessages.length > 0) {
       return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
         StatusToolTip: healthMessages.join("\n"),
       };
@@ -241,7 +257,7 @@ export class Processor {
 
     if (healthMessages.length > 0) {
       return {
-        Status: HealthLevel.Red,
+        Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.SslHosts.length} monitored certificate checks failed.`,
         StatusToolTip: healthMessages.join("\n"),
       };
@@ -252,6 +268,46 @@ export class Processor {
       StatusToolTip: "OK",
     };
   }
+
+  public shouldSetCriticalAlert(guardians: Guardians) {
+
+	let countErrors = 0;
+	try {
+		for (const memberData of Object.values(guardians)) {
+			countErrors += Number(
+				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Yellow)).length +
+				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Yellow)).length +
+				Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Yellow) > 0);
+
+			if (countErrors >= MinErrorsForCriticalAlert) return true;
+		}
+
+	} catch (err) {
+		console.log(`failed to update critical alert`)
+		return true;
+	}
+
+	return false
+  }
+
+  public updateVCsColors(guardians: Guardians) {
+
+	try {
+
+		for (const memberData of Object.values(guardians)) {
+			if (_.filter(memberData.NodeVirtualChains, nodeVirtualChain => ([HealthLevel.Yellow, HealthLevel.Red].includes(nodeVirtualChain.Status))).length === Object.keys(memberData.NodeVirtualChains).length &&
+			[HealthLevel.Yellow, HealthLevel.Red].includes(memberData.NodeServices.Management.Status)) {
+				for (const nodeVC of Object.values(memberData.NodeVirtualChains)) {
+					nodeVC.Status = HealthLevel.Green
+				}
+			}
+		}
+
+	} catch (err) {
+		console.log(`failed to update virtual chains colors`)
+	}
+  }
+
 }
 
 async function pingOneUrl(url:string, threshhold: number): Promise<string> {

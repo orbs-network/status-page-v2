@@ -56,6 +56,26 @@ export function getWeb3(ethereumEndpoint: string) {
     return web3;
 }
 
+export async function getWeb3Provider(ethereumEndpoints: string[]) {
+
+  if (ethereumEndpoints.length === 0) return null;
+
+  for (const ethereumEndpoint of ethereumEndpoints) {
+
+  	try {
+
+	  const web3 = getWeb3(ethereumEndpoint);
+	  await web3.eth.getBlockNumber();
+	  return web3
+
+  	} catch (err) {
+  	  console.log(`Failed to fetch block number from node ${ethereumEndpoint}`)
+  	}
+  }
+
+  return null
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getResources(nodeData:any, web3:any) : Promise<OrbsEthResrouces>{
     if (!_.isObject(nodeData?.Payload?.CurrentContractAddress)) {

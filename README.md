@@ -1,6 +1,6 @@
 # Status Page V2
 
-Web based status page for Orbs Network (for V2).
+Web based status page for Orbs Network (for V2). 
 
 ## Dev environment
 

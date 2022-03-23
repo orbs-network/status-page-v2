@@ -18,6 +18,7 @@ export class Model {
   SupplyData?: SupplyStatus = undefined; // only public-network
   PoSData?: PoSStatus = undefined; // only public-network
   Exchanges?: any = {};
+  CriticalAlert = false;
 }
 
 export enum StatusName {
