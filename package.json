@@ -36,6 +36,7 @@
     "testpos": "npm run build && node --async-stack-traces ./dist/test.js"
   },
   "devDependencies": {
+    "@makerdao/multicall": "^0.12.0",
     "@types/express": "^4.17.3",
     "@types/lodash": "^4.14.149",
     "@types/node": "^12.12.32",
