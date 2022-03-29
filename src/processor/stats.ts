@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 import BigNumber from 'bignumber.js';
-// @ts-ignore
 import { aggregate } from '@makerdao/multicall';
 import {Guardians, Model} from '../model/model';
 import {BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics} from './eth-helper';
