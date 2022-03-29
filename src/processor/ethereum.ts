@@ -13,14 +13,14 @@ import { aggregate } from '@makerdao/multicall';
 import { Configuration } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
-import { BlockTimestamp, multicallToBlockInfo, OrbsEthResrouces } from './eth-helper';
+import {BlockTimestamp, getChainName, multicallToBlockInfo, OrbsEthResrouces} from './eth-helper';
 
 
 function bigToNumber(n: BigNumber):number {
     return n.dividedBy("1e18").toNumber();
 }
 
-export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration): Promise<EthereumStatus>  {
+export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration, totalWeight: number, rewardsRate: number): Promise<EthereumStatus>  {
     const { block, data } = await read(resources, web3);
 
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
@@ -49,14 +49,14 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
         healthLevel = HealthLevel.Yellow;
     }
-    const stakingRewardsTwoWeeks = 80000000*14/365;
+    const stakingRewardsTwoWeeks = rewardsRate * totalWeight * 14 / 365;// 80000000*14/365;
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
     if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
         healthMessages.push(`Staking rewards: ORBS wallet balance (${stakingRewardsBalance.toFixed(3)}) minus allocated (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}) all numbers in ORBS.`);
         healthLevel = HealthLevel.Yellow;
     }
-    const bootstrapRewardsTwoWeeks = 3000*22*14/365;
+    const bootstrapRewardsTwoWeeks = 3000*numOfCertifiedGuardiansInCommittee*14/365;
     const bootstrapRewardsWallet = bigToNumber(data[BootstrapRewardWallet]);
     const bootstrapAllocatedToken = bigToNumber(new BigNumber(getCurrentClockTime()).minus(data[BootstrapRewardLastWithdraw])
         .multipliedBy(numOfCertifiedGuardiansInCommittee).multipliedBy(data[BootstrapRewardAnnual]).div(31536000 /*year in sec*/));
@@ -66,7 +66,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         healthLevel = HealthLevel.Yellow;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
-    const healthMessage = `PoS Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
+    const healthMessage = await getChainName(web3) + ` Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
 
     return {
         StakingRewardsBalance: stakingRewardsBalance,
@@ -89,8 +89,15 @@ const BootstrapRewardAnnual = 'BootstrapRewardAnnual';
 const BootstrapRewardLastWithdraw = 'BootstrapRewardLastWithdraw';
 // Function depends on version 0.11.0 of makderdao/multicall only on 'latest' block
 const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
+const MaticMulticallContractAddress = '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
+import { CHAIN_ID} from './eth-helper';
+
 export async function read(resources:OrbsEthResrouces, web3:any) {
-    const config = { web3, multicallAddress: MulticallContractAddress};
+	let config;
+	if (await web3.eth.getChainId() === CHAIN_ID.ETHEREUM)
+    	config = { web3, multicallAddress: MulticallContractAddress};
+	else if (await web3.eth.getChainId() === CHAIN_ID.MATIC)
+    	config = { web3, multicallAddress: MaticMulticallContractAddress};
 
     const calls: any[] = [
         {

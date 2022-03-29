@@ -31,7 +31,8 @@ export const defaultConfiguration: Configuration = {
 
   NetworkType: process.env.NETWORK_TYPE === NetworkType.Public ? NetworkType.Public : NetworkType.Private,
   RootNodeEndpoints: process.env.NETWORK_NODE_ENDPOINTS ? String(process.env.NETWORK_NODE_ENDPOINTS).split(',') : [],
-
+  MaticRootNodeEndpoint: process.env.MaticRootNodeEndpoint || '',
   EthereumEndpoints: [String(process.env.ETHEREUM_ENDPOINT)],
+  MaticEndpoints: [String(process.env.MATIC_ENDPOINT)],
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
 };

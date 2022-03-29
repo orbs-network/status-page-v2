@@ -77,6 +77,7 @@ export const testModel:Model = {
   "CommitteeNodes": {
     "c5e624d6824e626a6f14457810e794e4603cfee2": {
       "EthAddress": "c5e624d6824e626a6f14457810e794e4603cfee2",
+      "Network": ['Ethereum'],
       "Name": "WhaleCoreStake - ORBS KOREA - 오뽀",
       "Ip": "34.227.204.75",
       "Website": "https://blog.naver.com/fishcorestake",
@@ -202,6 +203,7 @@ export const testModel:Model = {
     },
     "63aef7616882f488bca97361d1c24f05b4657ae5": {
       "EthAddress": "63aef7616882f488bca97361d1c24f05b4657ae5",
+      "Network": ['Ethereum'],
       "Name": "japan-guardian-altive-orbs-v2",
       "Ip": "54.168.36.177",
       "Website": "https://guardian-japan-orbs.com",
@@ -327,6 +329,7 @@ export const testModel:Model = {
     },
     "8ddb908c77ccc9cfde28ddf84311cb6fdf3f3125": {
       "EthAddress": "8ddb908c77ccc9cfde28ddf84311cb6fdf3f3125",
+      "Network": ['Ethereum'],
       "Name": "Jjang Orbs(짱)",
       "Ip": "52.78.29.172",
       "Website": "https://blog.naver.com/jjang-orbs",
@@ -452,6 +455,7 @@ export const testModel:Model = {
     },
     "3d726623456e34e8a7f5567f6249ec4d72cc3595": {
       "EthAddress": "3d726623456e34e8a7f5567f6249ec4d72cc3595",
+      "Network": ['Ethereum'],
       "Name": "ORBS 1++흑우",
       "Ip": "3.34.237.131",
       "Website": "https://blog.naver.com/orbs_guardian",
@@ -577,6 +581,7 @@ export const testModel:Model = {
     },
     "f7ae622c77d0580f02bcb2f92380d61e3f6e466c": {
       "EthAddress": "f7ae622c77d0580f02bcb2f92380d61e3f6e466c",
+      "Network": ['Ethereum'],
       "Name": "Guardians-of-Orbs",
       "Ip": "54.241.122.39",
       "Website": "https://www.guardians-of-orbs.com/",
@@ -702,6 +707,7 @@ export const testModel:Model = {
     },
     "0c56b39184e22249e35efcb9394872f0d025256b": {
       "EthAddress": "0c56b39184e22249e35efcb9394872f0d025256b",
+      "Network": ['Ethereum'],
       "Name": "AngelSong-of-Orbs",
       "Ip": "13.124.229.86",
       "Website": "https://blog.naver.com/jinan0119",
@@ -827,6 +833,7 @@ export const testModel:Model = {
     },
     "f0db4646e4be8e2094cd6d7c6d253a87eec7af58": {
       "EthAddress": "f0db4646e4be8e2094cd6d7c6d253a87eec7af58",
+      "Network": ['Ethereum'],
       "Name": "Good relation-Guardian(굿가)",
       "Ip": "15.165.22.8",
       "Website": "https://blog.naver.com/emfla2272",
@@ -952,6 +959,7 @@ export const testModel:Model = {
     },
     "0874bc1383958e2475df73dc68c4f09658e23777": {
       "EthAddress": "0874bc1383958e2475df73dc68c4f09658e23777",
+      "Network": ['Ethereum'],
       "Name": "Wings Stiftung",
       "Ip": "46.101.165.46",
       "Website": "https://wingsfoundation.ch",
@@ -1077,6 +1085,7 @@ export const testModel:Model = {
     },
     "17fe98a222c41217c51c823352537dc542ad06ef": {
       "EthAddress": "17fe98a222c41217c51c823352537dc542ad06ef",
+      "Network": ['Ethereum'],
       "Name": "FREEMAN",
       "Ip": "13.125.31.152",
       "Website": "https://blog.naver.com/freeman-k",
@@ -1202,6 +1211,7 @@ export const testModel:Model = {
     },
     "460d922239030a83f419f2fb090bf901b628ec31": {
       "EthAddress": "460d922239030a83f419f2fb090bf901b628ec31",
+      "Network": ['Ethereum'],
       "Name": "test-guardian1-orbs-beta",
       "Ip": "34.255.138.28",
       "Website": "www.orbs.com",
@@ -1327,6 +1337,7 @@ export const testModel:Model = {
     },
     "4aca0c63e351b2ea44ee628425710e933b5b3396": {
       "EthAddress": "4aca0c63e351b2ea44ee628425710e933b5b3396",
+      "Network": ['Ethereum'],
       "Name": "0xCORE",
       "Ip": "52.9.29.25",
       "Website": "https://github.com/orbs-network/orbs-network-go",
@@ -1452,6 +1463,7 @@ export const testModel:Model = {
     },
     "5aefc9c2960635b2b1209d4330c84c15d9983ff5": {
       "EthAddress": "5aefc9c2960635b2b1209d4330c84c15d9983ff5",
+      "Network": ['Ethereum'],
       "Name": "Citadel.one",
       "Ip": "84.201.129.47",
       "Website": "https://citadel.one/",
@@ -1577,6 +1589,7 @@ export const testModel:Model = {
     },
     "69c57da3914693dbc5e96ff6c37216e70c6fbbc9": {
       "EthAddress": "69c57da3914693dbc5e96ff6c37216e70c6fbbc9",
+      "Network": ['Ethereum'],
       "Name": "Paradigm",
       "Ip": "130.193.51.109",
       "Website": "https://paradigmfund.io",
@@ -1702,6 +1715,7 @@ export const testModel:Model = {
     },
     "6dda3d258e21abc37668e82ae543e8c77567f220": {
       "EthAddress": "6dda3d258e21abc37668e82ae543e8c77567f220",
+      "Network": ['Ethereum'],
       "Name": "DELIGHT",
       "Ip": "15.164.83.34",
       "Website": "https://delightlabs.io",
@@ -1827,6 +1841,7 @@ export const testModel:Model = {
     },
     "77f20b33b2bc5637f8abc6a87aeea43b1b520591": {
       "EthAddress": "77f20b33b2bc5637f8abc6a87aeea43b1b520591",
+      "Network": ['Ethereum'],
       "Name": "test-guardian3-orbs-beta",
       "Ip": "54.154.100.33",
       "Website": "www.orbs.com",
@@ -1952,6 +1967,7 @@ export const testModel:Model = {
     },
     "7f0e5488a651c08f84df8e4088303c94c58a728b": {
       "EthAddress": "7f0e5488a651c08f84df8e4088303c94c58a728b",
+      "Network": ['Ethereum'],
       "Name": "Guardians of Blockchain (가.오.블)",
       "Ip": "15.165.194.81",
       "Website": "https://www.guardians-of-blockchain.com",
@@ -2077,6 +2093,7 @@ export const testModel:Model = {
     },
     "9b3853cc5734f18ab95e99e6fa4e7fb5da1e1186": {
       "EthAddress": "9b3853cc5734f18ab95e99e6fa4e7fb5da1e1186",
+      "Network": ['Ethereum'],
       "Name": "MollBBang",
       "Ip": "3.35.184.213",
       "Website": "https://blog.naver.com/mollbbang",
@@ -2202,6 +2219,7 @@ export const testModel:Model = {
     },
     "b844166d6c29f277b825265b5e1d8855901c1d7b": {
       "EthAddress": "b844166d6c29f277b825265b5e1d8855901c1d7b",
+      "Network": ['Ethereum'],
       "Name": "test-guardian4-orbs-beta",
       "Ip": "46.137.54.150",
       "Website": "www.orbs.com",
@@ -2327,6 +2345,7 @@ export const testModel:Model = {
     },
     "c82ec0f3c834d337c51c9375a1c0a65ce7aadaec": {
       "EthAddress": "c82ec0f3c834d337c51c9375a1c0a65ce7aadaec",
+      "Network": ['Ethereum'],
       "Name": "ORBS-POS",
       "Ip": "84.201.173.154",
       "Website": "http://orbs-pos.info/",
@@ -2452,6 +2471,7 @@ export const testModel:Model = {
     },
     "cca877408c68878ea02afd1c441cdaaa05d061f1": {
       "EthAddress": "cca877408c68878ea02afd1c441cdaaa05d061f1",
+      "Network": ['Ethereum'],
       "Name": "chainvalid8",
       "Ip": "54.219.18.44",
       "Website": "https://chainvalid8.com",
@@ -2577,6 +2597,7 @@ export const testModel:Model = {
     },
     "f058ccfb2324310c33e8fd9a1dda8e99c8beda59": {
       "EthAddress": "f058ccfb2324310c33e8fd9a1dda8e99c8beda59",
+      "Network": ['Ethereum'],
       "Name": "Bitgosu",
       "Ip": "54.180.3.15",
       "Website": "https://bitgosu.info",
@@ -2702,6 +2723,7 @@ export const testModel:Model = {
     },
     "f64443d47bfe0305e4cafaba4635a19da730ef51": {
       "EthAddress": "f64443d47bfe0305e4cafaba4635a19da730ef51",
+      "Network": ['Ethereum'],
       "Name": "test_guardian2-orbs-beta",
       "Ip": "54.220.78.16",
       "Website": "www.orbs.com",
@@ -2829,6 +2851,7 @@ export const testModel:Model = {
   "StandByNodes": {
     "ca0ff0479bd7f52e55e65da7b76074b477b734b3": {
       "EthAddress": "ca0ff0479bd7f52e55e65da7b76074b477b734b3",
+      "Network": ['Ethereum'],
       "Name": "0xAUDIT",
       "Ip": "18.132.102.185",
       "Website": "https://github.com/orbs-network/orbs-network-go",
@@ -2950,6 +2973,7 @@ export const testModel:Model = {
   "AllRegisteredNodes": {
     "460d922239030a83f419f2fb090bf901b628ec31": {
       "EthAddress": "460d922239030a83f419f2fb090bf901b628ec31",
+      "Network": ['Ethereum'],
       "Name": "test-guardian1-orbs-beta",
       "Ip": "34.255.138.28",
       "Website": "www.orbs.com",
@@ -3069,6 +3093,7 @@ export const testModel:Model = {
     },
     "f64443d47bfe0305e4cafaba4635a19da730ef51": {
       "EthAddress": "f64443d47bfe0305e4cafaba4635a19da730ef51",
+      "Network": ['Ethereum'],
       "Name": "test_guardian2-orbs-beta",
       "Ip": "54.220.78.16",
       "Website": "www.orbs.com",
@@ -3188,6 +3213,7 @@ export const testModel:Model = {
     },
     "77f20b33b2bc5637f8abc6a87aeea43b1b520591": {
       "EthAddress": "77f20b33b2bc5637f8abc6a87aeea43b1b520591",
+      "Network": ['Ethereum'],
       "Name": "test-guardian3-orbs-beta",
       "Ip": "54.154.100.33",
       "Website": "www.orbs.com",
@@ -3307,6 +3333,7 @@ export const testModel:Model = {
     },
     "b844166d6c29f277b825265b5e1d8855901c1d7b": {
       "EthAddress": "b844166d6c29f277b825265b5e1d8855901c1d7b",
+      "Network": ['Ethereum'],
       "Name": "test-guardian4-orbs-beta",
       "Ip": "46.137.54.150",
       "Website": "www.orbs.com",
@@ -3426,6 +3453,7 @@ export const testModel:Model = {
     },
     "6dda3d258e21abc37668e82ae543e8c77567f220": {
       "EthAddress": "6dda3d258e21abc37668e82ae543e8c77567f220",
+      "Network": ['Ethereum'],
       "Name": "DELIGHT",
       "Ip": "15.164.83.34",
       "Website": "https://delightlabs.io",
@@ -3545,6 +3573,7 @@ export const testModel:Model = {
     },
     "c5e624d6824e626a6f14457810e794e4603cfee2": {
       "EthAddress": "c5e624d6824e626a6f14457810e794e4603cfee2",
+      "Network": ['Ethereum'],
       "Name": "WhaleCoreStake - ORBS KOREA - 오뽀",
       "Ip": "34.227.204.75",
       "Website": "https://blog.naver.com/fishcorestake",
@@ -3664,6 +3693,7 @@ export const testModel:Model = {
     },
     "f7ae622c77d0580f02bcb2f92380d61e3f6e466c": {
       "EthAddress": "f7ae622c77d0580f02bcb2f92380d61e3f6e466c",
+      "Network": ['Ethereum'],
       "Name": "Guardians-of-Orbs",
       "Ip": "54.241.122.39",
       "Website": "https://www.guardians-of-orbs.com/",
@@ -3783,6 +3813,7 @@ export const testModel:Model = {
     },
     "0874bc1383958e2475df73dc68c4f09658e23777": {
       "EthAddress": "0874bc1383958e2475df73dc68c4f09658e23777",
+      "Network": ['Ethereum'],
       "Name": "Wings Stiftung",
       "Ip": "46.101.165.46",
       "Website": "https://wingsfoundation.ch",
@@ -3902,6 +3933,7 @@ export const testModel:Model = {
     },
     "7f0e5488a651c08f84df8e4088303c94c58a728b": {
       "EthAddress": "7f0e5488a651c08f84df8e4088303c94c58a728b",
+      "Network": ['Ethereum'],
       "Name": "Guardians of Blockchain (가.오.블)",
       "Ip": "15.165.194.81",
       "Website": "https://www.guardians-of-blockchain.com",
@@ -4021,6 +4053,7 @@ export const testModel:Model = {
     },
     "0c56b39184e22249e35efcb9394872f0d025256b": {
       "EthAddress": "0c56b39184e22249e35efcb9394872f0d025256b",
+      "Network": ['Ethereum'],
       "Name": "AngelSong-of-Orbs",
       "Ip": "13.124.229.86",
       "Website": "https://blog.naver.com/jinan0119",
@@ -4140,6 +4173,7 @@ export const testModel:Model = {
     },
     "17fe98a222c41217c51c823352537dc542ad06ef": {
       "EthAddress": "17fe98a222c41217c51c823352537dc542ad06ef",
+      "Network": ['Ethereum'],
       "Name": "FREEMAN",
       "Ip": "13.125.31.152",
       "Website": "https://blog.naver.com/freeman-k",
@@ -4259,6 +4293,7 @@ export const testModel:Model = {
     },
     "f0db4646e4be8e2094cd6d7c6d253a87eec7af58": {
       "EthAddress": "f0db4646e4be8e2094cd6d7c6d253a87eec7af58",
+      "Network": ['Ethereum'],
       "Name": "Good relation-Guardian(굿가)",
       "Ip": "15.165.22.8",
       "Website": "https://blog.naver.com/emfla2272",
@@ -4378,6 +4413,7 @@ export const testModel:Model = {
     },
     "cca877408c68878ea02afd1c441cdaaa05d061f1": {
       "EthAddress": "cca877408c68878ea02afd1c441cdaaa05d061f1",
+      "Network": ['Ethereum'],
       "Name": "chainvalid8",
       "Ip": "54.219.18.44",
       "Website": "https://chainvalid8.com",
@@ -4497,6 +4533,7 @@ export const testModel:Model = {
     },
     "8ddb908c77ccc9cfde28ddf84311cb6fdf3f3125": {
       "EthAddress": "8ddb908c77ccc9cfde28ddf84311cb6fdf3f3125",
+      "Network": ['Ethereum'],
       "Name": "Jjang Orbs(짱)",
       "Ip": "52.78.29.172",
       "Website": "https://blog.naver.com/jjang-orbs",
@@ -4616,6 +4653,7 @@ export const testModel:Model = {
     },
     "3d726623456e34e8a7f5567f6249ec4d72cc3595": {
       "EthAddress": "3d726623456e34e8a7f5567f6249ec4d72cc3595",
+      "Network": ['Ethereum'],
       "Name": "ORBS 1++흑우",
       "Ip": "3.34.237.131",
       "Website": "https://blog.naver.com/orbs_guardian",
@@ -4735,6 +4773,7 @@ export const testModel:Model = {
     },
     "f058ccfb2324310c33e8fd9a1dda8e99c8beda59": {
       "EthAddress": "f058ccfb2324310c33e8fd9a1dda8e99c8beda59",
+      "Network": ['Ethereum'],
       "Name": "Bitgosu",
       "Ip": "54.180.3.15",
       "Website": "https://bitgosu.info",
@@ -4854,6 +4893,7 @@ export const testModel:Model = {
     },
     "69c57da3914693dbc5e96ff6c37216e70c6fbbc9": {
       "EthAddress": "69c57da3914693dbc5e96ff6c37216e70c6fbbc9",
+      "Network": ['Ethereum'],
       "Name": "Paradigm",
       "Ip": "130.193.51.109",
       "Website": "https://paradigmfund.io",
@@ -4973,6 +5013,7 @@ export const testModel:Model = {
     },
     "c82ec0f3c834d337c51c9375a1c0a65ce7aadaec": {
       "EthAddress": "c82ec0f3c834d337c51c9375a1c0a65ce7aadaec",
+      "Network": ['Ethereum'],
       "Name": "ORBS-POS",
       "Ip": "84.201.173.154",
       "Website": "http://orbs-pos.info/",
@@ -5092,6 +5133,7 @@ export const testModel:Model = {
     },
     "63aef7616882f488bca97361d1c24f05b4657ae5": {
       "EthAddress": "63aef7616882f488bca97361d1c24f05b4657ae5",
+      "Network": ['Ethereum'],
       "Name": "japan-guardian-altive-orbs-v2",
       "Ip": "54.168.36.177",
       "Website": "https://guardian-japan-orbs.com",
@@ -5211,6 +5253,7 @@ export const testModel:Model = {
     },
     "5aefc9c2960635b2b1209d4330c84c15d9983ff5": {
       "EthAddress": "5aefc9c2960635b2b1209d4330c84c15d9983ff5",
+      "Network": ['Ethereum'],
       "Name": "Citadel.one",
       "Ip": "84.201.129.47",
       "Website": "https://citadel.one/",
@@ -5330,6 +5373,7 @@ export const testModel:Model = {
     },
     "9b3853cc5734f18ab95e99e6fa4e7fb5da1e1186": {
       "EthAddress": "9b3853cc5734f18ab95e99e6fa4e7fb5da1e1186",
+      "Network": ['Ethereum'],
       "Name": "MollBBang",
       "Ip": "3.35.184.213",
       "Website": "https://blog.naver.com/mollbbang",
@@ -5449,6 +5493,7 @@ export const testModel:Model = {
     },
     "4aca0c63e351b2ea44ee628425710e933b5b3396": {
       "EthAddress": "4aca0c63e351b2ea44ee628425710e933b5b3396",
+      "Network": ['Ethereum'],
       "Name": "0xCORE",
       "Ip": "52.9.29.25",
       "Website": "https://github.com/orbs-network/orbs-network-go",
@@ -5568,6 +5613,7 @@ export const testModel:Model = {
     },
     "ca0ff0479bd7f52e55e65da7b76074b477b734b3": {
       "EthAddress": "ca0ff0479bd7f52e55e65da7b76074b477b734b3",
+      "Network": ['Ethereum'],
       "Name": "0xAUDIT",
       "Ip": "18.132.102.185",
       "Website": "https://github.com/orbs-network/orbs-network-go",

@@ -14,23 +14,23 @@ import { Model } from '../model/model';
 import { healthCheck } from './healthcheck';
 import { checkStatusChange } from './status';
 
-export class Monitors {  
+export class Monitors {
     private msg = '';
 
     constructor(private config: Configuration) {}
-  
+
     async run(oldModel:Model, newModel: Model) {
         if(this.isMoninotorEnabled()) {
             if (oldModel.TimeSeconds <= 0) { // (re)start
                 const {msg, healthMsg} = healthCheck(newModel, this.config.MonitorSuppressMsgs);
                 this.msg = msg;
-                this.sendMessage(`Health Check: ${healthMsg}`);
+                await this.sendMessage(`Health Check: ${healthMsg}`);
             } else {
                 const msg = checkStatusChange(oldModel, newModel, this.config.MonitorSuppressMsgs);
                 if (msg.length > 0) {
                     if (this.msg !== msg) {
                         this.msg = msg;
-                        this.sendMessage(`Network News: the following *new issue(s)* are making it rain ☔:\n${msg}`);
+                        await this.sendMessage(`Network News: the following *new issue(s)* are making it rain ☔:\n${msg}`);
                     }
                 }
             }

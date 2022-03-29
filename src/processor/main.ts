@@ -67,15 +67,15 @@ export class Processor {
       tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
       await Promise.all(tasks);
+      this.updateVCsColors(newModel.CommitteeNodes);
+      this.updateVCsColors(newModel.StandByNodes);
       this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
       if (this.shouldSetCriticalAlert(newModel.AllRegisteredNodes)) newModel.CriticalAlert = true;
-      this.updateVCsColors(newModel.AllRegisteredNodes);
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
-
       // monitoring
-      this.monitors.run(this.model, newModel);
+      await this.monitors.run(this.model, newModel);
       Logger.log('Processor: finished monitoring.');
 
       // update model
@@ -299,6 +299,8 @@ export class Processor {
 			[HealthLevel.Yellow, HealthLevel.Red].includes(memberData.NodeServices.Management.Status)) {
 				for (const nodeVC of Object.values(memberData.NodeVirtualChains)) {
 					nodeVC.Status = HealthLevel.Green
+					nodeVC.StatusMsg = ''
+					nodeVC.StatusToolTip = ''
 				}
 			}
 		}

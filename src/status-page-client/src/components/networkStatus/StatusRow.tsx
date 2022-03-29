@@ -21,18 +21,20 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface IProps {
+    maticStatus: EthereumStatus | undefined
     ethereumStatus: EthereumStatus | undefined
     rootStatus: GenStatus | undefined
 }
 
 export const StatusRow = React.memo<IProps>((props) => {
-  const { rootStatus, ethereumStatus } = props;
+  const { rootStatus, ethereumStatus, maticStatus } = props;
 
   const classes = useStyles();
   return (
       <div className={classes.headerCell}>
         <RootNodeStatusCell rootStatus={rootStatus} />
         <POSContractsStatus ethereumStatus={ethereumStatus} />
+        <POSContractsStatus ethereumStatus={maticStatus}/>
      </div>
  );
 });
