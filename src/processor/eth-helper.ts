@@ -19,7 +19,7 @@ const maticErc20Address = "0x614389EaAE0A6821DC49062D56BDA3d9d45Fa2ff";
 export const FirstPoSv2BlockNumber = 9830000;
 export const FirstRewardsBlockNumber = 11145373;
 
-export const CHAIN_ID = {'MAINNET': 1, 'MATIC': 137}
+export const CHAIN_ID = {'ETHEREUM': 1, 'MATIC': 137}
 
 export enum Topics {
     Transfer = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
@@ -92,7 +92,7 @@ export async function getResources(nodeData:any, web3:any) : Promise<OrbsEthResr
     const certifiedFeesWalletAddress = String(nodeData.Payload.CurrentContractAddress["certifiedFeesWallet"]);
 
 	const chainId = await web3.eth.getChainId();
-	const erc20Address = (chainId === CHAIN_ID.MAINNET) ? ethereumErc20Address: maticErc20Address;
+	const erc20Address = (chainId === CHAIN_ID.ETHEREUM) ? ethereumErc20Address: maticErc20Address;
 
     return  {
         erc20Address: erc20Address,
@@ -140,4 +140,17 @@ export function multicallToBlockInfo(multiCallRes: any): BlockInfo {
         number: multiCallRes.results.blockNumber.toNumber(),
         time: multiCallRes.results.transformed[BlockTimestamp].toNumber()
     };
+}
+
+export async function getChainName(web3: any) {
+    const chainId = parseInt(await web3.eth.getChainId());
+    switch (chainId) {
+		case 1:
+    		return 'ETHEREUM';
+		case 137:
+			return 'MATIC';
+
+		default:
+			return 'Unsupported Chain';
+    }
 }

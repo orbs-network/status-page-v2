@@ -29,7 +29,7 @@ export interface Configuration {
   MaticRootNodeEndpoint: string;
   // ethereum
   EthereumEndpoints: string[];
-  MaticEndpoint: string;
+  MaticEndpoints: string[];
   MaxTimeSinceLastEvent: number;
 }
 

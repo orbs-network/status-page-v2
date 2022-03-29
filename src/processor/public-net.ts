@@ -11,10 +11,10 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
-import { getResources, getWeb3Provider, getWeb3} from './eth-helper';
+import { getResources, getWeb3Provider} from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
-import { getPoSStatus } from './stats';
+import { getPoSStatus, getTotalCommitteeWeight } from './stats';
 import BigNumber from "bignumber.js";
 
 // Important URLS for public-network - init explore of network from these.
@@ -26,12 +26,11 @@ let validSupplyInCirculation = "";
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
-  const maticRootNodeEndpoint = config.MaticRootNodeEndpoint; // TODO: fixme only for debug remove after matic pos launch, should be the same endpoint for ethereum and matic
 
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
       await readData(model, rootNodeEndpoint, config);
-      return await readDataMatic(model, maticRootNodeEndpoint, config);
+      return await readDataMatic(model, rootNodeEndpoint, config);
     } catch (e) {
       Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
     }
@@ -93,21 +92,12 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   if (web3) {
 
     const resources = await getResources(rootNodeData, web3);
-    ///////////////////////
-    try {
-      const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
-      model.Statuses[StatusName.EthereumContracts] =
-        await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
-    } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
-      Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
-    }
 
+	///////////////////////
     model.Exchanges.Coinmarketcap = null;
-
-    ///////////////////////
+    let pos;
     try {
-      const pos = await getPoSStatus(model, resources, web3);
+      pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;
       validSupplyInCirculation = model.SupplyData.supplyInCirculation;
       model.PoSData = pos.PosData;
@@ -118,6 +108,20 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Pos Data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
+
+    ///////////////////////
+    try {
+      const totalWeight = model.PoSData? model.PoSData.CommitteeData.TotalCommitteeWeight : 0;
+      const rewardsRate = model.PoSData? model.PoSData.RewardsAndFeeData.CurrentStakingRewardPrecentMille/100000 : 0;
+
+      const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
+      model.Statuses[StatusName.EthereumContracts] =
+        await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config, totalWeight, rewardsRate);
+    } catch (e) {
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
+      Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
+    }
+
   }
   // calc exchange data regardless if contract fetch was successfull
   if (validSupplyInCirculation.length) {
@@ -172,14 +176,19 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
 		}
   });
 
-  if (config.MaticEndpoint && config.MaticEndpoint !== '') {
-	  const web3 = getWeb3(config.MaticEndpoint);
+  const web3 = await getWeb3Provider(config.MaticEndpoints);
+
+  if (web3) {
 	  const resources = await getResources(rootNodeData, web3);
+
 	  ///////////////////////
 	  try {
+	  	  const totalWeight = getTotalCommitteeWeight(committeeMembers);
+	  	  const rewardsRate = parseInt(await resources.stakingRewardsContract.methods.getCurrentStakingRewardsRatePercentMille().call()) / 100000;
+
 		  const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, (g) => g.IsCertified))
 		  model.Statuses[StatusName.MaticContracts] =
-			  await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config);
+			  await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config, totalWeight, rewardsRate);
 	  } catch (e) {
 		  model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
 		  Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
@@ -261,8 +270,8 @@ function readGuardians(rootNodeData: any, network: string): Guardians {
       Ip: ip,
       Website: _.isString(guardianData.Website) ? guardianData.Website : '',
       EffectiveStake: _.isNumber(guardianData.EffectiveStake) ? guardianData.EffectiveStake : 0,
-      SelfStake: _.isNumber(guardianData.SelfStake) ? guardianData.SelfStake : 0,
-      DelegatedStake: _.isNumber(guardianData.DelegatedStake) ? guardianData.DelegatedStake : 0,
+      SelfStake: _.isNumber(guardianData.SelfStake[network]) ? guardianData.SelfStake[network] : 0,
+      DelegatedStake: _.isNumber(guardianData.DelegatedStake[network]) ? guardianData.DelegatedStake[network] : 0,
       IsCertified: _.isNumber(guardianData.IdentityType) ? guardianData.IdentityType === 1 : false,
       OrbsAddress: _.isString(guardianData.OrbsAddress) ? guardianData.OrbsAddress : '',
       NodeManagementURL: URLs.generateNodeManagmentUrl(ip),
