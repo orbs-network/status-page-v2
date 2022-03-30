@@ -3,3 +3,4 @@ dist
 e2e
 custom_typings
 /*.js
+multicall.d.ts
