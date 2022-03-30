@@ -7,8 +7,6 @@
  */
 
 import BigNumber from 'bignumber.js';
-import _ from 'lodash';
-// @ts-ignore
 import { aggregate } from '@makerdao/multicall';
 import { Configuration } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
