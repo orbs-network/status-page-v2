@@ -1,6 +1,6 @@
 {
   "include": [
-    "src"
+    "src", "multicall.d.ts"
   ],
   "compilerOptions": {
     "rootDir": "src",
