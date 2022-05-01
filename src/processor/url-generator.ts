@@ -32,10 +32,10 @@ export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirt
 }
 
 export function generateNodeServiceUrls(ip: string, service: Service): NodeServiceUrls {
-  const port = portsMapping[ip] ?? '';
+  const port = portsMapping[ip] ? `:${portsMapping[ip]}` : '';
   const res = {
-    Status: `http://${ip}:${port}/services/${service.ServiceUrlName}${StatusSuffix}`,
-    Logs: `http://${ip}:${port}/services/${service.ServiceUrlName}${LogsSuffix}`,
+    Status: `http://${ip}${port}/services/${service.ServiceUrlName}${StatusSuffix}`,
+    Logs: `http://${ip}${port}/services/${service.ServiceUrlName}${LogsSuffix}`,
     Version: '',
     Metrics: '',
   };
