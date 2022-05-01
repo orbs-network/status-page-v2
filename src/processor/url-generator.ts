@@ -7,6 +7,7 @@
  */
 
 import { VirtualChainUrls, NodeServiceUrls, NodeVirtualChainUrls, Service } from '../model/model';
+import {portsMapping} from "../config";
 
 const PrismSuffix = '.prism.orbs.network/';
 const SubscriptionUiPrefix = 'subscription.orbs.network/vc';
@@ -31,9 +32,10 @@ export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirt
 }
 
 export function generateNodeServiceUrls(ip: string, service: Service): NodeServiceUrls {
+  const port = portsMapping[ip] ?? '';
   const res = {
-    Status: `http://${ip}/services/${service.ServiceUrlName}${StatusSuffix}`,
-    Logs: `http://${ip}/services/${service.ServiceUrlName}${LogsSuffix}`,
+    Status: `http://${ip}:${port}/services/${service.ServiceUrlName}${StatusSuffix}`,
+    Logs: `http://${ip}:${port}/services/${service.ServiceUrlName}${LogsSuffix}`,
     Version: '',
     Metrics: '',
   };

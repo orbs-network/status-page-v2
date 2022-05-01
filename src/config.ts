@@ -81,3 +81,7 @@ export function validateConfiguration(config: Configuration) {
     }
   }
 }
+
+export const portsMapping: {[key: string]: string} = {
+  "52.194.147.147" : '18888' // okx
+}
