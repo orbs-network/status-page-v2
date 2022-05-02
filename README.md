@@ -154,4 +154,11 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
       * Overrides the address for staking address.
       * Default time is 1 day.  
 
+## Specific ports configuration
+Some guardians expose custom ports (instead of the default port 80).
+In such cases, add the corresponding mapping to **_portsMapping_** under `/src/config.ts`
+```
+{ip: port}
+```
+
 [heroku CLI]: https://devcenter.heroku.com/articles/heroku-command-line
