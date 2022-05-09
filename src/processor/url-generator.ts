@@ -22,12 +22,13 @@ export const StatusSuffix = '/status';
 const LogsSuffix = '/logs';
 
 export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirtualChainUrls {
+  const port = portsMapping[ip] ? `:${portsMapping[ip]}` : '';
   return {
-    Status: `http://${ip}/vchains/${vcid}${StatusSuffix}`,
+    Status: `http://${ip}${port}/vchains/${vcid}${StatusSuffix}`,
     Management: `http://${ip}:7666/vchains/${vcid}/management`,
-    Logs: `http://${ip}/vchains/${vcid}${LogsSuffix}`,
+    Logs: `http://${ip}${port}/vchains/${vcid}${LogsSuffix}`,
     Version: '',
-    Metrics: `http://${ip}/vchains/${vcid}/metrics`,
+    Metrics: `http://${ip}${port}/vchains/${vcid}/metrics`,
   };
 }
 
