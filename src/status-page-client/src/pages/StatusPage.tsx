@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, {  useState } from 'react';
 import { observer } from 'mobx-react';
 import { useStatusStore } from '../store/storeHooks';
 import { toJS } from 'mobx';
 import { Page } from '../components/structure/Page';
-import { StatusTable, ValidatorStatusGist } from '../components/statusTable/StatusTable';
+import { StatusTable } from '../components/statusTable/StatusTable';
 import { StatusRow } from "../components/networkStatus/StatusRow";
 import { Button } from '@material-ui/core';
 import { EthereumStatus } from '../../../model/model';
@@ -23,22 +23,6 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   const committeeNodes = statusStore?.statusModel?.CommitteeNodes;
   const standByNodes = statusStore?.statusModel?.StandByNodes;
   const allRegisteredNodes = statusStore?.statusModel?.AllRegisteredNodes;
-  const validatorStatusGists = useMemo<ValidatorStatusGist[]>(() => {
-    if (!committeeNodes || !standByNodes) {
-      return [];
-    }
-
-    const committeeValidatorStatusGists: ValidatorStatusGist[] = Object.entries(committeeNodes).map(([guardianId, guardian]) => {
-      const validatorStatusGist: ValidatorStatusGist = {
-        ip: guardian.Ip,
-        name: guardian.Name,
-      };
-
-      return validatorStatusGist;
-    });
-
-    return committeeValidatorStatusGists;
-  }, [committeeNodes, standByNodes]);
 
   return (
     <Page>

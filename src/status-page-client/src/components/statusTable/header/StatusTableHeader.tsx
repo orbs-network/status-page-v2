@@ -3,6 +3,8 @@ import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../../model/model';
 import { makeStyles } from '@material-ui/core/styles';
+import { DEBUG_PARAM } from '../../../consts';
+import { getParamsFromUrl } from '../../../utils';
 
 interface IProps {
   vcs: VirtualChain[];
@@ -16,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     width: '10rem',
     textAlign: 'center',
     borderBottom: '2px solid #cccccc20',
-    fontSize: '1.2rem'
+    fontSize: '1.2rem',
   },
   link: {
     textDecoration: 'none',
@@ -28,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 export const StatusTableHeader = React.memo<IProps>((props) => {
   const { showServices, vcs, services, setShowServices } = props;
   const classes = useStyles();
-
+  const isDebug = getParamsFromUrl(DEBUG_PARAM);
   const servicesHeaderCells = useMemo(() => {
     if (!showServices) {
       return null;
@@ -57,12 +59,24 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
       <TableRow>
         <TableCell className={classes.headerCell} />
         <TableCell className={classes.headerCell}>
-          <Button variant="outlined" onClick={onClick}>{showServices ? 'Hide Services' : 'Expand Services'}</Button>
+          <Button variant="outlined" onClick={onClick}>
+            {showServices ? 'Hide Services' : 'Expand Services'}
+          </Button>
         </TableCell>
         {servicesHeaderCells}
-        {vcs.map((vc) => (
-          <VcStatusCell key={vc.Id} vc={vc} />
-        ))}
+        {!showServices && (
+          <>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+              {' '}
+              Management service
+            </TableCell>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+              {' '}
+              Matic reader
+            </TableCell>
+          </>
+        )}
+        {isDebug && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
       </TableRow>
     );
 
@@ -74,21 +88,34 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Validators</TableCell>
-        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Node services</TableCell>
+        <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+          Validators
+        </TableCell>
+        <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+          Node services
+        </TableCell>
         {headerServicesPlaceholders}
-        {vcs.map((vc) => (
-          <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
-            {vc.IsCanary ? (vc.Id) : (
-              <a href={vc.VirtualChainUrls.Prism} target={'_blank'} rel={'noopener noreferrer'} className={classes.link}>
-               {vc.Id}
-              </a>
-            )}
-            {
-              vc.Name ? ` - ${vc.Name}` : false
-            } 
-          </TableCell>
-        ))}
+
+        {!showServices && (
+          <>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
+          </>
+        )}
+
+        {isDebug &&
+          vcs.map((vc) => (
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }} key={vc.Id}>
+              {vc.IsCanary ? (
+                vc.Id
+              ) : (
+                <a href={vc.VirtualChainUrls.Prism} target={'_blank'} rel={'noopener noreferrer'} className={classes.link}>
+                  {vc.Id}
+                </a>
+              )}
+              {vc.Name ? ` - ${vc.Name}` : false}
+            </TableCell>
+          ))}
       </TableRow>
       {topRow}
     </TableHead>
