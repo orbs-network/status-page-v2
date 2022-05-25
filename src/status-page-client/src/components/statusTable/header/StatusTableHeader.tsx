@@ -66,11 +66,11 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
           <>
             <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
               {' '}
-              Management service
+              Ethereum chain
             </TableCell>
             <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
               {' '}
-              Matic reader
+              Polygon chain
             </TableCell>
           </>
         )}
