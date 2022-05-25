@@ -3,6 +3,7 @@ import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../../model/model';
 import { makeStyles } from '@material-ui/core/styles';
+import { isDebug } from '../../../consts';
 
 interface IProps {
   vcs: VirtualChain[];
@@ -16,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     width: '10rem',
     textAlign: 'center',
     borderBottom: '2px solid #cccccc20',
-    fontSize: '1.2rem'
+    fontSize: '1.2rem',
   },
   link: {
     textDecoration: 'none',
@@ -28,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
 export const StatusTableHeader = React.memo<IProps>((props) => {
   const { showServices, vcs, services, setShowServices } = props;
   const classes = useStyles();
-
   const servicesHeaderCells = useMemo(() => {
     if (!showServices) {
       return null;
@@ -57,38 +57,63 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
       <TableRow>
         <TableCell className={classes.headerCell} />
         <TableCell className={classes.headerCell}>
-          <Button variant="outlined" onClick={onClick}>{showServices ? 'Hide Services' : 'Expand Services'}</Button>
+          <Button variant="outlined" onClick={onClick}>
+            {showServices ? 'Hide Services' : 'Expand Services'}
+          </Button>
         </TableCell>
         {servicesHeaderCells}
-        {vcs.map((vc) => (
-          <VcStatusCell key={vc.Id} vc={vc} />
-        ))}
+        {!showServices && (
+          <>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+              {' '}
+              Ethereum chain
+            </TableCell>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+              {' '}
+              Polygon chain
+            </TableCell>
+          </>
+        )}
+        {isDebug() && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
       </TableRow>
     );
 
     return topRow;
-  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs]);
+  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs, isDebug]);
 
   // DEV_NOTE : O.L : Setting the TableCell width to a small number is a trick to force "fit-content"
   // TODO : O.L : Find a better method for 'fit-content'
   return (
     <TableHead>
       <TableRow>
-        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Validators</TableCell>
-        <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}}>Node services</TableCell>
+        <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+          Validators
+        </TableCell>
+        <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
+          Node services
+        </TableCell>
         {headerServicesPlaceholders}
-        {vcs.map((vc) => (
-          <TableCell className={classes.headerCell} style={{paddingBottom: '20px'}} key={vc.Id}>
-            {vc.IsCanary ? (vc.Id) : (
-              <a href={vc.VirtualChainUrls.Prism} target={'_blank'} rel={'noopener noreferrer'} className={classes.link}>
-               {vc.Id}
-              </a>
-            )}
-            {
-              vc.Name ? ` - ${vc.Name}` : false
-            } 
-          </TableCell>
-        ))}
+
+        {!showServices && (
+          <>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
+          </>
+        )}
+
+        {isDebug() &&
+          vcs.map((vc) => (
+            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }} key={vc.Id}>
+              {vc.IsCanary ? (
+                vc.Id
+              ) : (
+                <a href={vc.VirtualChainUrls.Prism} target={'_blank'} rel={'noopener noreferrer'} className={classes.link}>
+                  {vc.Id}
+                </a>
+              )}
+              {vc.Name ? ` - ${vc.Name}` : false}
+            </TableCell>
+          ))}
       </TableRow>
       {topRow}
     </TableHead>

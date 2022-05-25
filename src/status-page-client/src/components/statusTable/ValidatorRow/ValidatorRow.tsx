@@ -5,7 +5,9 @@ import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';
 import { NodeVcStatusCell } from './NodeVcStatusCell';
 import { ValidatorInfoCell } from './ValidatorInfoCell';
-
+import _, { indexOf } from 'lodash';
+import { getNodeServices, getParamsFromUrl } from '../../../utils';
+import { isDebug, EXPANDED_SERVICES } from '../../../consts';
 interface IProps {
   validator: Guardian;
   isInCommittee: boolean;
@@ -14,10 +16,9 @@ interface IProps {
   vcsIds: string[];
   isShowAllRegistered: boolean;
 }
-
 export const ValidatorRow = React.memo<IProps>((props) => {
   const { validator, expandServices, servicesNames, vcsIds, isInCommittee, isShowAllRegistered } = props;
-
+  
   const expandedServicesCells = useMemo(() => {
     return servicesNames.map((serviceName) => {
       const nodeService = validator.NodeServices[serviceName];
@@ -34,9 +35,18 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     });
   }, [validator.NodeVirtualChains, vcsIds]);
 
+  const servicesCells = useMemo(() => {
+    return EXPANDED_SERVICES.map((service) => {
+      const nodeService = validator.NodeServices[service];
+
+      return <NodeServiceStatusCell nodeService={nodeService} key={service} />;
+    });
+  }, [validator.NodeVirtualChains]);
+
   const orderedServices = useMemo(() => {
-    return servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
+    return getNodeServices(servicesNames, EXPANDED_SERVICES).map((serviceName) => validator.NodeServices[serviceName]);
   }, [servicesNames, validator.NodeServices]);
+
 
   return (
     <TableRow>
@@ -44,13 +54,14 @@ export const ValidatorRow = React.memo<IProps>((props) => {
       <ValidatorInfoCell validator={validator} isInCommittee={isInCommittee} isShowAllRegistered={isShowAllRegistered} />
 
       {/* Services summary  */}
-      <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
+      <ServicesGistCell nodeServices={orderedServices} serviceNames={getNodeServices(servicesNames, EXPANDED_SERVICES)} />
 
       {/* Expanded services */}
-      {expandServices ? expandedServicesCells : null}
+      {expandServices ? expandedServicesCells : servicesCells}
+
 
       {/* Vcs status */}
-      {vcCells}
+      {isDebug() &&  vcCells}
     </TableRow>
   );
 });
