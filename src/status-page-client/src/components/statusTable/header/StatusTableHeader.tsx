@@ -3,8 +3,7 @@ import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../../model/model';
 import { makeStyles } from '@material-ui/core/styles';
-import { DEBUG_PARAM } from '../../../consts';
-import { getParamsFromUrl } from '../../../utils';
+import { isDebug } from '../../../consts';
 
 interface IProps {
   vcs: VirtualChain[];
@@ -30,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
 export const StatusTableHeader = React.memo<IProps>((props) => {
   const { showServices, vcs, services, setShowServices } = props;
   const classes = useStyles();
-  const isDebug = getParamsFromUrl(DEBUG_PARAM);
   const servicesHeaderCells = useMemo(() => {
     if (!showServices) {
       return null;
@@ -76,12 +74,12 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
             </TableCell>
           </>
         )}
-        {isDebug && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
+        {isDebug() && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
       </TableRow>
     );
 
     return topRow;
-  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs]);
+  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs, isDebug]);
 
   // DEV_NOTE : O.L : Setting the TableCell width to a small number is a trick to force "fit-content"
   // TODO : O.L : Find a better method for 'fit-content'
@@ -103,7 +101,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
           </>
         )}
 
-        {isDebug &&
+        {isDebug() &&
           vcs.map((vc) => (
             <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }} key={vc.Id}>
               {vc.IsCanary ? (

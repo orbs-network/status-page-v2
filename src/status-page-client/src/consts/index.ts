@@ -1,3 +1,5 @@
-const DEBUG_PARAM = 'debug';
+import { getParamsFromUrl } from '../utils';
+
+const isDebug = () => getParamsFromUrl('debug');
 const EXPANDED_SERVICES = ['Management', 'MaticReader'];
-export { DEBUG_PARAM, EXPANDED_SERVICES };
+export { isDebug, EXPANDED_SERVICES };

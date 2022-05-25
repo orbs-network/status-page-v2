@@ -44,7 +44,7 @@ export const StatusTableBody = React.memo<IProps>((props) => {
         />
       );
     });
-  }, [allValidators, committeeValidators, servicesNames, showServices, vcsIds]);
+  }, [allValidators, committeeValidators, servicesNames, showServices, vcsIds, isShowAllRegistered]);
 
   return <TableBody>{validatorRows}</TableBody>;
 });

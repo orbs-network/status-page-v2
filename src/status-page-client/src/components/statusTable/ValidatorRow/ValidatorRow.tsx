@@ -7,7 +7,7 @@ import { NodeVcStatusCell } from './NodeVcStatusCell';
 import { ValidatorInfoCell } from './ValidatorInfoCell';
 import _, { indexOf } from 'lodash';
 import { getNodeServices, getParamsFromUrl } from '../../../utils';
-import { DEBUG_PARAM, EXPANDED_SERVICES } from '../../../consts';
+import { isDebug, EXPANDED_SERVICES } from '../../../consts';
 interface IProps {
   validator: Guardian;
   isInCommittee: boolean;
@@ -61,7 +61,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
 
 
       {/* Vcs status */}
-      {getParamsFromUrl(DEBUG_PARAM) &&  vcCells}
+      {isDebug() &&  vcCells}
     </TableRow>
   );
 });
