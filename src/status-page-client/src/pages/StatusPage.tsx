@@ -23,7 +23,6 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   const committeeNodes = statusStore?.statusModel?.CommitteeNodes;
   const standByNodes = statusStore?.statusModel?.StandByNodes;
   const allRegisteredNodes = statusStore?.statusModel?.AllRegisteredNodes;
-  console.log(toJS(statusStore?.statusModel?.Statuses));
   
   return (
     <Page>
