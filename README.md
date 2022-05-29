@@ -148,6 +148,10 @@ Quickest way is to copy the `.env.example` into `.env` and fill out all mandator
       * Provider url for accessing Ethereum. It is optional if not supplied all the Ethereum checks will be skipped.
       * If left empty other fields will be ignored.
       * For example. `https://mainnet.infura.io/v3/<your key here>`
+    * MATIC_ENDPOINT
+        * Provider url for accessing Polygon. It is optional if not supplied all the Polygon checks will be skipped.
+        * If left empty other fields will be ignored.
+        * For example. `https://polygon-mainnet.g.alchemy.com/v2/<your key here>`
     * MAX_TIME_SECONDS_SINCE_LAST_EVENT
       * Optional.
       * The staking address undelying the Ethereum economy of your network. The time component is to allow checking the livness of your network if no event happened in the last amount of time then there might be a problem on the Ethereum side.

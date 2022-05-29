@@ -44,7 +44,7 @@ export const POSContractsStatus = React.memo<IProps>((props) => {
             {(ethereumStatus.Status == HealthLevel.Red || ethereumStatus.Status == HealthLevel.Yellow) && <>
             <WarningIcon className={classes.icon}/>
             </>}
-            <span>{ethereumStatus.StatusMsg}</span>
+            <span style={{whiteSpace: "break-spaces"}}>{ethereumStatus.StatusMsg}</span>
         </div>
     </Tooltip>
     )}

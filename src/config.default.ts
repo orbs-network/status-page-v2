@@ -8,6 +8,7 @@
 
 import dotenv from 'dotenv';
 import { Configuration, NetworkType } from './config';
+import * as process from "process";
 dotenv.config();
 
 export const defaultConfiguration: Configuration = {
@@ -35,4 +36,16 @@ export const defaultConfiguration: Configuration = {
   EthereumEndpoints: [String(process.env.ETHEREUM_ENDPOINT)],
   MaticEndpoints: [String(process.env.MATIC_ENDPOINT)],
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
+  MaxTimeSinceLastEventMatic: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*3,
+
+  NetworksContracts: {
+    "ETHEREUM": {
+      staking: process.env.ETHEREUM_STAKING_CONTRACT || "0x01D59Af68E2dcb44e04C50e05F62E7043F2656C3",
+      delegations: process.env.ETHEREUM_DELEGATIONS_CONTRACT || "0xB97178870F39d4389210086E4BcaccACD715c71d"
+    },
+    "MATIC": {
+      staking: process.env.MATIC_STAKING_CONTRACT || "0xeeae6791f684117b7028b48cb5dd21186df80b9c",
+      delegations: process.env.MATIC_DELEGATIONS_CONTRACT || "0x513d30e66641cB1f2670b5994DD8E2B61ED3C23c"
+    }
+  }
 };
