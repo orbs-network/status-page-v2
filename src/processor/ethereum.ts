@@ -8,14 +8,24 @@
 
 import BigNumber from 'bignumber.js';
 import { aggregate } from '@makerdao/multicall';
-import { Configuration } from '../config';
+import { Configuration, Contracts } from '../config';
 import { getCurrentClockTime, isStaleTime, timeAgoText } from '../helpers';
 import { EthereumStatus, HealthLevel } from '../model/model';
 import {BlockTimestamp, getChainName, multicallToBlockInfo, OrbsEthResrouces} from './eth-helper';
-
+import { DelegationsService, StakingService } from '@orbs-network/contracts-js';
 
 function bigToNumber(n: BigNumber):number {
     return n.dividedBy("1e18").toNumber();
+}
+
+async function readTotalStakeByChain(web3: any, contracts: Contracts) {
+    const { staking, delegations } = contracts
+    const totalStake = await new StakingService(web3, staking).readTotalStakedInFullOrbs();
+    const totalUncappedStakedOrbs = await new DelegationsService(
+        web3,
+        delegations,
+    ).readUncappedDelegatedStakeInFullOrbs();
+    return totalStake - totalUncappedStakedOrbs;
 }
 
 export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration, totalWeight: number, rewardsRate: number): Promise<EthereumStatus>  {
@@ -23,6 +33,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
 
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
     let lastEventTime = 0;
+    const chainName = await getChainName(web3);
 
     events.sort((n1:any, n2:any) => n2.blockNumber - n1.blockNumber); // sort desc
     for (const event of events) {
@@ -33,14 +44,11 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         }
     }
 
+    const MaxTimeSinceLastEvent = chainName === "MATIC" ? config.MaxTimeSinceLastEventMatic : config.MaxTimeSinceLastEvent
     let healthLevel = HealthLevel.Green;
     const healthMessages = [];
-    if (lastEventTime + config.MaxTimeSinceLastEvent < getCurrentClockTime() ) {
-        healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
-        healthLevel = HealthLevel.Yellow;
-    }
-    if (lastEventTime + (config.MaxTimeSinceLastEvent*3) < getCurrentClockTime() ) {
-        healthMessages.push(`Last staking/unstaking event was ${timeAgoText(lastEventTime)}. `);
+    if (lastEventTime + MaxTimeSinceLastEvent < getCurrentClockTime() ) {
+        healthMessages.push(`Last staking/unstaking event was ${timeAgoText(getCurrentClockTime()-MaxTimeSinceLastEvent)}. `);
         healthLevel = HealthLevel.Yellow;
     }
     if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
@@ -51,7 +59,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
     const stakingRewardsBalance = bigToNumber(data[StakeRewardWallet]);
     const stakingRewardsAllocated = bigToNumber(data[StakeRewardAllocated]);
     if ( (stakingRewardsBalance-stakingRewardsAllocated) < stakingRewardsTwoWeeks) {
-        healthMessages.push(`Staking rewards: ORBS wallet balance (${stakingRewardsBalance.toFixed(3)}) minus allocated (${stakingRewardsAllocated.toFixed(3)}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toFixed(3)}) all numbers in ORBS.`);
+        healthMessages.push(`Staking rewards: ORBS wallet balance minus allocated (${stakingRewardsBalance.toLocaleString()} - ${stakingRewardsAllocated.toLocaleString()} = ${(stakingRewardsBalance-stakingRewardsAllocated).toLocaleString()}) is below the 2 week threshold (${stakingRewardsTwoWeeks.toLocaleString()}). all numbers are in ORBS.`);
         healthLevel = HealthLevel.Yellow;
     }
     const bootstrapRewardsTwoWeeks = 3000*numOfCertifiedGuardiansInCommittee*14/365;
@@ -64,7 +72,9 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         healthLevel = HealthLevel.Yellow;
     }
     const healthTooltip = healthMessages.join("\n") || "OK";
-    const healthMessage = await getChainName(web3) + ` Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
+    const totalStaked = await readTotalStakeByChain(web3, config.NetworksContracts[chainName])
+    let healthMessage = `${chainName} Contracts status: ${healthMessages.length == 0 ? 'OK' : 'Issues Detected'}`;
+    healthMessage += `\nTotal Staked: ${totalStaked.toLocaleString("en",{maximumFractionDigits: 0})}`;
 
     return {
         StakingRewardsBalance: stakingRewardsBalance,

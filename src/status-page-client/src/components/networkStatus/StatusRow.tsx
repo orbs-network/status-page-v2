@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme: Theme) =>
             color: 'white',
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center',
+            alignItems: 'stretch',
             justifyContent: 'center',
             marginBottom: '20px'
         }

@@ -6,6 +6,11 @@
  * The above notice should be included in all copies or substantial portions of the software.
  */
 
+export interface Contracts {
+  staking: string,
+  delegations: string
+}
+
 export interface Configuration {
   // server settings
   Port: number;
@@ -31,6 +36,9 @@ export interface Configuration {
   EthereumEndpoints: string[];
   MaticEndpoints: string[];
   MaxTimeSinceLastEvent: number;
+  MaxTimeSinceLastEventMatic: number;
+  // contracts
+  NetworksContracts: { [key: string]: Contracts };
 }
 
 export enum NetworkType {
@@ -77,6 +85,14 @@ export function validateConfiguration(config: Configuration) {
       throw new Error(`MaxTimeSinceLastEvent is not a number.`);
     }
     if (config.MaxTimeSinceLastEvent <= 0) {
+      throw new Error(`StakingAddress is empty, zero or negative.`);
+    }
+  }
+  if (config.MaticEndpoints.length !== 0) {
+    if (typeof config.MaxTimeSinceLastEventMatic != 'number') {
+      throw new Error(`MaxTimeSinceLastEventPolygon is not a number.`);
+    }
+    if (config.MaxTimeSinceLastEventMatic <= 0) {
       throw new Error(`StakingAddress is empty, zero or negative.`);
     }
   }
