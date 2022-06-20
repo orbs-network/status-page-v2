@@ -102,6 +102,8 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       validSupplyInCirculation = model.SupplyData.supplyInCirculation;
       model.PoSData = pos.PosData;
 
+      model.EthDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {return delegators.size});
+
 	  model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
 
     } catch (e) {
@@ -180,6 +182,10 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
 
   if (web3) {
 	  const resources = await getResources(rootNodeData, web3);
+      const pos = await getPoSStatus(model, resources, web3);
+      model.PoSDataMatic = pos.PosData;
+
+    model.MaticDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {return delegators.size});
 
 	  ///////////////////////
 	  try {

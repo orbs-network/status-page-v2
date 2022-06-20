@@ -43,6 +43,11 @@ export function serve(config: Configuration) {
     response.status(200).json(body.PoSData);
   });
 
+  app.get('/posdatamatic', (_request, response) => {
+    const body = processor.getModel();
+    response.status(200).json(body.PoSDataMatic);
+  });
+
   app.get('/exchanges/data', (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body.Exchanges.Upbit);
@@ -51,6 +56,16 @@ export function serve(config: Configuration) {
   app.get('/exchanges/coinmarketcap', (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body.Exchanges.Coinmarketcap);
+  });
+
+  app.get('/eth_delegators', (_request, response) => {
+    const body = processor.getModel();
+    response.status(200).json(body.EthDelegators);
+  });
+
+  app.get('/matic_delegators', (_request, response) => {
+    const body = processor.getModel();
+    response.status(200).json(body.MaticDelegators);
   });
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
