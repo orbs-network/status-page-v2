@@ -18,6 +18,7 @@ const ethereumErc20Address = "0xff56cc6b1e6ded347aa0b7676c85ab0b3d08b0fa";
 const maticErc20Address = "0x614389EaAE0A6821DC49062D56BDA3d9d45Fa2ff";
 
 export const FirstPoSv2BlockNumber = 9830000;
+export const FirstMaticPoSv2BlockNumber = 25487295;
 export const FirstRewardsBlockNumber = 11145373;
 
 export const CHAIN_ID = {'ETHEREUM': 1, 'MATIC': 137}

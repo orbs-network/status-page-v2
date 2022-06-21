@@ -10,7 +10,7 @@ import _ from 'lodash';
 import BigNumber from 'bignumber.js';
 import { aggregate } from '@makerdao/multicall';
 import {Guardians, Model} from '../model/model';
-import {BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic} from './eth-helper';
+import {BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstMaticPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic} from './eth-helper';
 
 const THIRTY_DAYS_IN_BLOCKS = 45000;
 
@@ -24,13 +24,15 @@ const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUN
 export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
     const { block, data } = await read(resources, web3);
 
+    const chainId = await web3.eth.getChainId();
+    const firstPosBlock = chainId === 137 ? FirstMaticPoSv2BlockNumber : FirstPoSv2BlockNumber;
 
     // Delegations
     const delegatorMap: any = {};
     for (let guardian of Object.keys(model.AllRegisteredNodes)) {
         guardian = "0x" + guardian;
         const leftDelegators = [];
-        const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, FirstPoSv2BlockNumber, block.number, 100000)
+        const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, 100000)
         delegationEvents.sort((a: any, b: any) => {return b.blockNumber - a.blockNumber})
         for (const event of delegationEvents) {
             const delegatorAddress = event.returnValues.delegator;
