@@ -55,9 +55,10 @@
   },
   "dependencies": {
     "@makerdao/multicall": "^0.12.0",
-    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.38",
     "@orbs-network/contracts-js": "0.0.36",
+    "@orbs-network/orbs-ethereum-contracts-v2": "0.0.38",
     "@slack/web-api": "^5.12.0",
+    "abort-controller": "^3.0.0",
     "api": "^4.1.3",
     "bignumber.js": "^9.0.1",
     "dotenv": "^8.2.0",
