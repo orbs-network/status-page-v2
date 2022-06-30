@@ -13,6 +13,8 @@ import { TaskLoop } from './task-loop';
 import * as Logger from './logger';
 import { Processor } from './processor/main';
 import * as path from 'path';
+import {getNextUpdates, getRecovery} from './monitors/schedule'
+
 
 export function serve(config: Configuration) {
   const processor = new Processor(config);
@@ -67,6 +69,13 @@ export function serve(config: Configuration) {
     const body = processor.getModel();
     response.status(200).json(body.MaticDelegators);
   });
+
+  /// schedule
+  app.get('/schedule/recovery', getRecovery);
+  
+  app.get('/schedule/update',  getNextUpdates);
+
+
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
