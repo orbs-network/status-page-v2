@@ -348,21 +348,17 @@ export async function readEvents(filter: (string[] | string | undefined)[], cont
         const options = {topics: filter, fromBlock: startBlock, toBlock: endBlock};
         return await contract.getPastEvents('allEvents', options);
     } catch (e) {
-        if (`${e}`.includes('query returned more than')) {
-            if (pace <= 10) {
-                throw new Error('looking for events slowed down to 10 - fail')
-            }
-            //console.log('\x1b[36m%s\x1b[0m', `read events slowing down to ${pace}`);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const results:any = [];
-            for(let i = startBlock; i < endBlock; i+=pace) {
-                const currentEnd = i+pace > endBlock ? endBlock : i+pace;
-                results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace/10));
-            }
-            //console.log('\x1b[36m%s\x1b[0m', `read events slowing down ended`);
-            return results;
-        } else {
-            throw e;
+        if (pace <= 10) {
+            throw new Error('looking for events slowed down to 10 - fail')
         }
+        //console.log('\x1b[36m%s\x1b[0m', `read events slowing down to ${pace}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const results:any = [];
+        for(let i = startBlock; i < endBlock; i+=pace) {
+            const currentEnd = i+pace > endBlock ? endBlock : i+pace;
+            results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace/10));
+        }
+        //console.log('\x1b[36m%s\x1b[0m', `read events slowing down ended`);
+        return results;
     }
 }
