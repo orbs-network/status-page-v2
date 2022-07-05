@@ -21,6 +21,8 @@ const TEAM_AND_FOUNDING_PARTNERS = "0xc200f98f3c088b868d80d8eb0aeb9d7ee18d604b";
 const ADVISORS = "0x574d48b2ec0a5e968adb77636656672327402634";
 const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUNDING_PARTNERS, ADVISORS];
 
+const maxPace = 4000000;
+
 export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
     const { block, data } = await read(resources, web3);
 
@@ -32,7 +34,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     for (let guardian of Object.keys(model.AllRegisteredNodes)) {
         guardian = "0x" + guardian;
         const leftDelegators = [];
-        const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, 100000)
+        const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, maxPace)
         delegationEvents.sort((a: any, b: any) => {return b.blockNumber - a.blockNumber})
         for (const event of delegationEvents) {
             const delegatorAddress = event.returnValues.delegator;
@@ -52,7 +54,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     const startBlock = await getBlockInfo(block.number - THIRTY_DAYS_IN_BLOCKS, web3);
     const timePeriodSeconds = block.time - startBlock.time;
 
-    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, 100000);
+    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, maxPace);
     const dailyNumberOfTransfers = (transferEvents.length * 86400) / (timePeriodSeconds);
     let totalTransfers = new BigNumber(0);
     for (const event of transferEvents) {
@@ -61,7 +63,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     const dailyAmountOfTransfers = totalTransfers.times(new BigNumber(86400)).dividedToIntegerBy(new BigNumber(timePeriodSeconds))
 
     // Staked
-    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, 100000);
+    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, maxPace);
     const stakers: {[key:string]: BigNumber} = {};
     for (const event of stakeEvents) {
         const address = String(event.returnValues.stakeOwner).toLowerCase();
@@ -70,7 +72,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     }
 
     // Rewards
-    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, 100000);
+    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, maxPace);
     let totalAllocatedRewards = new BigNumber(0);
     for (const event of rewardsAllocEvents) {
         totalAllocatedRewards = totalAllocatedRewards.plus(new BigNumber(event.returnValues.allocatedRewards));
@@ -348,8 +350,9 @@ export async function readEvents(filter: (string[] | string | undefined)[], cont
         const options = {topics: filter, fromBlock: startBlock, toBlock: endBlock};
         return await contract.getPastEvents('allEvents', options);
     } catch (e) {
-        if (pace <= 10) {
-            throw new Error('looking for events slowed down to 10 - fail')
+        pace = Math.round(pace*0.9);
+        if (pace <= 100) {
+            throw new Error(`looking for events slowed down below ${pace} - fail`)
         }
         //console.log('\x1b[36m%s\x1b[0m', `read events slowing down to ${pace}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -357,6 +360,7 @@ export async function readEvents(filter: (string[] | string | undefined)[], cont
         for(let i = startBlock; i < endBlock; i+=pace) {
             const currentEnd = i+pace > endBlock ? endBlock : i+pace;
             results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace/10));
+            pace = maxPace;
         }
         //console.log('\x1b[36m%s\x1b[0m', `read events slowing down ended`);
         return results;
