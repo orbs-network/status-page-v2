@@ -11,14 +11,24 @@ interface IProps {
   services: Service[];
   showServices: boolean;
   isShowAllRegistered: boolean;
+  vmServices: Service[];
+  expandedServices: Service[];
 }
 
 export const StatusTableBody = React.memo<IProps>((props) => {
-  const { vcs, services, committeeValidators, standByValidators, showServices, isShowAllRegistered } = props;
+  const { vcs, services, committeeValidators, standByValidators, showServices, isShowAllRegistered , vmServices, expandedServices} = props;
 
   const servicesNames = useMemo(() => {
     return services.map((service) => service.Name);
   }, [services]);
+
+  const vmServicesNames = useMemo(() => {
+    return vmServices.map((service) => service.Name);
+  }, [vmServices]);
+
+  const expandedServicesNames = useMemo(() => {
+    return expandedServices.map((service) => service.Name);
+  }, [expandedServices]);
 
   const vcsIds = useMemo(() => {
     return vcs.map((vc) => vc.Id);
@@ -34,17 +44,21 @@ export const StatusTableBody = React.memo<IProps>((props) => {
 
       return (
         <ValidatorRow
+        expandedServicesNames={expandedServicesNames}
           key={validator.OrbsAddress}
           validator={validator}
           isInCommittee={isInCommittee}
           expandServices={showServices}
           servicesNames={servicesNames}
+          vmServicesNames={vmServicesNames}
           vcsIds={vcsIds}
           isShowAllRegistered={isShowAllRegistered}
         />
       );
     });
-  }, [allValidators, committeeValidators, servicesNames, showServices, vcsIds, isShowAllRegistered]);
+  }, [allValidators, committeeValidators, servicesNames, showServices, vcsIds, isShowAllRegistered, expandedServicesNames, vmServicesNames]);
 
-  return <TableBody>{validatorRows}</TableBody>;
+  return <TableBody>
+    {validatorRows}
+    </TableBody>;
 });

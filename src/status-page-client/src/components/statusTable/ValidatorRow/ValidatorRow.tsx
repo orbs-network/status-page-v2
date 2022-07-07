@@ -5,27 +5,35 @@ import { NodeServiceStatusCell } from './NodeServiceStatusCell';
 import { ServicesGistCell } from './ServicesGistCell';
 import { NodeVcStatusCell } from './NodeVcStatusCell';
 import { ValidatorInfoCell } from './ValidatorInfoCell';
-import _, { indexOf } from 'lodash';
-import { getNodeServices, getParamsFromUrl } from '../../../utils';
-import { isDebug, EXPANDED_SERVICES } from '../../../consts';
+import { isDebug, showVmServices } from '../../../consts';
 interface IProps {
   validator: Guardian;
   isInCommittee: boolean;
   expandServices: boolean;
   servicesNames: string[];
+  vmServicesNames: string[];
   vcsIds: string[];
   isShowAllRegistered: boolean;
+  expandedServicesNames:  string[];
 }
 export const ValidatorRow = React.memo<IProps>((props) => {
-  const { validator, expandServices, servicesNames, vcsIds, isInCommittee, isShowAllRegistered } = props;
-  
+  const { validator, expandServices, servicesNames, vcsIds, isInCommittee, isShowAllRegistered, vmServicesNames, expandedServicesNames } = props;
+
   const expandedServicesCells = useMemo(() => {
-    return servicesNames.map((serviceName) => {
+    return [...servicesNames, ...expandedServicesNames].map((serviceName) => {
       const nodeService = validator.NodeServices[serviceName];
 
       return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
     });
-  }, [servicesNames, validator.NodeServices]);
+  }, [servicesNames,expandedServicesNames, validator.NodeServices]);
+
+  const vmServicesCells = useMemo(() => {
+    return vmServicesNames.map((serviceName) => {
+      const nodeService = validator.NodeServices[serviceName];
+
+      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
+    });
+  }, [vmServicesNames, validator.NodeServices]);
 
   const vcCells = useMemo(() => {
     return vcsIds.map((vcId) => {
@@ -36,17 +44,16 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   }, [validator.NodeVirtualChains, vcsIds]);
 
   const servicesCells = useMemo(() => {
-    return EXPANDED_SERVICES.map((service) => {
+    return expandedServicesNames.map((service) => {
       const nodeService = validator.NodeServices[service];
 
       return <NodeServiceStatusCell nodeService={nodeService} key={service} />;
     });
-  }, [validator.NodeVirtualChains]);
+  }, [expandedServicesNames, validator.NodeServices]);
 
   const orderedServices = useMemo(() => {
-    return getNodeServices(servicesNames, EXPANDED_SERVICES).map((serviceName) => validator.NodeServices[serviceName]);
+    return servicesNames.map((serviceName) => validator.NodeServices[serviceName]);
   }, [servicesNames, validator.NodeServices]);
-
 
   return (
     <TableRow>
@@ -54,14 +61,15 @@ export const ValidatorRow = React.memo<IProps>((props) => {
       <ValidatorInfoCell validator={validator} isInCommittee={isInCommittee} isShowAllRegistered={isShowAllRegistered} />
 
       {/* Services summary  */}
-      <ServicesGistCell nodeServices={orderedServices} serviceNames={getNodeServices(servicesNames, EXPANDED_SERVICES)} />
+      <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
 
       {/* Expanded services */}
       {expandServices ? expandedServicesCells : servicesCells}
 
-
+      {showVmServices() &&  vmServicesCells}
       {/* Vcs status */}
-      {isDebug() &&  vcCells}
+
+      {isDebug() && vcCells}
     </TableRow>
   );
 });

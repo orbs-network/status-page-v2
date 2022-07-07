@@ -9,7 +9,7 @@
 export class Model {
   TimeSeconds = 0; // UTC seconds
   Timestamp = '';
-  Statuses: {[key: string]: GenStatus} = {};
+  Statuses: { [key: string]: GenStatus } = {};
   VirtualChains: VirtualChain[] = [];
   Services: Service[] = [];
   CommitteeNodes: Guardians = {};
@@ -20,8 +20,8 @@ export class Model {
   PoSDataMatic?: PoSStatus = undefined; // only public-network
   Exchanges?: any = {};
   CriticalAlert = false;
-  EthDelegators?: any = {}
-  MaticDelegators?: any = {}
+  EthDelegators?: any = {};
+  MaticDelegators?: any = {};
 }
 
 export enum StatusName {
@@ -43,7 +43,7 @@ export enum HealthLevel {
   Green = 'Green',
   Yellow = 'Yellow',
   Red = 'Red',
-  Gray = 'Gray',
+  Gray = 'Gray'
 }
 
 export interface VirtualChain {
@@ -64,7 +64,7 @@ export interface VirtualChainUrls {
 }
 
 export class Service {
-  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix: string) {}
+  constructor(readonly Name: string, readonly ServiceUrlName: string, readonly RepositoryPrefix?: string) {}
   static VC = new Service('VC', 'vchains', 'https://github.com/orbs-network/orbs-network-go/tree/');
   static Boyar = new Service('Boyar', 'boyar', 'https://github.com/orbs-network/boyarin/tree/');
   static Signer = new Service('Signer', 'signer', 'https://github.com/orbs-network/signer-service/tree/');
@@ -120,7 +120,7 @@ export interface NodeVirtualChain extends GenStatus {
   URLs: NodeVirtualChainUrls;
 }
 
-export function nodeVirtualChainCopy(vc:NodeVirtualChain) {
+export function nodeVirtualChainCopy(vc: NodeVirtualChain) {
   return {
     StatusMsg: vc.StatusMsg,
     Status: vc.Status,
@@ -130,8 +130,8 @@ export function nodeVirtualChainCopy(vc:NodeVirtualChain) {
     BlockHeight: vc.BlockHeight,
     BlockHeightToolTip: vc.BlockHeightToolTip,
     ProtocolVersion: vc.ProtocolVersion,
-    URLs: vc.URLs,
-  }
+    URLs: vc.URLs
+  };
 }
 
 export function nodeVirtualChainBuilder(
@@ -154,7 +154,7 @@ export function nodeVirtualChainBuilder(
     BlockHeight: blockHeight,
     BlockHeightToolTip: blockHeightToolTip,
     ProtocolVersion: protocolVersion,
-    URLs: urls,
+    URLs: urls
   };
 }
 
@@ -168,14 +168,14 @@ export interface NodeService extends GenStatus {
   URLs: NodeServiceUrls;
 }
 
-export function nodeServiceCopy(ns:NodeService){
+export function nodeServiceCopy(ns: NodeService) {
   return {
     StatusMsg: ns.StatusMsg,
     Status: ns.Status,
     StatusToolTip: ns.StatusToolTip,
     Timestamp: ns.Timestamp,
     Version: ns.Version,
-    URLs: ns.URLs,
+    URLs: ns.URLs
   };
 }
 
@@ -193,7 +193,7 @@ export function nodeServiceBuilder(
     StatusToolTip: statusTooltip,
     Timestamp: timestamp,
     Version: version,
-    URLs: urls,
+    URLs: urls
   };
 }
 
@@ -223,15 +223,15 @@ export interface EthereumStatus extends GenStatus {
 }
 
 export interface SupplyStatus {
-    contract: string;
-    stakingContract: string;
-    nonCirculatingWallets: string[];
-    supplyInCirculation: string;
-    totalSupply: string;
-    decimals: string;
-    block: number;
-    blockTimestamp: number;
-    updatedAt: string;
+  contract: string;
+  stakingContract: string;
+  nonCirculatingWallets: string[];
+  supplyInCirculation: string;
+  totalSupply: string;
+  decimals: string;
+  block: number;
+  blockTimestamp: number;
+  updatedAt: string;
 }
 
 export interface PoSStatus {
@@ -280,13 +280,13 @@ export interface RewardsAndFeeData {
 }
 
 export interface CommitteeData {
-  CommitteeMembersData : {
+  CommitteeMembersData: {
     Committee: string[];
     Weights: number[];
     Certification: boolean[];
     OrbsAddresses: string[];
     Ips: string[];
-  },
+  };
   CommitteeSize: number;
   CertifiedComitteeSize: number;
   TotalCommitteeWeight: number;
@@ -300,13 +300,13 @@ export interface PoSV2General {
 }
 
 export interface ExchangeEntry {
-  symbol: string,
-  currencyCode: string,
-  price: number,
-  marketCap: number,
-  accTradePrice24h: null,
-  circulatingSupply: number,
-  maxSupply: number,
-  provider: string,
-  lastUpdatedTimestamp: number
+  symbol: string;
+  currencyCode: string;
+  price: number;
+  marketCap: number;
+  accTradePrice24h: null;
+  circulatingSupply: number;
+  maxSupply: number;
+  provider: string;
+  lastUpdatedTimestamp: number;
 }

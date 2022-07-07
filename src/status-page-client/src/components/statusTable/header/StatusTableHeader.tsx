@@ -3,22 +3,31 @@ import { Button, TableCell, TableHead, TableRow, Typography } from '@material-ui
 import { VcStatusCell } from './VcStatusCell';
 import { VirtualChain, Service } from '../../../../../model/model';
 import { makeStyles } from '@material-ui/core/styles';
-import { isDebug } from '../../../consts';
+import { isDebug, servicesDisplayNameDict, showVmServices } from '../../../consts';
 
 interface IProps {
   vcs: VirtualChain[];
   services: Service[];
+  vmServices: Service[];
+  expandedServices: Service[];
   showServices: boolean;
   setShowServices: (val: boolean) => void;
+
+
 }
 
 const useStyles = makeStyles((theme) => ({
+  headerRow: {
+    borderBottom: '2px solid #cccccc20',
+  },
+ 
   headerCell: {
     width: '10rem',
     textAlign: 'center',
-    borderBottom: '2px solid #cccccc20',
     fontSize: '1.2rem',
+    paddingTop:10
   },
+
   link: {
     textDecoration: 'none',
     color: 'inherit',
@@ -26,8 +35,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+
 export const StatusTableHeader = React.memo<IProps>((props) => {
-  const { showServices, vcs, services, setShowServices } = props;
+  const { showServices, vcs, services, setShowServices, vmServices, expandedServices } = props;
+
   const classes = useStyles();
   const servicesHeaderCells = useMemo(() => {
     if (!showServices) {
@@ -54,7 +66,7 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
     const onClick = showServices ? () => setShowServices(false) : () => setShowServices(true);
 
     const topRow = (
-      <TableRow>
+      <TableRow className={classes.headerRow}>
         <TableCell className={classes.headerCell} />
         <TableCell className={classes.headerCell}>
           <Button variant="outlined" onClick={onClick}>
@@ -62,30 +74,34 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
           </Button>
         </TableCell>
         {servicesHeaderCells}
-        {!showServices && (
-          <>
-            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
-              {' '}
-              Ethereum chain
+
+        {expandedServices.map((s) => {
+          return (
+            <TableCell key={s.Name} className={classes.headerCell}>
+              <Typography>{servicesDisplayNameDict[s.Name]}</Typography>
             </TableCell>
-            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
-              {' '}
-              Polygon chain
+          );
+        })}
+        
+        {showVmServices() &&  vmServices.map((s, index) => {
+          return (
+            <TableCell key={s.Name} className={classes.headerCell}>
+              <Typography> {s.Name}</Typography>
             </TableCell>
-          </>
-        )}
+          );
+        })}
         {isDebug() && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
       </TableRow>
     );
 
     return topRow;
-  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs, isDebug]);
+  }, [classes.headerCell, servicesHeaderCells, setShowServices, showServices, vcs, classes.headerRow, expandedServices, vmServices]);
 
   // DEV_NOTE : O.L : Setting the TableCell width to a small number is a trick to force "fit-content"
   // TODO : O.L : Find a better method for 'fit-content'
   return (
     <TableHead>
-      <TableRow>
+      <TableRow className={classes.headerRow}>
         <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}>
           Validators
         </TableCell>
@@ -93,14 +109,9 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
           Node services
         </TableCell>
         {headerServicesPlaceholders}
+      </TableRow>
 
-        {!showServices && (
-          <>
-            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
-            <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }}></TableCell>
-          </>
-        )}
-
+      <TableRow className={classes.headerRow}>
         {isDebug() &&
           vcs.map((vc) => (
             <TableCell className={classes.headerCell} style={{ paddingBottom: '20px' }} key={vc.Id}>
