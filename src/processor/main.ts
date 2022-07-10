@@ -9,27 +9,27 @@
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import sslChecker from 'ssl-checker';
-import {Configuration, NetworkType} from '../config';
-import {fetchJson, isStaleTime, timeAgoText} from '../helpers';
+import { Configuration, NetworkType } from '../config';
+import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
 import * as Logger from '../logger';
 import {
-	GenStatus,
-	Guardian,
-	Guardians,
-	HealthLevel,
-	Model,
-	nodeServiceBuilder,
-	nodeServiceCopy,
-	nodeVirtualChainBuilder,
-	nodeVirtualChainCopy,
-	Service,
-	StatusName,
-	VirtualChain
+  GenStatus,
+  Guardian,
+  Guardians,
+  HealthLevel,
+  Model,
+  nodeServiceBuilder,
+  nodeServiceCopy,
+  nodeVirtualChainBuilder,
+  nodeVirtualChainCopy,
+  Service,
+  StatusName,
+  VirtualChain
 } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
-import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion} from './url-generator';
-import {Monitors} from '../monitors/main';
+import { generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
+import { Monitors } from '../monitors/main';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 3000;
@@ -90,10 +90,10 @@ export class Processor {
    */
   private readNodesVirtualChains(nodes: Guardians, virtualChains: VirtualChain[]) {
     const tasks: Promise<any>[] = [];
-    _.map(nodes, (node) => {
-      _.forEach(virtualChains, (vc) => {
+    _.map(nodes, node => {
+      _.forEach(virtualChains, vc => {
         tasks.push(
-          this.readNodeVirtualChain(node, vc).then((result) => {
+          this.readNodeVirtualChain(node, vc).then(result => {
             node.NodeVirtualChains[vc.Id] = result;
           })
         );
@@ -127,20 +127,25 @@ export class Processor {
         versionTag,
         inOrderBlockHeight,
         blockToolTip,
-        vcStatusData.Payload?.Management?.Protocol?.Current || 0,
+        vcStatusData.Payload?.Management?.Protocol?.Current || 0
       );
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeVirtualChainBuilder(urls, `HTTP gateway for node may be down`, HealthLevel.Yellow, `HTTP gateway for node may be down, status endpoint does not respond`);
+      return nodeVirtualChainBuilder(
+        urls,
+        `HTTP gateway for node may be down`,
+        HealthLevel.Yellow,
+        `HTTP gateway for node may be down, status endpoint does not respond`
+      );
     }
   }
 
   private readNodesServices(nodes: Guardians, services: Service[]) {
     const tasks: Promise<any>[] = [];
-    _.map(nodes, (node) => {
-      _.forEach(services, (service) => {
+    _.map(nodes, node => {
+      _.forEach(services, service => {
         tasks.push(
-          this.readNodeService(node, service).then((result) => {
+          this.readNodeService(node, service).then(result => {
             node.NodeServices[service.Name] = result;
           })
         );
@@ -149,11 +154,11 @@ export class Processor {
     return tasks;
   }
   ///////////////////////////////
-  private filterIgnoredServiceErrors(svcName: string, errMsg:string) : string{
+  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {
     const boyarErrs = [/^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/];
-    if(svcName === 'Boyar'){
-      for(let rx of boyarErrs){
-        if(rx.test(errMsg)){
+    if (svcName === 'Boyar') {
+      for (let rx of boyarErrs) {
+        if (rx.test(errMsg)) {
           return '';
         }
       }
@@ -165,7 +170,6 @@ export class Processor {
     const urls = generateNodeServiceUrls(node.Ip, service);
     try {
       const data = await fetchJson(urls.Status);
-
       const versionTag = data.Payload?.Version?.Semantic || '';
       updateNodeServiceUrlsWithVersion(urls, service.RepositoryPrefix, versionTag);
 
@@ -173,33 +177,37 @@ export class Processor {
       const timestamp = data.Timestamp || '';
       const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
-      return nodeServiceBuilder(
-        urls,
-        data.Status || '',
-        healthLevel,
-        healthLevelToolTip,
-        timestamp,
-        versionTag,
-      );
+      return nodeServiceBuilder(urls, data.Status || '', healthLevel, healthLevelToolTip, timestamp, versionTag, data.StatusSpec);
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
-      return nodeServiceBuilder(urls, `HTTP gateway for service may be down`, HealthLevel.Yellow, `HTTP gateway for service may be down, status endpoint does not respond`);
+      return nodeServiceBuilder(
+        urls,
+        `HTTP gateway for service may be down`,
+        HealthLevel.Yellow,
+        `HTTP gateway for service may be down, status endpoint does not respond`
+      );
     }
   }
 
-  private fillInAllRegistered(all: Guardians, committee: Guardians, standbys: Guardians,virtualChains: VirtualChain[], services: Service[]){
+  private fillInAllRegistered(all: Guardians, committee: Guardians, standbys: Guardians, virtualChains: VirtualChain[], services: Service[]) {
     _.forOwn(all, g => {
       if (_.has(committee, g.EthAddress)) {
         const member = committee[g.EthAddress];
-        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(member.NodeVirtualChains[vc.Id]));
-        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceCopy(member.NodeServices[service.Name]));
+        _.forEach(virtualChains, vc => (g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(member.NodeVirtualChains[vc.Id])));
+        _.forEach(services, service => (g.NodeServices[service.Name] = nodeServiceCopy(member.NodeServices[service.Name])));
       } else if (_.has(standbys, g.EthAddress)) {
         const standby = standbys[g.EthAddress];
-        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(standby.NodeVirtualChains[vc.Id]));
-        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceCopy(standby.NodeServices[service.Name]));
+        _.forEach(virtualChains, vc => (g.NodeVirtualChains[vc.Id] = nodeVirtualChainCopy(standby.NodeVirtualChains[vc.Id])));
+        _.forEach(services, service => (g.NodeServices[service.Name] = nodeServiceCopy(standby.NodeServices[service.Name])));
       } else {
-        _.forEach(virtualChains, vc => g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id), 'Unknown', HealthLevel.Gray));
-        _.forEach(services, service => g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service), 'Unknown', HealthLevel.Gray));
+        _.forEach(
+          virtualChains,
+          vc => (g.NodeVirtualChains[vc.Id] = nodeVirtualChainBuilder(generateNodeVirtualChainUrls(g.Ip, vc.Id), 'Unknown', HealthLevel.Gray))
+        );
+        _.forEach(
+          services,
+          service => (g.NodeServices[service.Name] = nodeServiceBuilder(generateNodeServiceUrls(g.Ip, service), 'Unknown', HealthLevel.Gray))
+        );
       }
     });
   }
@@ -213,8 +221,7 @@ export class Processor {
     } else if (timestamp === '') {
       healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = 'Missing timestamp field. Information may be stale information.';
-    }
-    else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
+    } else if (isStaleTime(timestamp, this.config.StaleStatusTimeSeconds)) {
       healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = `Information is stale, was updated ${timeAgoText(timestamp)}`;
     }
@@ -222,35 +229,38 @@ export class Processor {
   }
 
   public async pingUrls(): Promise<GenStatus> {
-    const txs:Promise<any>[] = [];
-    for(let i = 0;i < this.config.PingUrlEndpoints.length;i++) {
+    const txs: Promise<any>[] = [];
+    for (let i = 0; i < this.config.PingUrlEndpoints.length; i++) {
       const threshhold = this.config.PingUrlTimeoutsMillis.length > 0 ? this.config.PingUrlTimeoutsMillis[i] : DefaultPingTimeout;
       txs.push(pingOneUrl(this.config.PingUrlEndpoints[i], threshhold));
     }
     const res = await Promise.all(txs);
-    const healthMessages:string[] = _.map(_.pickBy(res, r => r !== ''), r => r);
+    const healthMessages: string[] = _.map(
+      _.pickBy(res, r => r !== ''),
+      r => r
+    );
 
     if (healthMessages.length > 0) {
       return {
         Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
-        StatusToolTip: healthMessages.join("\n"),
+        StatusToolTip: healthMessages.join('\n')
       };
     }
     return {
       Status: HealthLevel.Green,
-      StatusMsg: "All monitored URLs responded OK",
-      StatusToolTip: "OK",
+      StatusMsg: 'All monitored URLs responded OK',
+      StatusToolTip: 'OK'
     };
   }
 
   public async certificateChecks(): Promise<GenStatus> {
-    const healthMessages:string[] = [];
-    const certChecks = await Promise.all(this.config.SslHosts.map(host => sslChecker(host, {method: 'GET', port: 443})));
-    for(let i = 0; i < this.config.SslHosts.length;i++) {
+    const healthMessages: string[] = [];
+    const certChecks = await Promise.all(this.config.SslHosts.map(host => sslChecker(host, { method: 'GET', port: 443 })));
+    for (let i = 0; i < this.config.SslHosts.length; i++) {
       if (!certChecks[i].valid) {
         healthMessages.push(`Host ${this.config.SslHosts[i]} certificate is not valid.`);
-      } else if ( typeof certChecks[i].daysRemaining === 'number' && certChecks[i].daysRemaining < 8) {
+      } else if (typeof certChecks[i].daysRemaining === 'number' && certChecks[i].daysRemaining < 8) {
         healthMessages.push(`Host ${this.config.SslHosts[i]} certificate will expire in ${certChecks[i].daysRemaining} days.`);
       }
     }
@@ -259,62 +269,61 @@ export class Processor {
       return {
         Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.SslHosts.length} monitored certificate checks failed.`,
-        StatusToolTip: healthMessages.join("\n"),
+        StatusToolTip: healthMessages.join('\n')
       };
     }
     return {
       Status: HealthLevel.Green,
-      StatusMsg: "All monitored certificates are OK",
-      StatusToolTip: "OK",
+      StatusMsg: 'All monitored certificates are OK',
+      StatusToolTip: 'OK'
     };
   }
 
   public shouldSetCriticalAlert(guardians: Guardians) {
+    let countErrors = 0;
+    try {
+      for (const memberData of Object.values(guardians)) {
+        countErrors += Number(
+          _.filter(memberData.NodeVirtualChains, nodeVirtualChain => nodeVirtualChain.Status === HealthLevel.Yellow).length +
+            _.filter(memberData.NodeServices, nodeService => nodeService.Status === HealthLevel.Yellow).length +
+            Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Yellow) >
+            0
+        );
 
-	let countErrors = 0;
-	try {
-		for (const memberData of Object.values(guardians)) {
-			countErrors += Number(
-				_.filter(memberData.NodeVirtualChains, nodeVirtualChain => (nodeVirtualChain.Status === HealthLevel.Yellow)).length +
-				_.filter(memberData.NodeServices, nodeService => (nodeService.Status === HealthLevel.Yellow)).length +
-				Number(memberData.NodeReputation.ReputationStatus === HealthLevel.Yellow) > 0);
+        if (countErrors >= MinErrorsForCriticalAlert) return true;
+      }
+    } catch (err) {
+      console.log(`failed to update critical alert`);
+      return true;
+    }
 
-			if (countErrors >= MinErrorsForCriticalAlert) return true;
-		}
-
-	} catch (err) {
-		console.log(`failed to update critical alert`)
-		return true;
-	}
-
-	return false
+    return false;
   }
 
   public updateVCsColors(guardians: Guardians) {
-
-	try {
-
-		for (const memberData of Object.values(guardians)) {
-			if (_.filter(memberData.NodeVirtualChains, nodeVirtualChain => ([HealthLevel.Yellow, HealthLevel.Red].includes(nodeVirtualChain.Status))).length === Object.keys(memberData.NodeVirtualChains).length &&
-			[HealthLevel.Yellow, HealthLevel.Red].includes(memberData.NodeServices.Management.Status)) {
-				for (const nodeVC of Object.values(memberData.NodeVirtualChains)) {
-					nodeVC.Status = HealthLevel.Green
-					nodeVC.StatusMsg = ''
-					nodeVC.StatusToolTip = ''
-				}
-			}
-		}
-
-	} catch (err) {
-		console.log(`failed to update virtual chains colors`)
-	}
+    try {
+      for (const memberData of Object.values(guardians)) {
+        if (
+          _.filter(memberData.NodeVirtualChains, nodeVirtualChain => [HealthLevel.Yellow, HealthLevel.Red].includes(nodeVirtualChain.Status)).length ===
+            Object.keys(memberData.NodeVirtualChains).length &&
+          [HealthLevel.Yellow, HealthLevel.Red].includes(memberData.NodeServices.Management.Status)
+        ) {
+          for (const nodeVC of Object.values(memberData.NodeVirtualChains)) {
+            nodeVC.Status = HealthLevel.Green;
+            nodeVC.StatusMsg = '';
+            nodeVC.StatusToolTip = '';
+          }
+        }
+      }
+    } catch (err) {
+      console.log(`failed to update virtual chains colors`);
+    }
   }
-
 }
 
-async function pingOneUrl(url:string, threshhold: number): Promise<string> {
+async function pingOneUrl(url: string, threshhold: number): Promise<string> {
   let numErrs = 0;
-  for (let j = 0;j < NumberOfPingTries;j++) {
+  for (let j = 0; j < NumberOfPingTries; j++) {
     try {
       const response = await fetch(url, { timeout: threshhold });
       if (!response.ok) {
@@ -324,7 +333,7 @@ async function pingOneUrl(url:string, threshhold: number): Promise<string> {
       numErrs++;
     }
   }
-  if(numErrs !== 0) {
+  if (numErrs !== 0) {
     return `URL '${url}' failed to respond ${numErrs} out of ${NumberOfPingTries} times (timeout set at ${threshhold})`;
   }
   return '';

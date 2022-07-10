@@ -166,6 +166,7 @@ export interface NodeService extends GenStatus {
   Timestamp: string;
   Version: string;
   URLs: NodeServiceUrls;
+  StatusSpec?: { [key: string]: string };
 }
 
 export function nodeServiceCopy(ns: NodeService) {
@@ -185,7 +186,8 @@ export function nodeServiceBuilder(
   status: HealthLevel = HealthLevel.Green,
   statusTooltip = '',
   timestamp = '',
-  version = ''
+  version = '',
+  StatusSpec?: { [key: string]: string }
 ): NodeService {
   return {
     StatusMsg: statusMsg,
@@ -193,7 +195,8 @@ export function nodeServiceBuilder(
     StatusToolTip: statusTooltip,
     Timestamp: timestamp,
     Version: version,
-    URLs: urls
+    URLs: urls,
+    StatusSpec
   };
 }
 
