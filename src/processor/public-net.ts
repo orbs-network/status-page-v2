@@ -11,18 +11,18 @@ import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
 import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
-import { getResources, getWeb3Provider} from './eth-helper';
+import { getResources, getWeb3Provider } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
 import { getPoSStatus, getTotalCommitteeWeight } from './stats';
-import BigNumber from "bignumber.js";
+import BigNumber from 'bignumber.js';
 
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
 const MaticReaderStatusSuffix = '/services/matic-reader/status';
 
-let validSupplyInCirculation = "";
+let validSupplyInCirculation = '';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
@@ -32,15 +32,17 @@ export async function updateModel(model: Model, config: Configuration) {
       await readData(model, rootNodeEndpoint, config);
       return await readDataMatic(model, rootNodeEndpoint, config);
     } catch (e) {
-      Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`)
+      Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`);
     }
   }
 
-  throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`)
+  throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`);
 }
 
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
   const rootNodeData = await fetchJson(`${rootNodeEndpoint}${ManagementStatusSuffix}`);
+
+  const vmServices = readVmServices(rootNodeData.Payload.CurrentImageVersions.main);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
   if (_.size(virtualChainList) === 0) {
@@ -56,6 +58,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     Service.EthereumWriter,
     Service.MaticReader,
     Service.MaticWriter,
+    ...vmServices
   ];
 
   let committeeMembers = {};
@@ -70,7 +73,10 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   if (_.size(committeeMembers) === 0) {
     Logger.error(`Could not read a valid Ethereum Committee, current network seems empty.`);
   }
-  const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
+  const standbyMembersAddresses = _.map(
+    _.filter(rootNodeData.Payload.CurrentCandidates, data => data.IsStandby),
+    'EthAddress'
+  );
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
   try {
@@ -85,15 +91,16 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.Services = services;
   model.CommitteeNodes = committeeMembers;
   model.StandByNodes = standByMembers;
-  model.AllRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
+  model.AllRegisteredNodes = _.mapValues(guardians, g => {
+    return copyGuardianForAllRegistered(g);
+  });
 
   const web3 = await getWeb3Provider(config.EthereumEndpoints);
 
   if (web3) {
-
     const resources = await getResources(rootNodeData, web3);
 
-	///////////////////////
+    ///////////////////////
     model.Exchanges.Coinmarketcap = null;
     let pos;
     try {
@@ -102,10 +109,11 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       validSupplyInCirculation = model.SupplyData.supplyInCirculation;
       model.PoSData = pos.PosData;
 
-      model.EthDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {return delegators.size});
+      model.EthDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {
+        return delegators.size;
+      });
 
-	  model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
-
+      model.Exchanges.Coinmarketcap = getCoinmarketcapInfo(model.SupplyData.totalSupply, model.SupplyData.decimals);
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Pos Data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
@@ -113,23 +121,28 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
 
     ///////////////////////
     try {
-      const totalWeight = model.PoSData? model.PoSData.CommitteeData.TotalCommitteeWeight : 0;
-      const rewardsRate = model.PoSData? model.PoSData.RewardsAndFeeData.CurrentStakingRewardPrecentMille/100000 : 0;
+      const totalWeight = model.PoSData ? model.PoSData.CommitteeData.TotalCommitteeWeight : 0;
+      const rewardsRate = model.PoSData ? model.PoSData.RewardsAndFeeData.CurrentStakingRewardPrecentMille / 100000 : 0;
 
-      const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, (g) => g.IsCertified))
-      model.Statuses[StatusName.EthereumContracts] =
-        await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config, totalWeight, rewardsRate);
+      const numberOfCertifiedInCommittee = _.size(_.pickBy(model.CommitteeNodes, g => g.IsCertified));
+      model.Statuses[StatusName.EthereumContracts] = await getEthereumContractsStatus(
+        numberOfCertifiedInCommittee,
+        resources,
+        web3,
+        config,
+        totalWeight,
+        rewardsRate
+      );
     } catch (e) {
       model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
-
   }
   // calc exchange data regardless if contract fetch was successfull
   if (validSupplyInCirculation.length) {
     model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
   } else {
-    model.Exchanges.Upbit = { "error": "no valid SupplyInCirculation fetched yet" };
+    model.Exchanges.Upbit = { error: 'no valid SupplyInCirculation fetched yet' };
   }
 }
 
@@ -145,62 +158,70 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
   if (_.size(committeeMembers) === 0) {
     Logger.error(`Could not read a valid Matic Committee, current network seems empty.`);
   }
-  const standbyMembersAddresses = _.map(_.filter(rootNodeData.Payload.CurrentCandidates, (data) => data.IsStandby), 'EthAddress');
+  const standbyMembersAddresses = _.map(
+    _.filter(rootNodeData.Payload.CurrentCandidates, data => data.IsStandby),
+    'EthAddress'
+  );
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
-  committeeMembersAddresses.forEach( addr => {
-  	if (!(addr in model.CommitteeNodes)) {
-  		model.CommitteeNodes[addr] = committeeMembers[addr];
-  	}
-  	else if (model.CommitteeNodes[addr].OrbsAddress === committeeMembers[addr].OrbsAddress) {
-  	  model.CommitteeNodes[addr].Network = model.CommitteeNodes[addr].Network.concat(committeeMembers[addr].Network)
-  	}
+  committeeMembersAddresses.forEach(addr => {
+    if (!(addr in model.CommitteeNodes)) {
+      model.CommitteeNodes[addr] = committeeMembers[addr];
+    } else if (model.CommitteeNodes[addr].OrbsAddress === committeeMembers[addr].OrbsAddress) {
+      model.CommitteeNodes[addr].Network = model.CommitteeNodes[addr].Network.concat(committeeMembers[addr].Network);
+    }
   });
 
-  standbyMembersAddresses.forEach( addr => {
-  	if (!(addr in model.StandByNodes)) {
-  		model.StandByNodes[addr] = standByMembers[addr];
-  	}
-  	else if (model.StandByNodes[addr].OrbsAddress === standByMembers[addr].OrbsAddress) {
-  	  model.StandByNodes[addr].Network = model.StandByNodes[addr].Network.concat(standByMembers[addr].Network)
-  	}
+  standbyMembersAddresses.forEach(addr => {
+    if (!(addr in model.StandByNodes)) {
+      model.StandByNodes[addr] = standByMembers[addr];
+    } else if (model.StandByNodes[addr].OrbsAddress === standByMembers[addr].OrbsAddress) {
+      model.StandByNodes[addr].Network = model.StandByNodes[addr].Network.concat(standByMembers[addr].Network);
+    }
   });
 
-  const allRegisteredNodes = _.mapValues(guardians, g => { return copyGuardianForAllRegistered(g) });
+  const allRegisteredNodes = _.mapValues(guardians, g => {
+    return copyGuardianForAllRegistered(g);
+  });
 
-  Object.keys(allRegisteredNodes).forEach( addr => {
-
-		if (!(addr in model.AllRegisteredNodes)) {
-			model.AllRegisteredNodes[addr] = allRegisteredNodes[addr]
-		}
-		else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
-			model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network)
-		}
+  Object.keys(allRegisteredNodes).forEach(addr => {
+    if (!(addr in model.AllRegisteredNodes)) {
+      model.AllRegisteredNodes[addr] = allRegisteredNodes[addr];
+    } else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
+      model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network);
+    }
   });
 
   const web3 = await getWeb3Provider(config.MaticEndpoints);
 
   if (web3) {
-	  const resources = await getResources(rootNodeData, web3);
-      const pos = await getPoSStatus(model, resources, web3);
-      model.PoSDataMatic = pos.PosData;
+    const resources = await getResources(rootNodeData, web3);
+    const pos = await getPoSStatus(model, resources, web3);
+    model.PoSDataMatic = pos.PosData;
 
-    model.MaticDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {return delegators.size});
+    model.MaticDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {
+      return delegators.size;
+    });
 
-	  ///////////////////////
-	  try {
-	  	  const totalWeight = getTotalCommitteeWeight(committeeMembers);
-	  	  const rewardsRate = parseInt(await resources.stakingRewardsContract.methods.getCurrentStakingRewardsRatePercentMille().call()) / 100000;
+    ///////////////////////
+    try {
+      const totalWeight = getTotalCommitteeWeight(committeeMembers);
+      const rewardsRate = parseInt(await resources.stakingRewardsContract.methods.getCurrentStakingRewardsRatePercentMille().call()) / 100000;
 
-		  const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, (g) => g.IsCertified))
-		  model.Statuses[StatusName.MaticContracts] =
-			  await getEthereumContractsStatus(numberOfCertifiedInCommittee, resources, web3, config, totalWeight, rewardsRate);
-	  } catch (e) {
-		  model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
-		  Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
-	  }
+      const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, g => g.IsCertified));
+      model.Statuses[StatusName.MaticContracts] = await getEthereumContractsStatus(
+        numberOfCertifiedInCommittee,
+        resources,
+        web3,
+        config,
+        totalWeight,
+        rewardsRate
+      );
+    } catch (e) {
+      model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
+      Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
+    }
   }
-
 }
 
 function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string | number, config: Configuration): GenStatus {
@@ -212,11 +233,11 @@ function generateRootNodeStatus(rootNodeEndpoint: string, currentRefTime: string
     Logger.log(`${timeMsg}. Service might be syncing or ethereum outage.`);
     if (isStaleTime(currentRefTime, config.RootNodeStaleErrorTimeSeconds)) {
       rootNodeStatus = HealthLevel.Yellow;
-      rootNodeStatusMsg = 'Status Page: Issues Detected'
+      rootNodeStatusMsg = 'Status Page: Issues Detected';
       rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Consider replacing root node (IP:${rootNodeEndpoint}).`;
     } else {
       rootNodeStatus = HealthLevel.Yellow;
-      rootNodeStatusMsg = 'Status Page: Issues Detected'
+      rootNodeStatusMsg = 'Status Page: Issues Detected';
       rootNodeStatusToolTip = `${timeMsg}. Root node used to query status is out of sync. Please check root node (IP:${rootNodeEndpoint}).`;
     }
   }
@@ -237,7 +258,7 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
       if (isStaleTime(expirationTime, 0)) {
         healthLevel = HealthLevel.Yellow;
         healthLevelToolTip = 'VirtualChain expired.';
-      } else if (getCurrentClockTime() > (expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60)) {
+      } else if (getCurrentClockTime() > expirationTime - config.ExpirationWarningTimeInDays * 24 * 60 * 60) {
         healthLevel = HealthLevel.Yellow;
         healthLevelToolTip = `VirtualChain will expire in less than ${config.ExpirationWarningTimeInDays} days.`;
       }
@@ -252,9 +273,19 @@ function readVirtualChains(rootNodeData: any, config: Configuration): VirtualCha
       ExpirationTimeSeconds: expirationTime,
       SubscriptionStatus: healthLevel,
       SubscriptionStatusToolTip: healthLevelToolTip,
-      VirtualChainUrls: URLs.generateVirtualChainUrls(vcId),
+      VirtualChainUrls: URLs.generateVirtualChainUrls(vcId)
     };
   });
+}
+
+function readVmServices(currentImageVersions: any) {
+  const result: Service[] = [];
+  for (const key in currentImageVersions) {
+    if (_.startsWith(key, 'vm-')) {
+      result.push(new Service(key, key, undefined));
+    }
+  }
+  return result;
 }
 
 function vcName(vcId: string, vcName: string, config: Configuration) {
@@ -267,7 +298,7 @@ function vcName(vcId: string, vcName: string, config: Configuration) {
 }
 
 function readGuardians(rootNodeData: any, network: string): Guardians {
-  return _.mapValues(rootNodeData.Payload.Guardians, (guardianData) => {
+  return _.mapValues(rootNodeData.Payload.Guardians, guardianData => {
     const ip = _.isString(guardianData.Ip) ? guardianData.Ip : '';
     return {
       EthAddress: guardianData.EthAddress,
@@ -287,8 +318,8 @@ function readGuardians(rootNodeData: any, network: string): Guardians {
         NodeVirtualChainReputations: {},
         NodeVirtualChainBadReputations: {},
         ReputationStatus: HealthLevel.Green,
-        ReputationToolTip: '',
-      },
+        ReputationToolTip: ''
+      }
     };
   });
 }
@@ -312,8 +343,8 @@ function copyGuardianForAllRegistered(guardianData: Guardian): Guardian {
       NodeVirtualChainReputations: {},
       NodeVirtualChainBadReputations: {},
       ReputationStatus: HealthLevel.Gray,
-      ReputationToolTip: '',
-    },
+      ReputationToolTip: ''
+    }
   };
 }
 
@@ -321,7 +352,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   const data = await fetchJson(url);
 
   const orbsToEthAddr: { [key: string]: string } = {};
-  _.map(committeeMembers, (node) => {
+  _.map(committeeMembers, node => {
     orbsToEthAddr[node.OrbsAddress] = node.EthAddress;
   });
 
@@ -353,7 +384,7 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
     }
   });
 
-  _.map(committeeMembers, (node) => {
+  _.map(committeeMembers, node => {
     const rep = node.NodeReputation;
     const result: string[] = [];
     let foundRed = false;
@@ -375,12 +406,11 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
 }
 
 async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
-
   // TODO: first draft
-  const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS'
-  const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC'
-  const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC'
-  const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC'
+  const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS';
+  const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC';
+  const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC';
+  const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC';
 
   const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any) => v.trade_price);
   // const data = await fetchJson(url);
@@ -392,7 +422,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
   const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
   const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
   const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
-  const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18)
+  const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18);
 
   return [
     {
@@ -450,10 +480,9 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     }
-  ]
+  ];
 }
 
-
 function getCoinmarketcapInfo(totalSupply: string, decimals: string): number {
-	return new BigNumber(totalSupply).dividedBy(new BigNumber(10).exponentiatedBy(decimals)).toNumber();
+  return new BigNumber(totalSupply).dividedBy(new BigNumber(10).exponentiatedBy(decimals)).toNumber();
 }

@@ -7,14 +7,14 @@
  */
 
 import { VirtualChainUrls, NodeServiceUrls, NodeVirtualChainUrls, Service } from '../model/model';
-import {portsMapping} from "../config";
+import { portsMapping } from '../config';
 
 const PrismSuffix = '.prism.orbs.network/';
 const SubscriptionUiPrefix = 'subscription.orbs.network/vc';
 export function generateVirtualChainUrls(vcId: string): VirtualChainUrls {
   return {
     Prism: `https://${vcId}${PrismSuffix}`,
-    Subscription: `https://${SubscriptionUiPrefix}/${vcId}`,
+    Subscription: `https://${SubscriptionUiPrefix}/${vcId}`
   };
 }
 
@@ -28,7 +28,7 @@ export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirt
     Management: `http://${ip}:7666/vchains/${vcid}/management`,
     Logs: `http://${ip}${port}/vchains/${vcid}${LogsSuffix}`,
     Version: '',
-    Metrics: `http://${ip}${port}/vchains/${vcid}/metrics`,
+    Metrics: `http://${ip}${port}/vchains/${vcid}/metrics`
   };
 }
 
@@ -38,14 +38,14 @@ export function generateNodeServiceUrls(ip: string, service: Service): NodeServi
     Status: `http://${ip}${port}/services/${service.ServiceUrlName}${StatusSuffix}`,
     Logs: `http://${ip}${port}/services/${service.ServiceUrlName}${LogsSuffix}`,
     Version: '',
-    Metrics: '',
+    Metrics: ''
   };
   if (service.Name === 'Boyar') res.Metrics = `http://${ip}:9100/metrics`;
   return res;
 }
 
-export function updateNodeServiceUrlsWithVersion(urls: NodeServiceUrls, repoUrl: string, version: string) {
-  urls.Version = `${repoUrl}${version}`;
+export function updateNodeServiceUrlsWithVersion(urls: NodeServiceUrls, repoUrl?: string, version?: string) {
+  urls.Version = repoUrl ? `${repoUrl}${version}` : version || '';
 }
 
 export function generateNodeManagmentUrl(ip: string) {

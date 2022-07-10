@@ -7,6 +7,7 @@ import { StatusTable } from '../components/statusTable/StatusTable';
 import { StatusRow } from "../components/networkStatus/StatusRow";
 import { Button } from '@material-ui/core';
 import { EthereumStatus } from '../../../model/model';
+import { getServices } from '../utils';
 
 interface IProps {}
 
@@ -18,7 +19,8 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   console.log(toJS(statusStore.statusModel));
 
   const virtualChains = statusStore?.statusModel?.VirtualChains;
-  const services = statusStore?.statusModel?.Services;
+  const {services, vmServices, expandedServices} = getServices(statusStore?.statusModel?.Services);
+
 
   const committeeNodes = statusStore?.statusModel?.CommitteeNodes;
   const standByNodes = statusStore?.statusModel?.StandByNodes;
@@ -35,6 +37,8 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
       <StatusTable
         vcs={virtualChains || []}
         services={services || []}
+        vmServices={vmServices || []}
+        expandedServices={expandedServices || []}
         committeeValidators={
           !showAllRegistered ?
             (committeeNodes ? Object.values(committeeNodes) : []) : // regular view

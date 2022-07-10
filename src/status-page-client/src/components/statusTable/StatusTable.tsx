@@ -19,11 +19,13 @@ interface IProps {
   committeeValidators: Guardian[];
   standByValidators: Guardian[];
   services: Service[];
+  vmServices: Service[];
   isShowAllRegistered: boolean;
+  expandedServices: Service[];
 }
 
 export const StatusTable = React.memo<IProps>((props) => {
-  const { vcs, committeeValidators, standByValidators, services, isShowAllRegistered } = props;
+  const { vcs, committeeValidators, standByValidators, services, isShowAllRegistered, vmServices, expandedServices } = props;
   // console.log({ vcs });
   // console.log({ committeeValidators: committeeValidators.map((c) => toJS(c)) });
   // console.log({ standByValidators: standByValidators.map((s) => toJS(s)) });
@@ -43,8 +45,11 @@ export const StatusTable = React.memo<IProps>((props) => {
   return (
     <TableContainer component={Paper} style={{ width: 'fit-content', overflowX: 'inherit' }}>
       <Table size={'small'}>
-        <StatusTableHeader services={services} vcs={vcs} setShowServices={setShowServices} showServices={showServices} />
+        
+        <StatusTableHeader expandedServices={expandedServices} vmServices={vmServices} services={services} vcs={vcs} setShowServices={setShowServices} showServices={showServices} />
         <StatusTableBody
+        expandedServices={expandedServices}
+        vmServices={vmServices}
           services={services}
           vcs={vcs}
           committeeValidators={sortedCommitteeValidators}
