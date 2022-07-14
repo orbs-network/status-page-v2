@@ -33,14 +33,20 @@ export function generateNodeVirtualChainUrls(ip: string, vcid: string): NodeVirt
 }
 
 export function generateNodeServiceUrls(ip: string, service: Service): NodeServiceUrls {
+  const res =  generateNodeServiceUrlsRaw(ip, service.ServiceUrlName);
+  if (service.Name === 'Boyar') res.Metrics = `http://${ip}:9100/metrics`;
+
+  return res;
+}
+export function generateNodeServiceUrlsRaw(ip: string, serviceUrlName: string): NodeServiceUrls {
   const port = portsMapping[ip] ? `:${portsMapping[ip]}` : '';
   const res = {
-    Status: `http://${ip}${port}/services/${service.ServiceUrlName}${StatusSuffix}`,
-    Logs: `http://${ip}${port}/services/${service.ServiceUrlName}${LogsSuffix}`,
+    Status: `http://${ip}${port}/services/${serviceUrlName}${StatusSuffix}`,
+    Logs: `http://${ip}${port}/services/${serviceUrlName}${LogsSuffix}`,
     Version: '',
     Metrics: ''
   };
-  if (service.Name === 'Boyar') res.Metrics = `http://${ip}:9100/metrics`;
+  
   return res;
 }
 
