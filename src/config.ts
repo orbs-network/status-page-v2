@@ -39,6 +39,7 @@ export interface Configuration {
   MaxTimeSinceLastEventMatic: number;
   // contracts
   NetworksContracts: { [key: string]: Contracts };
+  xCoreUrl: string;
 }
 
 export enum NetworkType {

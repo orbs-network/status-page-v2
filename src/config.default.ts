@@ -37,6 +37,7 @@ export const defaultConfiguration: Configuration = {
   MaticEndpoints: [String(process.env.MATIC_ENDPOINT)],
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
   MaxTimeSinceLastEventMatic: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*3,
+  xCoreUrl:"http://0xcore.orbs.com/services/management-service/status",
 
   NetworksContracts: {
     "ETHEREUM": {
