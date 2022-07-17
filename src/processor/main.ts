@@ -154,12 +154,28 @@ export class Processor {
     return tasks;
   }
   ///////////////////////////////
-  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {
-    const boyarErrs = [/^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/];
+  highMemMsg = `Memory usage is higher`;
+  rgxPercent = /([\d.]+)%\)$/g;
+  memPercThreshold = 85;
+  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {    
+    const boyarErrs = [
+      /^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/
+    ];
     if (svcName === 'Boyar') {
-      for (let rx of boyarErrs) {
+      for (const rx of boyarErrs) {
         if (rx.test(errMsg)) {
           return '';
+        }
+      }
+      // PATCH (yuval) to ignore memory usage > 75 but < 86 (dockerd)
+      if ( errMsg.startsWith(this.highMemMsg)){            
+        // extract decimal
+        const res = this.rgxPercent.exec(errMsg);
+        if(res && res.length > 1 ){
+          const perc = parseFloat(res[1]);
+          if(perc && perc < this.memPercThreshold){          
+            return '';                        
+          }
         }
       }
     }

@@ -2,13 +2,12 @@
 import fetch from 'node-fetch';
 
 // AbortController was added in node v14.17.0 globally
-//const AbortController = globalThis.AbortController || await import('abort-controller')
 import AbortController from "abort-controller"
-const xCoreUrl = "http://18.211.83.127/services/management-service/status" ;
-
+import { defaultConfiguration } from '../config.default';
+import { generateNodeServiceUrlsRaw } from '../processor/url-generator'
 
 ////////////////////////////////////////////////
-async function fetchTimeout(url:string, ms:number) {
+export async function fetchTimeout(url:string, ms:number) {
     const controller = new AbortController();
     const timeout = setTimeout(() => {
         controller.abort();
@@ -43,8 +42,11 @@ async function checkNodeUpdate(url:string, node:any, res:Record<string, any>) {
             if (!res[name][ver])
                 res[name][ver] = [];
             // push pending node
+            const dt = new Date(svc.PendingVersionTime * 1000); 
             res[name][ver].push({                
                 time: svc.PendingVersionTime,
+                timeLocal: dt.toString(),
+                timeUTC: "  " + dt.toUTCString(),
                 nodeName: node.Name,
                 nodeIp: node.Ip
             });
@@ -63,45 +65,16 @@ async function checkNodeUpdate(url:string, node:any, res:Record<string, any>) {
         }
     }
 }
-////////////////////////////////////////////////
-// function printUpdate(name, list) {
-//     console.log(`update ${name} ----------------------------`)
-//     list.sort((a, b) => {
-//         if (a.time > b.time)
-//             return 1;
-//         if (a.time < b.time)
-//             return -1;
 
-//         return 0;
-//     })
-//     for (const item of list) {
-//         //console.log(item)
-//         if (item.time > 0) {
-//             const timeDiff = (item.time * 1000) - Date.now()
-//             let h = (new Date(timeDiff)).getHours();
-//             let m = (new Date(timeDiff)).getMinutes();
-
-//             h = (h < 10) ? '0' + h : h;
-//             m = (m < 10) ? '0' + m : m;
-
-//             const output = h + ':' + m;
-//             const tm = new Date(item.time * 1000)
-//             console.log(`pending in ${output} hours\t| on ${tm.toString()}\t${item.nodeName} `)
-//         } else {
-//             console.log(`updated to date\t${item.nodeName}`)
-
-//         }
-//     }
-
-// }
 ////////////////////////////////////////////////
 export async function getNextUpdates(_req:any, response:any) {
-    const status = await fetchTimeout(xCoreUrl, 2000);
+    const status = await fetchTimeout(defaultConfiguration.xCoreUrl, 2000);
     if (!status) return;
     const res:Record<string, any> = {};
     const checkNodes = [];
     for (const node of status.Payload.CurrentTopology) {
-        const url = `http://${node.Ip}/services/management-service/status`;
+        // status url of a service
+        const url = generateNodeServiceUrlsRaw(node.Ip, "management-service").Status;
         try {
             checkNodes.push(checkNodeUpdate(url, node, res));
         } catch (e) {
@@ -112,20 +85,24 @@ export async function getNextUpdates(_req:any, response:any) {
     await Promise.all(checkNodes);
     console.log(`getNextUpdates DONE!`)
 
-    for (const update in res) {
-        const list = res[update];
-        // sort
-        if (list.length > 0) {
-            list.sort((a:any, b:any) => {
-                if (a.time > b.time)
-                    return 1;
-                if (a.time < b.time)
-                    return -1;
+    for (const svc in res) {
+        for (const update in res[svc]) {
+            const list = res[svc][update];
+            // sort
+            if (list.length > 0 && list[0].time) {
+                // console.log("-----------------------------")
+                // console.log('sorting', list)
+                list.sort((a:any, b:any) => {
+                    if (a.time > b.time)
+                        return 1;
+                    if (a.time < b.time)
+                        return -1;
 
-                return 0;
-            });
-        }
-    };
+                    return 0;
+                });
+            }
+        };
+    }
     response.status(200).json(res);
 }
 ////////////////////////////////////////////////
@@ -146,15 +123,13 @@ async function checkRecovery(url:string, node:any, res:any) {
 
 ////////////////////////////////////////////////
 export async function getRecovery(_req:any, response:any) {    
-    const status = await fetchTimeout(xCoreUrl, 2000);
+    const status = await fetchTimeout(defaultConfiguration.xCoreUrl, 2000);
     if (!status) return;
     const res:Array<any> = [];
     const checkNodes = [];
     for (const node of status.Payload.CurrentTopology) {
-        let url = `http://${node.Ip}/services/boyar/status`;
-        if (node.Name.indexOf("okx") > -1) {
-            url = `http://${node.Ip}:18888/services/boyar/status`;
-        }
+        // status url of a service
+        const url = generateNodeServiceUrlsRaw(node.Ip, "boyar").Status;
         try {
             checkNodes.push(checkRecovery(url, node, res));            
         } catch (e) {

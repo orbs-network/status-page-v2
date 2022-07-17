@@ -166,3 +166,19 @@ In such cases, add the corresponding mapping to **_portsMapping_** under `/src/c
 ```
 
 [heroku CLI]: https://devcenter.heroku.com/articles/heroku-command-line
+
+
+## Monitoring and data api
+- ```/schdule/update```
+  - shows current version and pending updates per service
+  - [example link](http://status.orbs.network/schedule/update)
+- ```/schdule/recovery```
+  - shows next recovery sorted by next execution
+  - [example link](http://status.orbs.network/schedule/recovery)
+- ```/svc_data_by_node?service={service_name}&columns={field1,field2}...```
+  - return columns from a service status page in csv format 
+  - [example link](https://status.orbs.network/svc_data_by_node?service=boyar&columns=Payload.Metrics.MemoryUsedPercent,Payload.SystemDocker.ServerVersion)
+  
+## filterIgnoredServiceErrors
+- Boyar cpu error is filter out in this function
+- Boyar Memory threshold was set to > 85% duw to non swap

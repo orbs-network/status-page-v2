@@ -14,6 +14,7 @@ import * as Logger from './logger';
 import { Processor } from './processor/main';
 import * as path from 'path';
 import {getNextUpdates, getRecovery} from './monitors/schedule'
+import {svcStatusDataByNode} from './monitors/node-data'
 
 
 export function serve(config: Configuration) {
@@ -71,9 +72,28 @@ export function serve(config: Configuration) {
   });
 
   /// schedule
-  app.get('/schedule/recovery', getRecovery);
-  
+  app.get('/schedule/recovery', getRecovery); 
   app.get('/schedule/update',  getNextUpdates);
+
+  // ServicedataByNode
+  app.get('/svc_data_by_node', (req, res) => {
+    if(!req.query.service || ! req.query.columns){
+      res.status(422).send({
+        message: 'service or columns are missing '
+     });
+     return; 
+    }
+    const cs = req.query.columns as string;
+    const columns = cs.split(',');
+    try{
+      svcStatusDataByNode( req.query.service as string, columns, res);
+    }
+    catch(e){
+      res.status(400).send({
+        message:e
+     });
+    }
+  });
 
 
 
