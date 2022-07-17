@@ -154,8 +154,7 @@ export class Processor {
     return tasks;
   }
   ///////////////////////////////
-  highMemMsg = `Memory usage is higher`;
-  rgxPercent = /([\d.]+)%\)$/g;
+  highMemMsg = `Memory usage is higher`;  
   memPercThreshold = 85;
   private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {    
     const boyarErrs = [
@@ -170,7 +169,7 @@ export class Processor {
       // PATCH (yuval) to ignore memory usage > 75 but < 86 (dockerd)
       if ( errMsg.startsWith(this.highMemMsg)){            
         // extract decimal
-        const res = this.rgxPercent.exec(errMsg);
+        const res = /(\d+.\d+)/g.exec(errMsg);
         if(res && res.length > 1 ){
           const perc = parseFloat(res[1]);
           if(perc && perc < this.memPercThreshold){          
@@ -188,7 +187,7 @@ export class Processor {
       const data = await fetchJson(urls.Status);
       const versionTag = data.Payload?.Version?.Semantic || '';
       updateNodeServiceUrlsWithVersion(urls, service.RepositoryPrefix, versionTag);
-
+      
       const errMsg = this.filterIgnoredServiceErrors(service.Name, data?.Error) || '';
       const timestamp = data.Timestamp || '';
       const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
