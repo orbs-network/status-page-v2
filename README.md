@@ -179,3 +179,6 @@ In such cases, add the corresponding mapping to **_portsMapping_** under `/src/c
   - return columns from a service status page in csv format 
   - [example link](https://status.orbs.network/svc_data_by_node?service=boyar&columns=Payload.Metrics.MemoryUsedPercent,Payload.SystemDocker.ServerVersion)
   
+## filterIgnoredServiceErrors
+- Boyar cpu error is filter out in this function
+- Boyar Memory threshold was set to > 85% duw to non swap
