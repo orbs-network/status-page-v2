@@ -1,7 +1,7 @@
 import { getParamsFromUrl } from '../utils';
 
 const isDebug = () => getParamsFromUrl('debug');
-const showVmServices = () => getParamsFromUrl('vm');
+const showVmServices = () => true;
 const EXPANDED_SERVICES = ['Management', 'MaticReader'];
 
 const servicesDisplayNameDict: { [key: string]: string } = {
