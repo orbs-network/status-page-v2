@@ -9,7 +9,11 @@ async function checkServiceColumns(url:string, node:any, columns:Array<string>, 
     // get values into array
     const vals = [];
     for (const c of columns) {
-        vals.push(c.split('.').reduce((o, i) => o[i], jsn));
+        try {
+            vals.push(c.split('.').reduce((o, i) => o[i], jsn));
+        }catch(e){
+            console.error(`Error: Cant map value from column [${c}] `, e);
+        }
     }
     // add line to csv
     res.push([node.Name].concat(vals));
@@ -22,12 +26,17 @@ export async function svcStatusDataByNode(service:string, columns:Array<string>,
     // csv header
     const tailColumns:Array<string> = [];
     for (const a of columns) {
-        const tail = a.substring(a.lastIndexOf('.') + 1);
-        const tailColumns:any = [];
-        tailColumns.push(tail);
+        try {
+            const tail = a.substring(a.lastIndexOf('.') + 1);        
+            tailColumns.push(tail);
+        }catch(e){
+            console.error(`Error: Cant get tail of column [${a}] `, e);
+        }
     }
     const res:Array<Array<string>> = [];
     res.push(["Node Name"].concat(tailColumns));
+    console.log('HEADER-----------------------------------')
+    console.log(res);    
     const checkNodes = [];
     for (const node of status.Payload.CurrentTopology) {
         // status url of a service
