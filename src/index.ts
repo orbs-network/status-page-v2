@@ -84,7 +84,7 @@ export function serve(config: Configuration) {
      return; 
     }
     const cs = req.query.columns as string;
-    const columns = cs.split(',');
+    const columns = cs.indexOf(',')>1 ? cs.split(','):[cs];
     try{
       svcStatusDataByNode( req.query.service as string, columns, res);
     }

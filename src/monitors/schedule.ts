@@ -26,7 +26,7 @@ export async function fetchTimeout(url:string, ms:number) {
 }
 ////////////////////////////////////////////////
 async function checkNodeUpdate(url:string, node:any, res:Record<string, any>) {
-    const status = await fetchTimeout(url, 2000)
+    const status = await fetchTimeout(url, 5000)
     if (!status) return;
 
     // enum updater services
