@@ -34,10 +34,10 @@ export async function updateModel(model: Model, config: Configuration) {
       await readDataMatic(model, rootNodeEndpoint, config);
       // override IsCertified with ETH IsCertified (always false in Polygon)
       for (const node in model.AllRegisteredNodes) {
-        const isCertifiedEth = AllRegisteredNodesEth[node].IsCertified;
-        model.AllRegisteredNodes[node].IsCertified = model.AllRegisteredNodes[node].IsCertified || isCertifiedEth;
-        if (model.CommitteeNodes[node]) model.CommitteeNodes[node].IsCertified = model.CommitteeNodes[node].IsCertified || isCertifiedEth;
-        if (model.StandByNodes[node]) model.StandByNodes[node].IsCertified = model.StandByNodes[node].IsCertified || isCertifiedEth;
+        const IsCertifiedEth = AllRegisteredNodesEth[node].IsCertified;
+        model.AllRegisteredNodes[node].IsCertified = IsCertifiedEth;
+        if (model.CommitteeNodes[node]) model.CommitteeNodes[node].IsCertified = IsCertifiedEth;
+        if (model.StandByNodes[node]) model.StandByNodes[node].IsCertified = IsCertifiedEth;
       }
       return
     } catch (e) {
