@@ -30,7 +30,16 @@ export async function updateModel(model: Model, config: Configuration) {
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
       await readData(model, rootNodeEndpoint, config);
-      return await readDataMatic(model, rootNodeEndpoint, config);
+      const AllRegisteredNodesEth = model.AllRegisteredNodes;
+      await readDataMatic(model, rootNodeEndpoint, config);
+      // override IsCertified with ETH IsCertified (always false in Polygon)
+      for (const node in model.AllRegisteredNodes) {
+        const IsCertifiedEth = AllRegisteredNodesEth[node].IsCertified;
+        model.AllRegisteredNodes[node].IsCertified = IsCertifiedEth;
+        if (model.CommitteeNodes[node]) model.CommitteeNodes[node].IsCertified = IsCertifiedEth;
+        if (model.StandByNodes[node]) model.StandByNodes[node].IsCertified = IsCertifiedEth;
+      }
+      return
     } catch (e) {
       Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`);
     }
