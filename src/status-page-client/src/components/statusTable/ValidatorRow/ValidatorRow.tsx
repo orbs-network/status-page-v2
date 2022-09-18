@@ -8,7 +8,8 @@ import { ValidatorInfoCell } from './ValidatorInfoCell';
 import { isDebug, showVmServices } from '../../../consts';
 interface IProps {
   validator: Guardian;
-  isInCommittee: boolean;
+  isInCommitteeEth: boolean;
+  isInCommitteeMatic: boolean;
   expandServices: boolean;
   servicesNames: string[];
   vmServicesNames: string[];
@@ -17,7 +18,7 @@ interface IProps {
   expandedServicesNames:  string[];
 }
 export const ValidatorRow = React.memo<IProps>((props) => {
-  const { validator, expandServices, servicesNames, vcsIds, isInCommittee, isShowAllRegistered, vmServicesNames, expandedServicesNames } = props;
+  const { validator, expandServices, servicesNames, vcsIds, isInCommitteeEth, isInCommitteeMatic, isShowAllRegistered, vmServicesNames, expandedServicesNames } = props;
 
   const expandedServicesCells = useMemo(() => {
     return [...servicesNames, ...expandedServicesNames].map((serviceName) => {
@@ -58,7 +59,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   return (
     <TableRow>
       {/* Gist */}
-      <ValidatorInfoCell validator={validator} isInCommittee={isInCommittee} isShowAllRegistered={isShowAllRegistered} />
+      <ValidatorInfoCell validator={validator} isInCommitteeEth={isInCommitteeEth} isInCommitteeMatic={isInCommitteeMatic} isShowAllRegistered={isShowAllRegistered} />
 
       {/* Services summary  */}
       <ServicesGistCell nodeServices={orderedServices} serviceNames={servicesNames} />
