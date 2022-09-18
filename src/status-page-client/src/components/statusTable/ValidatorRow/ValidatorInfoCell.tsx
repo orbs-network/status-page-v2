@@ -1,5 +1,5 @@
 import React from 'react';
-import {TableCell, Tooltip, Typography} from '@material-ui/core';
+import {Icon, TableCell, Tooltip, Typography} from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
@@ -7,7 +7,7 @@ import { green, red, grey } from '@material-ui/core/colors';
 import { makeStyles } from '@material-ui/core/styles';
 import { CommonLink } from '../../link/CommonLink';
 import polygonIcon from "../../../media/polygon.svg"
-import ethIcon from "../../../media/ethereum.svg"
+import {FaEthereum} from "react-icons/fa"
 
 interface IProps {
   validator: Guardian;
@@ -45,11 +45,11 @@ export const ValidatorInfoCell = React.memo<IProps>((props) => {
       committeeText = 'In Eth and Polygon Committees';
   }
   else if (isInCommitteeEth) {
-      committeeIcon = <img src={ethIcon} className={classes.customImage}/>
+      committeeIcon = <FaEthereum size={15} style={{marginTop: 2}}/>
       committeeText = 'In Eth Committee';
   }
   else if (isInCommitteeMatic) {
-      committeeIcon = <img src={polygonIcon} className={classes.customImage}/>
+      committeeIcon = <Icon><img src={polygonIcon}/></Icon>
       committeeText = 'In Polygon Committee';
   }
   else {
