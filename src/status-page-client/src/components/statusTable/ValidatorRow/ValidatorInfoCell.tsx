@@ -1,5 +1,5 @@
 import React from 'react';
-import {Icon, TableCell, Tooltip, Typography} from '@material-ui/core';
+import {TableCell, Tooltip, Typography} from '@material-ui/core';
 import { Guardian } from '../../../../../model/model';
 import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
@@ -17,16 +17,16 @@ interface IProps {
 }
 
 const useStyles = makeStyles((theme) => ({
-  cell: {
-    textAlign: 'left',
-    borderBottom: '2px solid #cccccc20',
-    minWidth: '260px',
-  },
-  noMaxWidth: {
-    maxWidth: 'none',
-  },
+    cell: {
+        textAlign: 'left',
+        borderBottom: '2px solid #cccccc20',
+        minWidth: '260px',
+    },
+    noMaxWidth: {
+        maxWidth: 'none',
+    },
     customImage: {
-      margin: "3px 2px 0px 0px",
+        margin: "3px 2px 0px 0px",
         width: "15px",
         height: "15px"
     }
