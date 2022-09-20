@@ -40,14 +40,17 @@ export const StatusTableBody = React.memo<IProps>((props) => {
 
   const validatorRows = useMemo(() => {
     return allValidators.map((validator) => {
-      const isInCommittee = committeeValidators.includes(validator);
+      const committeeValidator = committeeValidators.find(v => v === validator)
+      const isInCommitteeEth = committeeValidator ? committeeValidator.Network.includes("Ethereum") : false
+      const isInCommitteeMatic = committeeValidator ? committeeValidator.Network.includes("Matic") : false;
 
       return (
         <ValidatorRow
         expandedServicesNames={expandedServicesNames}
           key={validator.OrbsAddress}
           validator={validator}
-          isInCommittee={isInCommittee}
+          isInCommitteeEth={isInCommitteeEth}
+          isInCommitteeMatic={isInCommitteeMatic}
           expandServices={showServices}
           servicesNames={servicesNames}
           vmServicesNames={vmServicesNames}
