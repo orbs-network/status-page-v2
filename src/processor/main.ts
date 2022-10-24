@@ -155,7 +155,7 @@ export class Processor {
   }
   ///////////////////////////////
   highMemMsg = `Memory usage is higher`;  
-  memPercThreshold = 85;
+  memPercThreshold = 98;
   private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {    
     const boyarErrs = [
       /^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/
@@ -166,7 +166,7 @@ export class Processor {
           return '';
         }
       }
-      // PATCH (yuval) to ignore memory usage > 75 but < 86 (dockerd)
+      // PATCH (yuval) to ignore memory usage > 75 but < 99 (dockerd)
       if ( errMsg.startsWith(this.highMemMsg)){            
         // extract decimal
         const res = /(\d+.\d+)/g.exec(errMsg);
@@ -228,9 +228,10 @@ export class Processor {
   }
 
   private healthLevel(errMsg: string, timestamp: string) {
+    const ignoredErrors = ['signAndSendTransaction didnt complete', 'Cannot read properties of undefined'] // ignore some Keepers errors
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
-    if (errMsg !== '') {
+    if (errMsg !== '' && !ignoredErrors.some(e => errMsg.includes(e))) {
       healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = errMsg;
     } else if (timestamp === '') {
