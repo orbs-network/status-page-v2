@@ -154,9 +154,9 @@ export class Processor {
     return tasks;
   }
   ///////////////////////////////
-  highMemMsg = `Memory usage is higher`;
+  highMemMsg = `Memory usage is higher`;  
   memPercThreshold = 98;
-  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {
+  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {    
     const boyarErrs = [
       /^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/
     ];
@@ -167,7 +167,7 @@ export class Processor {
         }
       }
       // PATCH (yuval) to ignore memory usage > 75 but < 99 (dockerd)
-      if ( errMsg.startsWith(this.highMemMsg)){
+      if ( errMsg.startsWith(this.highMemMsg)){            
         // extract decimal
         const res = /(\d+.\d+)/g.exec(errMsg);
         if(res && res.length > 1 ){
