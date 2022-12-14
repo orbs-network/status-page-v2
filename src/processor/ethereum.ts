@@ -44,6 +44,7 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         }
     }
 
+    if (!lastEventTime) throw new Error(`lastEventTime is ${lastEventTime}`)
     const MaxTimeSinceLastEvent = chainName === "MATIC" ? config.MaxTimeSinceLastEventMatic : config.MaxTimeSinceLastEvent
     let healthLevel = HealthLevel.Green;
     const healthMessages = [];

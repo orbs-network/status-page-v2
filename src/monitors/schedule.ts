@@ -112,6 +112,7 @@ async function checkRecovery(url:string, node:any, res:any) {
 
     // enum updater services
     const recovery = status.Payload.Recovery;
+    if (!recovery) return;
     // last tick
     const dt = new Date(recovery.lastTick)
     // add 6h

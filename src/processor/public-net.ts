@@ -143,7 +143,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
         rewardsRate
       );
     } catch (e) {
-      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Ethereum status data: ${e.stack}`);
+      model.Statuses[StatusName.EthereumContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch contracts status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
   }
