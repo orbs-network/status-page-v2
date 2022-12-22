@@ -15,6 +15,9 @@ import {Processor} from './processor/main';
 import * as path from 'path';
 import {getNextUpdates, getRecovery, svcDataByNode} from './monitors/schedule'
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import cors from "cors";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
@@ -78,7 +81,28 @@ export function serve(config: Configuration) {
   /// schedule
   app.get('/schedule/recovery', getRecovery);
   app.get('/schedule/update',  getNextUpdates);
-  app.get('/svc_data_by_node', svcDataByNode);
+
+  // ServicedataByNode
+  app.get('/svc_data_by_node', (req, res) => {
+    if(!req.query.service || ! req.query.columns){
+      res.status(422).send({
+        message: 'service or columns are missing '
+     });
+     return;
+    }
+    const cs = req.query.columns as string;
+    const columns = cs.indexOf(',')>1 ? cs.split(','):[cs];
+    try{
+      svcStatusDataByNode( req.query.service as string, columns, res);
+    }
+    catch(e){
+      res.status(400).send({
+        message:e
+     });
+    }
+  });
+
+
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof Error) {
