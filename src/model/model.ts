@@ -167,6 +167,7 @@ export interface NodeService extends GenStatus {
   Version: string;
   URLs: NodeServiceUrls;
   StatusSpec?: { [key: string]: string };
+  VMStatusJson?: object;
 }
 
 export function nodeServiceCopy(ns: NodeService) {
@@ -187,11 +188,13 @@ export function nodeServiceBuilder(
   statusTooltip = '',
   timestamp = '',
   version = '',
-  StatusSpec?: { [key: string]: string }
+  StatusSpec?: { [key: string]: string },
+  vmStatusJson?: object
 ): NodeService {
   return {
     StatusMsg: statusMsg,
     Status: status,
+    VMStatusJson: vmStatusJson,
     StatusToolTip: statusTooltip,
     Timestamp: timestamp,
     Version: version,
