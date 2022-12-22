@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import sslChecker from 'ssl-checker';
-import { Configuration, NetworkType } from '../config';
-import { fetchJson, isStaleTime, timeAgoText } from '../helpers';
+import {Configuration, NetworkType} from '../config';
+import {fetchJson, isStaleTime, timeAgoText} from '../helpers';
 import * as Logger from '../logger';
 import {
   GenStatus,
@@ -28,8 +28,8 @@ import {
 } from '../model/model';
 import * as Public from './public-net';
 import * as Private from './private-net';
-import { generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion } from './url-generator';
-import { Monitors } from '../monitors/main';
+import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion} from './url-generator';
+import {Monitors} from '../monitors/main';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 3000;
@@ -154,9 +154,9 @@ export class Processor {
     return tasks;
   }
   ///////////////////////////////
-  highMemMsg = `Memory usage is higher`;  
+  highMemMsg = `Memory usage is higher`;
   memPercThreshold = 98;
-  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {    
+  private filterIgnoredServiceErrors(svcName: string, errMsg: string): string {
     const boyarErrs = [
       /^\s*CPU usage is higher (that|than) [0-9]+% \(currently at [0-9]+.?[0-9]*%\)\s*$/
     ];
@@ -167,13 +167,13 @@ export class Processor {
         }
       }
       // PATCH (yuval) to ignore memory usage > 75 but < 99 (dockerd)
-      if ( errMsg.startsWith(this.highMemMsg)){            
+      if ( errMsg.startsWith(this.highMemMsg)){
         // extract decimal
         const res = /(\d+.\d+)/g.exec(errMsg);
         if(res && res.length > 1 ){
           const perc = parseFloat(res[1]);
-          if(perc && perc < this.memPercThreshold){          
-            return '';                        
+          if(perc && perc < this.memPercThreshold){
+            return '';
           }
         }
       }
@@ -187,12 +187,22 @@ export class Processor {
       const data = await fetchJson(urls.Status);
       const versionTag = data.Payload?.Version?.Semantic || '';
       updateNodeServiceUrlsWithVersion(urls, service.RepositoryPrefix, versionTag);
-      
+
       const errMsg = this.filterIgnoredServiceErrors(service.Name, data?.Error) || '';
       const timestamp = data.Timestamp || '';
       const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
 
-      return nodeServiceBuilder(urls, data.Status || '', healthLevel, healthLevelToolTip, timestamp, versionTag, data.StatusSpec);
+      return nodeServiceBuilder(
+          urls,
+          data.Status || '',
+          healthLevel,
+          healthLevelToolTip,
+          timestamp,
+          versionTag,
+          data.StatusSpec,
+          service.Name.startsWith("vm-") ? data : undefined
+      );
+
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeServiceBuilder(
