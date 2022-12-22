@@ -6,12 +6,12 @@
  * The above notice should be included in all copies or substantial portions of the software.
  */
 
-import { Configuration } from './config';
-import express, { Request, Response, NextFunction } from 'express';
-import { errorString } from './helpers';
-import { TaskLoop } from './task-loop';
+import {Configuration} from './config';
+import express, {NextFunction, Request, Response} from 'express';
+import {errorString} from './helpers';
+import {TaskLoop} from './task-loop';
 import * as Logger from './logger';
-import { Processor } from './processor/main';
+import {Processor} from './processor/main';
 import * as path from 'path';
 import {getNextUpdates, getRecovery, svcDataByNode} from './monitors/schedule'
 
@@ -19,6 +19,7 @@ export function serve(config: Configuration) {
   const processor = new Processor(config);
 
   const app = express();
+
   app.set('json spaces', 2);
 
   // Serves static files for the client
@@ -29,7 +30,7 @@ export function serve(config: Configuration) {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
   });
 
-  app.get('/json', (_request, response) => {
+  app.get('/json', cors(), (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body);
   });
@@ -70,7 +71,7 @@ export function serve(config: Configuration) {
   });
 
   /// schedule
-  app.get('/schedule/recovery', getRecovery); 
+  app.get('/schedule/recovery', getRecovery);
   app.get('/schedule/update',  getNextUpdates);
   app.get('/svc_data_by_node', svcDataByNode);
 
