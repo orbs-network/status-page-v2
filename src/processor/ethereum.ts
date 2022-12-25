@@ -44,14 +44,17 @@ export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommit
         }
     }
 
-    if (!lastEventTime) throw new Error(`lastEventTime is ${lastEventTime}`)
-    const MaxTimeSinceLastEvent = chainName === "MATIC" ? config.MaxTimeSinceLastEventMatic : config.MaxTimeSinceLastEvent
     let healthLevel = HealthLevel.Green;
     const healthMessages = [];
-    if (lastEventTime + MaxTimeSinceLastEvent < getCurrentClockTime() ) {
-        healthMessages.push(`Last staking/unstaking event was ${timeAgoText(getCurrentClockTime()-MaxTimeSinceLastEvent)}. `);
-        healthLevel = HealthLevel.Yellow;
+    if (lastEventTime) {
+        const MaxTimeSinceLastEvent = chainName === "MATIC" ? config.MaxTimeSinceLastEventMatic : config.MaxTimeSinceLastEvent
+        if (lastEventTime + MaxTimeSinceLastEvent < getCurrentClockTime()) {
+            healthMessages.push(`Last staking/unstaking event was ${timeAgoText(getCurrentClockTime() - MaxTimeSinceLastEvent)}. `);
+            healthLevel = HealthLevel.Yellow;
+        }
     }
+    else console.error(`lastEventTime is ${lastEventTime}. Ignoring`);
+
     if (isStaleTime(block.time, config.RootNodeStaleErrorTimeSeconds)) {
         healthMessages.push(`Ethereum connection is stale. Ethereum latest block (${block.number}) is from ${timeAgoText(block.time)}.`);
         healthLevel = HealthLevel.Yellow;
