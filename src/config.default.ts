@@ -37,12 +37,12 @@ export const defaultConfiguration: Configuration = {
   MaticEndpoints: [String(process.env.MATIC_ENDPOINT)],
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
   MaxTimeSinceLastEventMatic: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*3,
-  xCoreUrl:"http://0xcore.orbs.com/services/management-service/status",
+  xCoreUrl:"http://44.234.135.57/services/management-service/status",
 
   NetworksContracts: {
     "ETHEREUM": {
-      staking: process.env.ETHEREUM_STAKING_CONTRACT || "0x01D59Af68E2dcb44e04C50e05F62E7043F2656C3",
-      delegations: process.env.ETHEREUM_DELEGATIONS_CONTRACT || "0xB97178870F39d4389210086E4BcaccACD715c71d"
+      staking: process.env.ETHEREUM_STAKING_CONTRACT || "0xE6f4C12A49B557b2Ad46e03E729662ac5425fbeD",
+      delegations: process.env.ETHEREUM_DELEGATIONS_CONTRACT || "0x74aD147017eAa8C1d5977A48b21F4d712EE617a0"
     },
     "MATIC": {
       staking: process.env.MATIC_STAKING_CONTRACT || "0xeeae6791f684117b7028b48cb5dd21186df80b9c",

@@ -31,7 +31,7 @@
     "prettify": "npx prettier \"src/**/*.ts\" --write",
     "dev": "npm run build && open http://localhost:8081/json && nodemon -e js,ts --watch src --exec npm run start",
     "start:dev": "npm run build && npm start",
-    "start": "node --async-stack-traces ./dist/main.js",
+    "start": "npm run build && node --async-stack-traces ./dist/main.js",
     "gitAddRemoteHeroku": "heroku login && heroku git:remote -a status-v2",
     "deployHeroku": "git push heroku master",
     "testpos": "npm run build && node --async-stack-traces ./dist/test.js"

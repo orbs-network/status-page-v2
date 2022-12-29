@@ -98,15 +98,9 @@ const BootstrapRewardAnnual = 'BootstrapRewardAnnual';
 const BootstrapRewardLastWithdraw = 'BootstrapRewardLastWithdraw';
 // Function depends on version 0.11.0 of makderdao/multicall only on 'latest' block
 const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
-const MaticMulticallContractAddress = '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
-import { CHAIN_ID} from './eth-helper';
 
 export async function read(resources:OrbsEthResrouces, web3:any) {
-	let config;
-	if (await web3.eth.getChainId() === CHAIN_ID.ETHEREUM)
-    	config = { web3, multicallAddress: MulticallContractAddress};
-	else if (await web3.eth.getChainId() === CHAIN_ID.MATIC)
-    	config = { web3, multicallAddress: MaticMulticallContractAddress};
+	const config = { web3, multicallAddress: MulticallContractAddress};
 
     const calls: any[] = [
         {
@@ -139,6 +133,8 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             returns: [[BlockTimestamp]]
         }
     ];
+
+    calls.splice(calls.length-1,1);
 
     const r = await aggregate(calls, config);
     return { block: multicallToBlockInfo(r), data: r.results.transformed};

@@ -14,13 +14,12 @@ import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStat
 import { getResources, getWeb3Provider } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
-import { getPoSStatus, getTotalCommitteeWeight } from './stats';
+import { getPoSStatus } from './stats';
 import BigNumber from 'bignumber.js';
 
 // Important URLS for public-network - init explore of network from these.
 const ManagementStatusSuffix = '/services/management-service/status';
 const EthWriterStatusSuffix = '/services/ethereum-writer/status';
-const MaticReaderStatusSuffix = '/services/matic-reader/status';
 
 let validSupplyInCirculation = '';
 
@@ -31,7 +30,6 @@ export async function updateModel(model: Model, config: Configuration) {
     try {
       await readData(model, rootNodeEndpoint, config);
       const AllRegisteredNodesEth = model.AllRegisteredNodes;
-      await readDataMatic(model, rootNodeEndpoint, config);
       // override IsCertified with ETH IsCertified (always false in Polygon)
       for (const node in model.AllRegisteredNodes) {
         const isCertifiedEth = AllRegisteredNodesEth[node].IsCertified;
@@ -152,84 +150,6 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
     model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
   } else {
     model.Exchanges.Upbit = { error: 'no valid SupplyInCirculation fetched yet' };
-  }
-}
-
-async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Configuration) {
-  const rootNodeData = await fetchJson(`${rootNodeEndpoint}${MaticReaderStatusSuffix}`);
-
-  let committeeMembers = model.CommitteeNodes;
-  let standByMembers = model.StandByNodes;
-
-  const guardians = readGuardians(rootNodeData, 'Matic');
-  const committeeMembersAddresses = _.map(rootNodeData.Payload.CurrentCommittee, 'EthAddress');
-  committeeMembers = _.pick(guardians, committeeMembersAddresses);
-  if (_.size(committeeMembers) === 0) {
-    Logger.error(`Could not read a valid Matic Committee, current network seems empty.`);
-  }
-  const standbyMembersAddresses = _.map(
-    _.filter(rootNodeData.Payload.CurrentCandidates, data => data.IsStandby),
-    'EthAddress'
-  );
-  standByMembers = _.pick(guardians, standbyMembersAddresses);
-
-  committeeMembersAddresses.forEach(addr => {
-    if (!(addr in model.CommitteeNodes)) {
-      model.CommitteeNodes[addr] = committeeMembers[addr];
-    } else if (model.CommitteeNodes[addr].OrbsAddress === committeeMembers[addr].OrbsAddress) {
-      model.CommitteeNodes[addr].Network = model.CommitteeNodes[addr].Network.concat(committeeMembers[addr].Network);
-    }
-  });
-
-  standbyMembersAddresses.forEach(addr => {
-    if (!(addr in model.StandByNodes)) {
-      model.StandByNodes[addr] = standByMembers[addr];
-    } else if (model.StandByNodes[addr].OrbsAddress === standByMembers[addr].OrbsAddress) {
-      model.StandByNodes[addr].Network = model.StandByNodes[addr].Network.concat(standByMembers[addr].Network);
-    }
-  });
-
-  const allRegisteredNodes = _.mapValues(guardians, g => {
-    return copyGuardianForAllRegistered(g);
-  });
-
-  Object.keys(allRegisteredNodes).forEach(addr => {
-    if (!(addr in model.AllRegisteredNodes)) {
-      model.AllRegisteredNodes[addr] = allRegisteredNodes[addr];
-    } else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
-      model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network);
-    }
-  });
-
-  const web3 = await getWeb3Provider(config.MaticEndpoints);
-
-  if (web3) {
-    const resources = await getResources(rootNodeData, web3);
-    const pos = await getPoSStatus(model, resources, web3);
-    model.PoSDataMatic = pos.PosData;
-
-    model.MaticDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {
-      return delegators.size;
-    });
-
-    ///////////////////////
-    try {
-      const totalWeight = getTotalCommitteeWeight(committeeMembers);
-      const rewardsRate = parseInt(await resources.stakingRewardsContract.methods.getCurrentStakingRewardsRatePercentMille().call()) / 100000;
-
-      const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, g => g.IsCertified));
-      model.Statuses[StatusName.MaticContracts] = await getEthereumContractsStatus(
-        numberOfCertifiedInCommittee,
-        resources,
-        web3,
-        config,
-        totalWeight,
-        rewardsRate
-      );
-    } catch (e) {
-      model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
-      Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);
-    }
   }
 }
 

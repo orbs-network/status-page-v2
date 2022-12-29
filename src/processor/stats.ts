@@ -10,7 +10,7 @@ import _ from 'lodash';
 import BigNumber from 'bignumber.js';
 import { aggregate } from '@makerdao/multicall';
 import {Guardians, Model} from '../model/model';
-import {BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstMaticPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic} from './eth-helper';
+import {BlockTimestamp,  FirstPoSv2BlockNumber,  FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic} from './eth-helper';
 
 const THIRTY_DAYS_IN_BLOCKS = 45000;
 
@@ -26,8 +26,7 @@ const maxPace = 4000000;
 export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
     const { block, data } = await read(resources, web3);
 
-    const chainId = await web3.eth.getChainId();
-    const firstPosBlock = chainId === 137 ? FirstMaticPoSv2BlockNumber : FirstPoSv2BlockNumber;
+    const firstPosBlock = FirstPoSv2BlockNumber;
 
     // Delegations
     const delegatorMap: any = {};
@@ -209,16 +208,10 @@ const DelegationStakeTotal = 'DelegationStakeTotal';
 
 // Function depends on version 0.11.0 of makderdao/multicall only on 'latest' block
 const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
-const MaticMulticallContractAddress = '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
 
 export async function read(resources:OrbsEthResrouces, web3:any) {
-	let config;
-	const chainId = await web3.eth.getChainId()
+	const config = {web3, multicallAddress: MulticallContractAddress};
 
-	if (chainId === CHAIN_ID.ETHEREUM)
-    	config = { web3, multicallAddress: MulticallContractAddress};
-	else if (chainId === CHAIN_ID.MATIC)
-    	config = { web3, multicallAddress: MaticMulticallContractAddress};
 
     const nowTime = Math.floor(Date.now() / 1000) + 13; // time component needs to be "not in past"
 
@@ -340,6 +333,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
         }
     ];
 
+    calls.splice(calls.length-1,1);
     const r = await aggregate(calls, config);
     return { block: multicallToBlockInfo(r), data: r.results.transformed};
 }

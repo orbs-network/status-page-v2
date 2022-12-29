@@ -18,7 +18,7 @@ export class StatusStore {
   }
 
   private async fetchStatusObject(): Promise<Model> {
-    const res = await fetch('/json');
+    const res = await fetch('http://localhost:8081/json');
     const statusJson = (await res.json()) as Model;
 
     return statusJson;
