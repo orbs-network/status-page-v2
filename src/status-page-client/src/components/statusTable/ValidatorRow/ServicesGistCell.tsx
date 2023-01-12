@@ -19,8 +19,8 @@ const useStyles = makeStyles((theme) => ({
     color: 'inherit',
   },
   cell: {
-    textAlign: 'center', 
-    border: '2px solid #06142e', 
+    textAlign: 'center',
+    border: '2px solid #06142e',
     borderRight: 'none',
     minWidth: '140px'
   }
@@ -41,7 +41,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
     } else return HealthLevel.Gray;
   }, [nodeServices]);
 
-  const backgroundColor = backgroundColorFromHealthLevel(aggregatedStatus);
+  const backgroundColor = backgroundColorFromHealthLevel(aggregatedStatus, true);
 
   const servicesIcons = useMemo(() => {
     return nodeServices.map((nodeService, index) => {

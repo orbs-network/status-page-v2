@@ -8,6 +8,7 @@ import InsertChartIcon from '@material-ui/icons/InsertChart';
 import { backgroundColorFromHealthLevel } from '../../statusUtils';
 
 interface IProps {
+  serviceName: string;
   title: string;
   subTitle: string;
   healthLevel: HealthLevel;
@@ -64,8 +65,8 @@ const useStyles = makeStyles((theme) => ({
 
 export const StatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
-  const { healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, metricsLink, statusLink, statusSpec } = props;
-  const backgroundColor = backgroundColorFromHealthLevel(healthLevel);
+  const {serviceName, healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, metricsLink, statusLink, statusSpec } = props;
+  const backgroundColor = backgroundColorFromHealthLevel(healthLevel, !serviceName || !serviceName.startsWith('vm-'));
   const titleComponent = useMemo(() => {
     let baseComponent = <Typography variant={'caption'}>{newlineCommas(title)}</Typography>;
     let finalComponent;
