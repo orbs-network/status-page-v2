@@ -33,11 +33,11 @@ export const POSContractsStatus = React.memo<IProps>((props) => {
   const classes = useStyles();
   return (
     <>
-    {(ethereumStatus === null || ethereumStatus === undefined) ? 
+    {(ethereumStatus === null || ethereumStatus === undefined) ?
       null
       : (
         <Tooltip title={statusTooltip} arrow>
-        <div className={classes.root} style={{margin: '1px', padding: "10px", backgroundColor: backgroundColorFromHealthLevel(ethereumStatus.Status), display: 'flex', alignItems: 'center'}}>
+        <div className={classes.root} style={{margin: '1px', padding: "10px", backgroundColor: backgroundColorFromHealthLevel(ethereumStatus.Status, true), display: 'flex', alignItems: 'center'}}>
             {ethereumStatus.Status == HealthLevel.Green && <>
             <CheckCircleIcon className={classes.icon}/>
             </>}

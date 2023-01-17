@@ -16,7 +16,7 @@ export const VcStatusCell = React.memo<IProps>((props) => {
 
   return (
     <Tooltip title={vc.SubscriptionStatusToolTip} arrow>
-      <TableCell style={{ textAlign: 'center', backgroundColor: backgroundColorFromHealthLevel(vc.SubscriptionStatus) }}>
+      <TableCell style={{ textAlign: 'center', backgroundColor: backgroundColorFromHealthLevel(vc.SubscriptionStatus, false) }}>
         <Typography>{moment.unix(vc.ExpirationTimeSeconds).format('YYYY-MM-DD')}</Typography>
         {vc.IsCertified ? (
           <Tooltip title={'Certified validators only'} arrow>
