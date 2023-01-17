@@ -37,14 +37,6 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     });
   }, [vmServicesNames, validator.NodeServices]);
 
-  const vmKeepersCells = useMemo(() => {
-    return vmServicesNames.filter(serviceName => serviceName === 'vm-keepers').map((serviceName) => {
-      const nodeService = validator.NodeServices[serviceName];
-
-      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} serviceName={serviceName} />;
-    });
-  }, [vmServicesNames, validator.NodeServices]);
-
   const vcCells = useMemo(() => {
     return vcsIds.map((vcId) => {
       const nodeVc = validator.NodeVirtualChains[vcId];
