@@ -13,6 +13,7 @@ export const NodeVcStatusCell = React.memo<IProps>((props) => {
 
   return (
     <StatusCell
+      serviceName={''}
       healthLevel={nodeVc.Status}
       title={nodeVc.BlockHeight.toLocaleString()}
       // titleLink={nodeVc.URLs.Status}
