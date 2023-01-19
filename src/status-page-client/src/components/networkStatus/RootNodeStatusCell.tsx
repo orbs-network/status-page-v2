@@ -32,11 +32,11 @@ export const RootNodeStatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
   return (
       <>
-            {(rootStatus === null || rootStatus === undefined) ? 
+            {(rootStatus === null || rootStatus === undefined) ?
               null
               : (
                 <Tooltip title={rootStatus.StatusToolTip} arrow>
-                <div className={classes.root} style={{margin: '1px', padding: "10px", backgroundColor: backgroundColorFromHealthLevel(rootStatus.Status), display: 'flex', alignItems: 'center'}}>
+                <div className={classes.root} style={{margin: '1px', padding: "10px", backgroundColor: backgroundColorFromHealthLevel(rootStatus.Status, true), display: 'flex', alignItems: 'center'}}>
                     {rootStatus.Status == HealthLevel.Green && <>
                     <CheckCircleIcon className={classes.icon}/>
                     </>}

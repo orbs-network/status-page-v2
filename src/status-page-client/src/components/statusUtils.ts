@@ -1,9 +1,9 @@
 import { HealthLevel } from '../shared/HealthLevel';
 
-export function backgroundColorFromHealthLevel(healthLevel: HealthLevel) {
+export function backgroundColorFromHealthLevel(healthLevel: HealthLevel, infra: boolean) {
   switch (healthLevel) {
     case HealthLevel.Green: {
-      return '#66bb6a';
+            return infra ? '#66bb6a' : '#539a54';
     }
     case HealthLevel.Yellow: {
       return '#bcc900';

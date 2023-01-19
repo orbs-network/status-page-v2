@@ -24,7 +24,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     return [...servicesNames, ...expandedServicesNames].map((serviceName) => {
       const nodeService = validator.NodeServices[serviceName];
 
-      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
+      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} serviceName={serviceName} />;
     });
   }, [servicesNames,expandedServicesNames, validator.NodeServices]);
 
@@ -32,7 +32,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     return vmServicesNames.map((serviceName) => {
       const nodeService = validator.NodeServices[serviceName];
 
-      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} />;
+      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} serviceName={serviceName} />;
     });
   }, [vmServicesNames, validator.NodeServices]);
 
@@ -48,7 +48,7 @@ export const ValidatorRow = React.memo<IProps>((props) => {
     return expandedServicesNames.map((service) => {
       const nodeService = validator.NodeServices[service];
 
-      return <NodeServiceStatusCell nodeService={nodeService} key={service} />;
+      return <NodeServiceStatusCell nodeService={nodeService} key={service} serviceName={service} />;
     });
   }, [expandedServicesNames, validator.NodeServices]);
 

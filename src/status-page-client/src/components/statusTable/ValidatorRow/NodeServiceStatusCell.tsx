@@ -4,13 +4,15 @@ import { StatusCell } from './StatusCell';
 
 interface IProps {
   nodeService: NodeService;
+    serviceName: string;
 }
 
 export const NodeServiceStatusCell = React.memo<IProps>((props) => {
-  const { nodeService } = props;
+    const {nodeService, serviceName} = props;
 
   return (
     <StatusCell
+      serviceName={serviceName}
       healthLevel={nodeService.Status}
       title={nodeService.StatusMsg}
       titleLink={nodeService.URLs.Status}
