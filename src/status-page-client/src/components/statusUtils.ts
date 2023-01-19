@@ -6,7 +6,7 @@ export function backgroundColorFromHealthLevel(healthLevel: HealthLevel, infra: 
             return infra ? '#66bb6a' : '#539a54';
     }
     case HealthLevel.Yellow: {
-      return '#f3c100';
+      return '#bcc900';
     }
     case HealthLevel.Red: {
       return '#d32f2f';
