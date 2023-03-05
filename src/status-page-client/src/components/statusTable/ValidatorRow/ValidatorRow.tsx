@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
-import { TableRow } from '@material-ui/core';
-import { Guardian } from '../../../../../model/model';
-import { NodeServiceStatusCell } from './NodeServiceStatusCell';
-import { ServicesGistCell } from './ServicesGistCell';
-import { NodeVcStatusCell } from './NodeVcStatusCell';
-import { ValidatorInfoCell } from './ValidatorInfoCell';
-import { isDebug, showVmServices } from '../../../consts';
+import React, {useMemo} from 'react';
+import {TableRow} from '@material-ui/core';
+import {Guardian} from '../../../../../model/model';
+import {NodeServiceStatusCell} from './NodeServiceStatusCell';
+import {ServicesGistCell} from './ServicesGistCell';
+import {NodeVcStatusCell} from './NodeVcStatusCell';
+import {ValidatorInfoCell} from './ValidatorInfoCell';
+import {isDebug, showVmServices} from '../../../consts';
+
 interface IProps {
   validator: Guardian;
   isInCommitteeEth: boolean;
@@ -29,7 +30,15 @@ export const ValidatorRow = React.memo<IProps>((props) => {
   }, [servicesNames,expandedServicesNames, validator.NodeServices]);
 
   const vmServicesCells = useMemo(() => {
-    return vmServicesNames.map((serviceName) => {
+    return vmServicesNames.filter(serviceName => serviceName !== 'vm-keepers').map((serviceName) => {
+      const nodeService = validator.NodeServices[serviceName];
+
+      return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} serviceName={serviceName} />;
+    });
+  }, [vmServicesNames, validator.NodeServices]);
+
+  const vmKeepersCells = useMemo(() => {
+    return vmServicesNames.filter(serviceName => serviceName === 'vm-keepers').map((serviceName) => {
       const nodeService = validator.NodeServices[serviceName];
 
       return <NodeServiceStatusCell key={serviceName} nodeService={nodeService} serviceName={serviceName} />;
@@ -66,6 +75,8 @@ export const ValidatorRow = React.memo<IProps>((props) => {
 
       {/* Expanded services */}
       {expandServices ? expandedServicesCells : servicesCells}
+
+      {showVmServices() &&  isDebug() && vmKeepersCells}
 
       {showVmServices() &&  vmServicesCells}
       {/* Vcs status */}
