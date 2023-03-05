@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   headerRow: {
     borderBottom: '2px solid #cccccc20',
   },
- 
+
   headerCell: {
     width: '10rem',
     textAlign: 'center',
@@ -82,14 +82,23 @@ export const StatusTableHeader = React.memo<IProps>((props) => {
             </TableCell>
           );
         })}
-        
-        {showVmServices() &&  vmServices.map((s, index) => {
+
+        {showVmServices() && isDebug() && vmServices.filter(service => service.Name === 'vm-keepers').map((s, index) => {
           return (
             <TableCell key={s.Name} className={classes.headerCell}>
               <Typography> {s.Name}</Typography>
             </TableCell>
           );
         })}
+
+        {showVmServices() &&  vmServices.filter(service => service.Name !== 'vm-keepers').map((s, index) => {
+          return (
+            <TableCell key={s.Name} className={classes.headerCell}>
+              <Typography> {s.Name}</Typography>
+            </TableCell>
+          );
+        })}
+
         {isDebug() && vcs.map((vc) => <VcStatusCell key={vc.Id} vc={vc} />)}
       </TableRow>
     );
