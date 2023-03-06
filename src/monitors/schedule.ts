@@ -1,5 +1,7 @@
 
 import fetch from 'node-fetch';
+import {svcStatusDataByNode} from '../monitors/node-data'
+
 
 // AbortController was added in node v14.17.0 globally
 import AbortController from "abort-controller"
@@ -113,12 +115,18 @@ async function checkRecovery(url:string, node:any, res:any) {
     // enum updater services
     const recovery = status.Payload.Recovery;
     // last tick
-    const dt = new Date(recovery.lastTick)
-    // add 6h
-    const numOfHours = 6;
-    dt.setTime(dt.getTime() + numOfHours * 60 * 60 * 1000);
+    if(recovery?.lastTick){
+        const dt = new Date(recovery.lastTick)
+        // add 6h
+        const numOfHours = 6;
+        dt.setTime(dt.getTime() + numOfHours * 60 * 60 * 1000);
+        res.push({ nodeName: node.Name, time: dt })
+    }
+    else {
+        res.push({ nodeName: node.Name, error: "recovery info not found" });
+    }
 
-    res.push({ nodeName: node.Name, time: dt })
+    
 }
 
 ////////////////////////////////////////////////
@@ -149,4 +157,25 @@ export async function getRecovery(_req:any, response:any) {
         return 0;
     })
     response.status(200).json(res);
+}
+
+////////////////////////////////////////////////
+export async function svcDataByNode(req:any, res:any) {
+    if(!req.query.service || ! req.query.columns){
+        res.status(422).send({
+          message: 'service or columns are missing '
+       });
+       return; 
+      }
+      const cs = req.query.columns as string;
+      
+      try{
+        const columns = cs.indexOf(',')>1 ? cs.split(','):[cs];      
+        await svcStatusDataByNode( req.query.service as string, columns, res);            
+      }
+      catch(e){
+        res.status(400).send({
+          message:e
+       });
+      }
 }
