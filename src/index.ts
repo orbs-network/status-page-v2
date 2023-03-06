@@ -30,7 +30,7 @@ export function serve(config: Configuration) {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
   });
 
-  app.get('/json', cors(), (_request, response) => {
+  app.get('/json', (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body);
   });
