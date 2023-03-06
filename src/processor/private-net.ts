@@ -33,9 +33,6 @@ async function readData(model: Model, rootNodeEndpoint: string) {
   const rootNodeData = await fetchJson(`${rootNodeEndpoint}${NodeManagementSuffix}`);
 
   const virtualChainList = readVirtualChains(rootNodeData);
-  if (_.size(virtualChainList) === 0 ) {
-    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
-  }
 
   const services = [
     // choose the services that exist in a private network

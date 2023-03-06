@@ -54,9 +54,6 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   const vmServices = readVmServices(rootNodeData.Payload.CurrentImageVersions.main);
 
   const virtualChainList = readVirtualChains(rootNodeData, config);
-  if (_.size(virtualChainList) === 0) {
-    Logger.error(`Could not read valid Virtual Chains, current network seems not to be running any.`);
-  }
 
   const services = [
     // choose the services that exist in a public network
