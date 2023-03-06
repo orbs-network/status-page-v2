@@ -15,6 +15,11 @@ import {Processor} from './processor/main';
 import * as path from 'path';
 import {getNextUpdates, getRecovery, svcDataByNode} from './monitors/schedule'
 
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import cors from "cors";
+
 export function serve(config: Configuration) {
   const processor = new Processor(config);
 
@@ -30,7 +35,7 @@ export function serve(config: Configuration) {
     res.sendFile(path.join(__dirname, './status-page-client/build/index.html'));
   });
 
-  app.get('/json', (_request, response) => {
+  app.get('/json', cors(), (_request, response) => {
     const body = processor.getModel();
     response.status(200).json(body);
   });
