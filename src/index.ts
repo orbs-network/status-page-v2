@@ -79,29 +79,9 @@ export function serve(config: Configuration) {
   });
 
   /// schedule
-  app.get('/schedule/recovery', getRecovery);
+  app.get('/schedule/recovery',getRecovery);
   app.get('/schedule/update',  getNextUpdates);
-
-  // ServicedataByNode
-  app.get('/svc_data_by_node', (req, res) => {
-    if(!req.query.service || ! req.query.columns){
-      res.status(422).send({
-        message: 'service or columns are missing '
-     });
-     return;
-    }
-    const cs = req.query.columns as string;
-    const columns = cs.indexOf(',')>1 ? cs.split(','):[cs];
-    try{
-      svcStatusDataByNode( req.query.service as string, columns, res);
-    }
-    catch(e){
-      res.status(400).send({
-        message:e
-     });
-    }
-  });
-
+  app.get('/svc_data_by_node', svcDataByNode);
 
 
   app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
