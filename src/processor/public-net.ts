@@ -10,7 +10,7 @@ import _ from 'lodash';
 import * as Logger from '../logger';
 import { Configuration } from '../config';
 import { fetchJson, isStaleTime, getCurrentClockTime, timeAgoText } from '../helpers';
-import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName } from '../model/model';
+import { Model, VirtualChain, Service, Guardians, HealthLevel, Guardian, GenStatus, StatusName, ExchangeEntry } from '../model/model';
 import { getResources, getWeb3Provider } from './eth-helper';
 import { generateErrorEthereumContractsStatus, getEthereumContractsStatus } from './ethereum';
 import * as URLs from './url-generator';
@@ -41,11 +41,11 @@ export async function updateModel(model: Model, config: Configuration) {
       }
       return
     } catch (e) {
-      Logger.log(`Warning: access to Node ${rootNodeEndpoint} failed, trying another. Error: ${e}`);
+      Logger.log(`Warning: failed to readData, trying another node. Error: ${e}`);
     }
   }
 
-  throw new Error(`Error while creating Status Page, all Netowrk Nodes failed to respond.`);
+  throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
 }
 
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
@@ -144,13 +144,18 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       Logger.error(model.Statuses[StatusName.EthereumContracts].StatusToolTip);
     }
   }
-  // calc exchange data regardless if contract fetch was successfull
-  if (validSupplyInCirculation.length) {
-    // model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
-    model.Exchanges.Upbit = {}
-  } else {
-    model.Exchanges.Upbit = { error: 'no valid SupplyInCirculation fetched yet' };
-  }
+  // calc exchange data regardless if contract fetch was successful
+    if (validSupplyInCirculation.length) {
+      try {
+        model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
+      } catch (e) {
+        Logger.error('Failed to fetch Upbit data')
+        model.Exchanges.Upbit = {error: 'Failed to fetch Upbit data'};
+      }
+    }
+    else {
+      model.Exchanges.Upbit = {error: 'no valid SupplyInCirculation fetched yet'};
+    }
 }
 
 async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Configuration) {
@@ -412,83 +417,83 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   });
 }
 
-// async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
-//   // TODO: first draft
-//   const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS';
-//   const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC';
-//   const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC';
-//   const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC';
-//
-//   const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any) => v.trade_price);
-//   // const data = await fetchJson(url);
-//   const idrBtc = (await fetchJson(idrUrl))[0].trade_price;
-//   const sgdBtc = (await fetchJson(sgdUrl))[0].trade_price;
-//   const thbBtc = (await fetchJson(thbUrl))[0].trade_price;
-//
-//   const usdtOrbs = new BigNumber(usdtBtc).multipliedBy(btcOrbs).toNumber();
-//   const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
-//   const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
-//   const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
-//   const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18);
-//
-//   return [
-//     {
-//       symbol: 'ORBS',
-//       currencyCode: 'KRW',
-//       price: krwOrbs,
-//       marketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
-//       accTradePrice24h: null,
-//       circulatingSupply: Number(normCirculatingSupply),
-//       maxSupply: 10000000000,
-//       provider: 'ORBS Ltd.',
-//       lastUpdatedTimestamp: Date.now()
-//     },
-//     {
-//       symbol: 'ORBS',
-//       currencyCode: 'USDT',
-//       price: usdtOrbs,
-//       marketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
-//       accTradePrice24h: null,
-//       circulatingSupply: Number(normCirculatingSupply),
-//       maxSupply: 10000000000,
-//       provider: 'ORBS Ltd.',
-//       lastUpdatedTimestamp: Date.now()
-//     },
-//     {
-//       symbol: 'ORBS',
-//       currencyCode: 'IDR',
-//       price: isdrOrbs,
-//       marketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
-//       accTradePrice24h: null,
-//       circulatingSupply: Number(normCirculatingSupply),
-//       maxSupply: 10000000000,
-//       provider: 'ORBS Ltd.',
-//       lastUpdatedTimestamp: Date.now()
-//     },
-//     {
-//       symbol: 'ORBS',
-//       currencyCode: 'SGD',
-//       price: sgdOrbs,
-//       marketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
-//       accTradePrice24h: null,
-//       circulatingSupply: Number(normCirculatingSupply),
-//       maxSupply: 10000000000,
-//       provider: 'ORBS Ltd.',
-//       lastUpdatedTimestamp: Date.now()
-//     },
-//     {
-//       symbol: 'ORBS',
-//       currencyCode: 'THB',
-//       price: thbOrbs,
-//       marketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
-//       accTradePrice24h: null,
-//       circulatingSupply: Number(normCirculatingSupply),
-//       maxSupply: 10000000000,
-//       provider: 'ORBS Ltd.',
-//       lastUpdatedTimestamp: Date.now()
-//     }
-//   ];
-// }
+async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
+  // TODO: first draft
+  const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS';
+  const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC';
+  const sgdUrl = 'https://sg-api.upbit.com/v1/ticker?markets=SGD-BTC';
+  const thbUrl = 'https://th-api.upbit.com/v1/ticker?markets=THB-BTC';
+
+  const [krwOrbs, usdtBtc, btcOrbs] = (await fetchJson(url)).map((v: any) => v.trade_price);
+  // const data = await fetchJson(url);
+  const idrBtc = (await fetchJson(idrUrl))[0].trade_price;
+  const sgdBtc = (await fetchJson(sgdUrl))[0].trade_price;
+  const thbBtc = (await fetchJson(thbUrl))[0].trade_price;
+
+  const usdtOrbs = new BigNumber(usdtBtc).multipliedBy(btcOrbs).toNumber();
+  const isdrOrbs = new BigNumber(idrBtc).multipliedBy(btcOrbs).toNumber();
+  const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
+  const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
+  const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18);
+
+  return [
+    {
+      symbol: 'ORBS',
+      currencyCode: 'KRW',
+      price: krwOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
+    },
+    {
+      symbol: 'ORBS',
+      currencyCode: 'USDT',
+      price: usdtOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
+    },
+    {
+      symbol: 'ORBS',
+      currencyCode: 'IDR',
+      price: isdrOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
+    },
+    {
+      symbol: 'ORBS',
+      currencyCode: 'SGD',
+      price: sgdOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
+    },
+    {
+      symbol: 'ORBS',
+      currencyCode: 'THB',
+      price: thbOrbs,
+      marketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
+      accTradePrice24h: null,
+      circulatingSupply: Number(normCirculatingSupply),
+      maxSupply: 10000000000,
+      provider: 'ORBS Ltd.',
+      lastUpdatedTimestamp: Date.now()
+    }
+  ];
+}
 
 function getCoinmarketcapInfo(totalSupply: string, decimals: string): number {
   return new BigNumber(totalSupply).dividedBy(new BigNumber(10).exponentiatedBy(decimals)).toNumber();
