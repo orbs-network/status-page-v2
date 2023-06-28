@@ -15,10 +15,12 @@ import {Processor} from './processor/main';
 import * as path from 'path';
 import {getNextUpdates, getRecovery} from './monitors/schedule'
 import {svcStatusDataByNode} from './monitors/node-data'
+import cloneDeep from 'lodash/cloneDeep';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import cors from "cors";
+import {Guardian} from "./model/model";
 
 export function serve(config: Configuration) {
   const processor = new Processor(config);
@@ -36,8 +38,25 @@ export function serve(config: Configuration) {
   });
 
   app.get('/json', cors(), (_request, response) => {
-    const body = processor.getModel();
+
+    const model = processor.getModel();
+
+    const body = cloneDeep( model);
+
+    removeVMStatusJson(body.CommitteeNodes);
+    removeVMStatusJson(body.StandByNodes);
+    removeVMStatusJson(body.AllRegisteredNodes);
+
     response.status(200).json(body);
+
+  });
+
+  app.get('/json-full', cors(), (_request, response) => {
+
+    const body = processor.getModel();
+
+    response.status(200).json(body);
+
   });
 
   app.get('/supply', (_request, response) => {
@@ -123,4 +142,20 @@ export function serve(config: Configuration) {
     processorTask.stop();
   });
   return server;
+}
+
+/**
+ * removes the VMStatusJson object from nodes status to reduce the size of status json for orbs status page
+ *
+ * @param nodes
+ */
+function removeVMStatusJson(nodes: { [p: string]: Guardian }) {
+
+  for (const node of Object.values(nodes)) {
+
+    for (const service of Object.values(node.NodeServices)) {
+      delete service.VMStatusJson
+    }
+
+  }
 }
