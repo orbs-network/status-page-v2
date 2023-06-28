@@ -154,8 +154,15 @@ function removeVMStatusJson(nodes: { [p: string]: Guardian }) {
   for (const node of Object.values(nodes)) {
 
     for (const service of Object.values(node.NodeServices)) {
-      delete service.VMStatusJson
+
+      delete service.VMStatusJson;
+      service.StatusToolTip = truncateWithEllipsis(service.StatusToolTip, 250);
+
     }
 
   }
+}
+
+function truncateWithEllipsis(str:string, maxLength:number) {
+  return str.length > maxLength ? str.substring(0, maxLength - 3) + '...' : str;
 }
