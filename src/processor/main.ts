@@ -32,7 +32,7 @@ import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeService
 import {Monitors} from '../monitors/main';
 
 const NumberOfPingTries = 10;
-const DefaultPingTimeout = 3000;
+const DefaultPingTimeout = 5000;
 const MinErrorsForCriticalAlert = 6;
 
 export class Processor {
@@ -266,7 +266,8 @@ export class Processor {
       r => r
     );
 
-    if (healthMessages.length > 0) {
+    //if (healthMessages.length > 0) {
+    if (this.config.PingUrlEndpoints.length && healthMessages.length / this.config.PingUrlEndpoints.length > 0.4) {
       return {
         Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
