@@ -266,8 +266,7 @@ export class Processor {
       r => r
     );
 
-    //if (healthMessages.length > 0) {
-    if (this.config.PingUrlEndpoints.length && healthMessages.length / this.config.PingUrlEndpoints.length > 0.4) {
+    if (healthMessages.length > 0) {    
       return {
         Status: HealthLevel.Yellow,
         StatusMsg: `${healthMessages.length} of ${this.config.PingUrlEndpoints.length} monitored URLs failed to respond on time.`,
@@ -360,7 +359,8 @@ async function pingOneUrl(url: string, threshhold: number): Promise<string> {
       numErrs++;
     }
   }
-  if (numErrs !== 0) {
+  //if (numErrs !== 0) {
+  if(NumberOfPingTries && numErrs / NumberOfPingTries > 0.4){    
     return `URL '${url}' failed to respond ${numErrs} out of ${NumberOfPingTries} times (timeout set at ${threshhold})`;
   }
   return '';
