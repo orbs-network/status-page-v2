@@ -360,7 +360,7 @@ async function pingOneUrl(url: string, threshhold: number): Promise<string> {
     }
   }
   //if (numErrs !== 0) {
-  if(NumberOfPingTries && numErrs / NumberOfPingTries > 0.4)    
+  if(NumberOfPingTries && numErrs / NumberOfPingTries > 0.4){    
     return `URL '${url}' failed to respond ${numErrs} out of ${NumberOfPingTries} times (timeout set at ${threshhold})`;
   }
   return '';
