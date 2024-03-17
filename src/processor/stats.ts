@@ -23,6 +23,20 @@ const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUN
 
 const maxPace = 4000000;
 
+async function sumUnlocked(wallets: string[], resources:OrbsEthResrouces)  {
+    let sum = new BigNumber(0)
+
+    for (const w of wallets){
+        try{            
+            const status = await resources.stakingContract.methods.getUnstakeStatus(w).call()
+            sum = sum.plus(status.cooldownAmount)
+        }catch(e){
+            console.error(`fail to call getUnstakeStatus on ${w}`, e)
+        }
+    }
+    return sum;
+    
+}
 export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
     const { block, data } = await read(resources, web3);
 
@@ -45,11 +59,16 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
             }
         }
     }
+    // calc total UNLOCKED of NON_CIRCULATING_WALLETS
+    const unlockedNonCirculating = await sumUnlocked(NON_CIRCULATING_WALLETS, resources);
+    console.log(`chainId: ${chainId}`)
+    console.log(`stakingContract: ${resources.stakingContract}`)    
+    console.log("total ORBS non circulating wallets unlocked in cooldown: ", unlockedNonCirculating.dividedBy('1e18').toNumber())
 
     // Token
     const supplyInCirculation = data[Erc20TotalSupply]
         .minus(data[Erc20LongTerm]).minus(data[Erc20PrivateSale]).minus(data[Erc20TeamAndFounding]).minus(data[Erc20Advisors])
-        .minus(data[StakingLongTerm]).minus(data[StakingPrivateSale]).minus(data[StakingTeamAndFounding]).minus(data[StakingAdvisors]);
+        .minus(data[StakingLongTerm]).minus(data[StakingPrivateSale]).minus(data[StakingTeamAndFounding]).minus(data[StakingAdvisors]).minus(unlockedNonCirculating);
 
     const startBlock = await getBlockInfo(block.number - THIRTY_DAYS_IN_BLOCKS, web3);
     const timePeriodSeconds = block.time - startBlock.time;
