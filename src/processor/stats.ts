@@ -62,7 +62,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     // calc total UNLOCKED of NON_CIRCULATING_WALLETS
     const unlockedNonCirculating = await sumUnlocked(NON_CIRCULATING_WALLETS, resources);
     console.log(`chainId: ${chainId}`)
-    console.log(`stakingContract: ${resources.stakingContract}`)    
+    console.log(`stakingContract Address: ${resources.stakingAddress}`)    
     console.log("total ORBS non circulating wallets unlocked in cooldown: ", unlockedNonCirculating.dividedBy('1e18').toNumber())
 
     // Token
