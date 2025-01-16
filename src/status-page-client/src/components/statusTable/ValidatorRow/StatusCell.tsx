@@ -119,7 +119,16 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
   }, [classes.link, statusLink]);
 
-  console.log(statusSpec);
+  if (title=="N/A" || title=="offline") {
+    return (
+      <TableCell
+        className={classes.cell}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
+      >
+        <Typography variant={'caption'}>{title}</Typography>
+      </TableCell>
+    );
+  }
 
   const renderStatusSpec = useMemo(() => {
     if (statusSpec) {

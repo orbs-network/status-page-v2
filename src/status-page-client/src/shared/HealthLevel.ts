@@ -3,4 +3,5 @@ export enum HealthLevel {
   Yellow = 'Yellow',
   Red = 'Red',
   Gray = 'Gray',
+  Blue = 'Blue'
 }

@@ -1,8 +1,6 @@
 # Ignore generated directories
 dist/
 exec/
-
-
 # Logs
 logs
 *.log
@@ -70,3 +68,5 @@ typings/
 
 #ide related
 .idea
+/jordan.env
+*.run.xml

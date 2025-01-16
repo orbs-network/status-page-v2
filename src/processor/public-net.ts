@@ -31,6 +31,9 @@ export async function updateModel(model: Model, config: Configuration) {
     try {
       await readData(model, rootNodeEndpoint, config);
       const AllRegisteredNodesEth = model.AllRegisteredNodes;
+
+      Logger.log(`Successfully readData from ${rootNodeEndpoint}`);
+
       await readDataMatic(model, rootNodeEndpoint, config);
       // override IsCertified with ETH IsCertified (always false in Polygon)
       for (const node in model.AllRegisteredNodes) {
@@ -38,18 +41,26 @@ export async function updateModel(model: Model, config: Configuration) {
         model.AllRegisteredNodes[node].IsCertified = model.AllRegisteredNodes[node].IsCertified || isCertifiedEth;
         if (model.CommitteeNodes[node]) model.CommitteeNodes[node].IsCertified = model.CommitteeNodes[node].IsCertified || isCertifiedEth;
         if (model.StandByNodes[node]) model.StandByNodes[node].IsCertified = model.StandByNodes[node].IsCertified || isCertifiedEth;
+
+        Logger.log(`Node eth ${node} is certified: ${model.AllRegisteredNodes[node].IsCertified}`);
       }
-      return
+      // return
     } catch (e) {
       Logger.log(`Warning: failed to readData, trying another node. Error: ${e}`);
     }
   }
 
-  throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
+  // throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
 }
 
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
-  const rootNodeData = await fetchJson(`${rootNodeEndpoint}${ManagementStatusSuffix}`);
+  let rootNodeData;
+
+  if (rootNodeEndpoint.indexOf("127.0.0.1")>-1 || rootNodeEndpoint.indexOf("localhost")>-1) {
+    rootNodeData = await fetchJson(`${rootNodeEndpoint}`);
+  } else {
+    rootNodeData = await fetchJson(`${rootNodeEndpoint}${ManagementStatusSuffix}`);
+  }
 
   const vmServices = readVmServices(rootNodeData.Payload.CurrentImageVersions.main);
 
@@ -58,6 +69,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   const services = [
     // choose the services that exist in a public network
     Service.Boyar,
+    Service.Controller,
     Service.Signer,
     Service.Logger,
     Service.Management,

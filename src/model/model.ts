@@ -33,7 +33,7 @@ export enum StatusName {
 }
 export interface GenStatus {
   Status: HealthLevel;
-  StatusToolTip: string;
+  StatusToolTip: any;
   StatusMsg: string;
 }
 
@@ -43,7 +43,8 @@ export enum HealthLevel {
   Green = 'Green',
   Yellow = 'Yellow',
   Red = 'Red',
-  Gray = 'Gray'
+  Gray = 'Gray',
+  Blue = 'Blue'
 }
 
 export interface VirtualChain {
@@ -73,6 +74,7 @@ export class Service {
   static Management = new Service('Management', 'management-service', 'https://github.com/orbs-network/management-service/tree/');
   static MaticReader = new Service('MaticReader', 'matic-reader', 'https://github.com/orbs-network/management-service/tree/');
   static MaticWriter = new Service('MaticWriter', 'matic-writer', 'https://github.com/orbs-network/ethereum-writer/tree/');
+  static Controller = new Service('Controller', 'controller', 'https://github.com/orbs-network/v3-node-setup');
 }
 
 export interface Guardians {
@@ -171,6 +173,17 @@ export interface NodeService extends GenStatus {
 }
 
 export function nodeServiceCopy(ns: NodeService) {
+  if (ns === undefined) {
+    return {
+        StatusMsg: '',
+        Status: HealthLevel.Gray,
+        StatusToolTip: '',
+        Timestamp: '',
+        Version: '',
+        URLs: { Status: '', Logs: '', Version: '', Metrics: '' }
+    }
+  }
+
   return {
     StatusMsg: ns.StatusMsg,
     Status: ns.Status,

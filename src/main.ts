@@ -9,6 +9,7 @@
 import { serve } from '.';
 import { parseArgs } from './cli-args';
 import * as Logger from './logger';
+require('source-map-support').install();
 
 process.on('uncaughtException', function (err) {
   Logger.log('Uncaught exception on process, shutting down:');
