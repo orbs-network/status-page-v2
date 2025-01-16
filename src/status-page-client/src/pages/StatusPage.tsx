@@ -16,8 +16,6 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   const [showAllRegistered, setShowAllRegistered] = useState(false);
   const onClick = showAllRegistered ? () => setShowAllRegistered(false) : () => setShowAllRegistered(true);
 
-  console.log(toJS(statusStore.statusModel));
-
   const virtualChains = statusStore?.statusModel?.VirtualChains;
   const {services, vmServices, expandedServices} = getServices(statusStore?.statusModel?.Services);
 

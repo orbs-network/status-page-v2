@@ -33,7 +33,7 @@ export enum StatusName {
 }
 export interface GenStatus {
   Status: HealthLevel;
-  StatusToolTip: any;
+  StatusToolTip: string;
   StatusMsg: string;
 }
 
