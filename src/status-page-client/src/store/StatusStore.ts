@@ -11,7 +11,7 @@ export class StatusStore {
     this.fetchAndSetStatus();
   }
 
-  private async fetchAndSetStatus() {
+  public async fetchAndSetStatus() {
     // TODO : O.L : Organise it and add error handling
     const model = await this.fetchStatusObject();
     this.setStatusModel(model);

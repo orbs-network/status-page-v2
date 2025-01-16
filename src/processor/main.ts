@@ -30,10 +30,12 @@ import * as Public from './public-net';
 import * as Private from './private-net';
 import {generateNodeServiceUrls, generateNodeVirtualChainUrls, updateNodeServiceUrlsWithVersion} from './url-generator';
 import {Monitors} from '../monitors/main';
+import {FailedAttemptsTracker} from './fail_tracker';
 
 const NumberOfPingTries = 10;
 const DefaultPingTimeout = 5000;
 const MinErrorsForCriticalAlert = 6;
+export const tracker = new FailedAttemptsTracker();
 
 export class Processor {
   private model = new Model();
@@ -50,6 +52,7 @@ export class Processor {
   // single tick of the run loop
   async run() {
     try {
+      const start = Date.now();
       Logger.log('Processor: waking up do refresh model.');
 
       const newModel = new Model();
@@ -60,27 +63,34 @@ export class Processor {
       }
       Logger.log('Processor: finished discovering nodes to query.');
 
+      this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
+
       // read all the different url-generated data
       const tasks: Promise<any>[] = [];
       tasks.push(...this.readNodesVirtualChains(newModel.CommitteeNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesVirtualChains(newModel.StandByNodes, newModel.VirtualChains));
       tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
       tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
+      tasks.push(...this.readNodesServices(newModel.AllRegisteredNodes, newModel.Services));
       await Promise.all(tasks);
       this.updateVCsColors(newModel.CommitteeNodes);
       this.updateVCsColors(newModel.StandByNodes);
-      this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
+
       if (this.shouldSetCriticalAlert(newModel.AllRegisteredNodes)) newModel.CriticalAlert = true;
       newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
       newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
       Logger.log('Processor: finished query all nodes/vcs/services/urls.');
       // monitoring
       await this.monitors.run(this.model, newModel);
-      Logger.log('Processor: finished monitoring.');
+
+      const end = Date.now();
+
+      Logger.log(`Processor: finished monitoring, took: ${end - start} ms`);
 
       // update model
       this.model = newModel;
     } catch (e) {
+      console.log (e);
       Logger.error(`Failed to update model, error: ${e}. Skipping ... `);
     }
   }
@@ -112,7 +122,7 @@ export class Processor {
 
       const errMsg = vcStatusData?.Error || '';
       const timestamp = vcStatusData.Timestamp || '';
-      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
+      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, "", timestamp);
 
       const inOrderBlockHeight = vcStatusData.Payload?.BlockStorage?.InOrderBlock?.BlockHeight || 0;
       const topBlockHeight = vcStatusData.Payload?.BlockStorage?.TopBlock?.BlockHeight || 0; //
@@ -133,9 +143,11 @@ export class Processor {
       Logger.error(`Error while attempting to fetch status of Node Virtual Chain ${vc.Id} of ${node.Name}(${node.Ip}): ${err}`);
       return nodeVirtualChainBuilder(
         urls,
-        `HTTP gateway for node may be down`,
+        //`HTTP gateway for node may be down`,
+        `offline`,
         HealthLevel.Yellow,
-        `HTTP gateway for node may be down, status endpoint does not respond`
+        //`HTTP gateway for node may be down, status endpoint does not respond`
+        `offline`
       );
     }
   }
@@ -190,7 +202,7 @@ export class Processor {
 
       const errMsg = this.filterIgnoredServiceErrors(service.Name, data?.Error) || '';
       const timestamp = data.Timestamp || '';
-      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, timestamp);
+      const { healthLevel, healthLevelToolTip } = this.healthLevel(errMsg, data?.Extra, timestamp);
 
       return nodeServiceBuilder(
           urls,
@@ -205,11 +217,23 @@ export class Processor {
 
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
+
+      if ((err.message.includes("404") && service.Name === "Controller") || (err.message.includes("404") && service.Name === "Boyar")) {
+        return nodeServiceBuilder(
+          urls,
+          `N/A`,
+          HealthLevel.Green,
+          `N/A`
+        );
+      }
+
       return nodeServiceBuilder(
         urls,
-        `HTTP gateway for service may be down`,
+        //`HTTP gateway for service may be down`,
+        `offline`,
         HealthLevel.Yellow,
-        `HTTP gateway for service may be down, status endpoint does not respond`
+        //`HTTP gateway for service may be down, status endpoint does not respond`
+        `offline`
       );
     }
   }
@@ -237,10 +261,19 @@ export class Processor {
     });
   }
 
-  private healthLevel(errMsg: string, timestamp: string) {
+  private healthLevel(errMsg: string, extra : string,  timestamp: string) {
     const ignoredErrors = ['signAndSendTransaction didnt complete', 'Cannot read properties of undefined'] // ignore some Keepers errors
     let healthLevel = HealthLevel.Green;
     let healthLevelToolTip = '';
+
+    if (extra!=undefined && extra.indexOf('updating')>-1) {
+      healthLevel = HealthLevel.Blue;
+      const obj = JSON.parse(extra);
+      healthLevelToolTip = obj.time;
+
+      return { healthLevel, healthLevelToolTip };
+    }
+
     if (errMsg !== '' && !ignoredErrors.some(e => errMsg.includes(e))) {
       healthLevel = HealthLevel.Yellow;
       healthLevelToolTip = errMsg;

@@ -13,7 +13,7 @@ dotenv.config();
 
 export const defaultConfiguration: Configuration = {
   Port: Number(process.env.PORT),
-  ProcessorPollTimeSeconds: Number(process.env.POLL_INTERVAL_SECONDS) || 5 * 60,
+  ProcessorPollTimeSeconds: Number(process.env.POLL_INTERVAL_SECONDS) || 1 * 30,
   MonitorSuppressMsgs: process.env.MONITOR_SUPPRESS_MSGS ? String(process.env.MONITOR_SUPPRESS_MSGS).split(',') : [],
   MonitorSlackToken: String(process.env.SLACK_TOKEN || ''),
   MonitorSlackChannel: String(process.env.SLACK_CHANNEL) || 'prod-v2-monitoring',
@@ -38,6 +38,7 @@ export const defaultConfiguration: Configuration = {
   MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
   MaxTimeSinceLastEventMatic: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*3,
   xCoreUrl:"http://0xcore.orbs.com/services/management-service/status",
+  PatchZeus: process.env.PATCH_ZEUS === "true" || false,
 
   NetworksContracts: {
     "ETHEREUM": {

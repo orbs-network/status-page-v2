@@ -14,6 +14,9 @@ export function backgroundColorFromHealthLevel(healthLevel: HealthLevel, infra: 
     case HealthLevel.Gray: {
       return '#808080';
     }
+    case HealthLevel.Blue: {
+      return '#2196f3';
+    }
     default: {
       throw new Error(`Unsupported health level of ${healthLevel}`);
     }

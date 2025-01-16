@@ -40,6 +40,7 @@ export interface Configuration {
   // contracts
   NetworksContracts: { [key: string]: Contracts };
   xCoreUrl: string;
+  PatchZeus : boolean;
 }
 
 export enum NetworkType {
