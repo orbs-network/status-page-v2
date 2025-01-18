@@ -18,7 +18,7 @@ export const AppWrapper = React.memo(() => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             refreshStores();
-        }, 30000);
+        }, 10000);
 
         return () => clearInterval(intervalId);
     }, []);

@@ -53,6 +53,9 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
 
     const renderTimeLeft = ((updateTimestamp: string) => {
         const epoch = parseInt(updateTimestamp);
+        if (isNaN(epoch) || epoch==0) {
+            return "Updating now";
+        }
         const futureDate = new Date(epoch * 1000); // Convert from epoch seconds to milliseconds
         const currentDate = new Date();
 
@@ -60,7 +63,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
         const diffInSeconds = differenceInSeconds(futureDate, currentDate);
 
         // If the time has already passed, don't display anything
-        if (diffInSeconds <= 0) return "";
+        if (diffInSeconds <= 0) return "Updating now";
 
         // Format the time in HH:mm:ss
         const hours = Math.floor(diffInSeconds / 3600);
@@ -70,10 +73,12 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
         // Ensure two-digit formatting for hours, minutes, and seconds
         const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-        return formattedTime;
+        return "Updating in: "+formattedTime;
     });
 
     const servicesIcons = useMemo(() => {
+        setNodeServiceWithTimestamp(null);
+
         return nodeServices.map((nodeService, index) => {
             const serviceStatusOK = nodeService.Status === HealthLevel.Green;
             const serviceStatusUnknown = nodeService.Status === HealthLevel.Gray;
@@ -96,7 +101,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
 
             if (serviceName === "Controller" && nodeService.Status === HealthLevel.Blue) {
                 setNodeServiceWithTimestamp(nodeService);
-                tooltipText = timeLeft;
+                tooltipText = "";
             }
 
             return (
@@ -108,22 +113,19 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
                 </Tooltip>
             );
         });
-    }, [classes.link, nodeServices, serviceNames, nodeServiceWithTimestamp]);
+    }, [classes.link, nodeServices, serviceNames]);
 
     useEffect(() => {
-        if (nodeServiceWithTimestamp == null) return;
+        if (nodeServiceWithTimestamp == null) {
+            setTimeleft("");
+            return;
+        }
 
         const interval = setInterval(() => {
-            let tl = renderTimeLeft(nodeServiceWithTimestamp.StatusToolTip);
-            if (tl == "") {
-                tl = "Updating now";
-            } else {
-                tl = "Updating in: " + tl;
-            }
-            setTimeleft(tl);
+            setTimeleft(renderTimeLeft(nodeServiceWithTimestamp.StatusToolTip));
         }, 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [backgroundColor]);
 
     // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
     // TODO : O.L : Find a better solution
