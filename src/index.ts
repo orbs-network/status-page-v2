@@ -51,14 +51,14 @@ export function serve(config: Configuration) {
       for (const node of Object.values(body.AllRegisteredNodes)) {
         if (node.Name === 'Zeus') {
           node.NodeServices['Controller'].Status = HealthLevel.Blue;
-          node.NodeServices['Controller'].StatusToolTip = Date.now() / 1000 + 60 * 60 * 2;
+          node.NodeServices['Controller'].StatusToolTip = (Date.now() / 1000 + 60 * 60 * 2).toString();
         }
       }
 
       for (const node of Object.values(body.StandByNodes)) {
         if (node.Name === 'Zeus') {
           node.NodeServices['Controller'].Status = HealthLevel.Blue;
-          node.NodeServices['Controller'].StatusToolTip = Date.now() / 1000 + 60 * 60 * 2;
+          node.NodeServices['Controller'].StatusToolTip = (Date.now() / 1000 + 60 * 60 * 2).toString();
         }
       }
     }
