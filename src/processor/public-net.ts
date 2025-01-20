@@ -53,6 +53,23 @@ export async function updateModel(model: Model, config: Configuration) {
   // throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
 }
 
+function mergeGuardians(newGuardians: Guardians, oldGuardians: Guardians) {
+  for (const key in newGuardians) {
+    if (newGuardians.hasOwnProperty(key)) {
+      const newGuardian = newGuardians[key];
+      const existingGuardian = oldGuardians[newGuardian.EthAddress];
+      if (existingGuardian) {
+        oldGuardians[newGuardian.EthAddress] = {
+          ...newGuardian,
+          ...existingGuardian
+        };
+      } else {
+        oldGuardians[newGuardian.EthAddress] = newGuardian;
+      }
+    }
+  }
+}
+
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
   let rootNodeData;
 
@@ -107,11 +124,12 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   model.Timestamp = new Date().toISOString();
   model.VirtualChains = virtualChainList;
   model.Services = services;
-  model.CommitteeNodes = committeeMembers;
-  model.StandByNodes = standByMembers;
-  model.AllRegisteredNodes = _.mapValues(guardians, g => {
+  mergeGuardians (committeeMembers, model.CommitteeNodes);
+  mergeGuardians(standByMembers, model.StandByNodes);
+  const allRegisteredNodes = _.mapValues(guardians, g => {
     return copyGuardianForAllRegistered(g);
   });
+  mergeGuardians(allRegisteredNodes, model.AllRegisteredNodes);
 
   const web3 = await getWeb3Provider(config.EthereumEndpoints);
 

@@ -40,6 +40,8 @@ export const tracker = new FailedAttemptsTracker();
 export class Processor {
   private model = new Model();
   private monitors: Monitors;
+  private slowPart : number = 0;
+  private fastPart : number = 0;
 
   constructor(private config: Configuration) {
     this.monitors = new Monitors(this.config);
@@ -49,46 +51,57 @@ export class Processor {
     return this.model;
   }
 
+  finishedAtLeastOnce(): boolean {
+    return this.slowPart > 0 && this.fastPart > 0;
+  }
+  
+  async runFrequent() {
+    if (this.slowPart == 0) {
+      return;
+    }
+
+    const start = Date.now();
+    Logger.log('Processor: starting frequent flyer.');
+
+    this.fillInAllRegistered(this.model.AllRegisteredNodes, this.model.CommitteeNodes, this.model.StandByNodes, this.model.VirtualChains, this.model.Services);
+
+    // read all the different url-generated data
+    const tasks: Promise<any>[] = [];
+    tasks.push(...this.readNodesVirtualChains(this.model.CommitteeNodes, this.model.VirtualChains));
+    tasks.push(...this.readNodesVirtualChains(this.model.StandByNodes, this.model.VirtualChains));
+    tasks.push(...this.readNodesServices(this.model.CommitteeNodes, this.model.Services));
+    tasks.push(...this.readNodesServices(this.model.StandByNodes, this.model.Services));
+    tasks.push(...this.readNodesServices(this.model.AllRegisteredNodes, this.model.Services));
+    await Promise.all(tasks);
+    this.updateVCsColors(this.model.CommitteeNodes);
+    this.updateVCsColors(this.model.StandByNodes);
+
+    if (this.shouldSetCriticalAlert(this.model.AllRegisteredNodes)) this.model.CriticalAlert = true;
+    this.model.Statuses[StatusName.PingUrls] = await this.pingUrls();
+    this.model.Statuses[StatusName.Certs] = await this.certificateChecks();
+    Logger.log('Processor: finished query all nodes/vcs/services/urls.');
+    // monitoring
+    await this.monitors.run(this.model, this.model);
+    const end = Date.now();
+
+    Logger.log(`Processor: frequent flyer, took: ${end - start} ms`);
+
+    this.fastPart++;
+  }
+
   // single tick of the run loop
   async run() {
     try {
-      const start = Date.now();
       Logger.log('Processor: waking up do refresh model.');
 
-      const newModel = new Model();
       if (this.config.NetworkType === NetworkType.Public) {
-        await Public.updateModel(newModel, this.config);
+        await Public.updateModel(this.model, this.config);
       } else {
-        await Private.updateModel(newModel, this.config);
+        await Private.updateModel(this.model, this.config);
       }
       Logger.log('Processor: finished discovering nodes to query.');
 
-      this.fillInAllRegistered(newModel.AllRegisteredNodes, newModel.CommitteeNodes, newModel.StandByNodes, newModel.VirtualChains, newModel.Services);
-
-      // read all the different url-generated data
-      const tasks: Promise<any>[] = [];
-      tasks.push(...this.readNodesVirtualChains(newModel.CommitteeNodes, newModel.VirtualChains));
-      tasks.push(...this.readNodesVirtualChains(newModel.StandByNodes, newModel.VirtualChains));
-      tasks.push(...this.readNodesServices(newModel.CommitteeNodes, newModel.Services));
-      tasks.push(...this.readNodesServices(newModel.StandByNodes, newModel.Services));
-      tasks.push(...this.readNodesServices(newModel.AllRegisteredNodes, newModel.Services));
-      await Promise.all(tasks);
-      this.updateVCsColors(newModel.CommitteeNodes);
-      this.updateVCsColors(newModel.StandByNodes);
-
-      if (this.shouldSetCriticalAlert(newModel.AllRegisteredNodes)) newModel.CriticalAlert = true;
-      newModel.Statuses[StatusName.PingUrls] = await this.pingUrls();
-      newModel.Statuses[StatusName.Certs] = await this.certificateChecks();
-      Logger.log('Processor: finished query all nodes/vcs/services/urls.');
-      // monitoring
-      await this.monitors.run(this.model, newModel);
-
-      const end = Date.now();
-
-      Logger.log(`Processor: finished monitoring, took: ${end - start} ms`);
-
-      // update model
-      this.model = newModel;
+      this.slowPart++;
     } catch (e) {
       console.log (e);
       Logger.error(`Failed to update model, error: ${e}. Skipping ... `);

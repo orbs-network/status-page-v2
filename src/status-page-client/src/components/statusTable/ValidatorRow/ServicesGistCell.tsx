@@ -125,7 +125,7 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
             setTimeleft(renderTimeLeft(nodeServiceWithTimestamp.StatusToolTip));
         }, 1000);
         return () => clearInterval(interval);
-    }, [backgroundColor]);
+    }, [backgroundColor, nodeServiceWithTimestamp]);
 
     // DEV_NOTE : O.L : This 'borderRight:none' is a hack to prevent overflowX on large screens
     // TODO : O.L : Find a better solution
