@@ -8,21 +8,27 @@ interface IProps {
 }
 
 export const NodeServiceStatusCell = React.memo<IProps>((props) => {
-    const {nodeService, serviceName} = props;
+    const { nodeService, serviceName } = props;
 
-  return (
-    <StatusCell
-      serviceName={serviceName}
-      healthLevel={nodeService.Status}
-      title={nodeService.StatusMsg}
-      titleLink={nodeService.URLs.Status}
-      subTitle={nodeService.Version}
-      subTitleLink={nodeService.URLs.Version}
-      tooltip={nodeService.StatusToolTip}
-      statusLink={nodeService.URLs.Status}
-      logsLink={nodeService.URLs.Logs}
-      metricsLink={nodeService.URLs.Metrics}
-      statusSpec = {nodeService.StatusSpec}
-    />
-  );
+    // Add default values or fallbacks for nested properties
+    const status = nodeService?.Status ?? "Unknown";
+    const statusMsg = nodeService?.StatusMsg ?? "No message available";
+    const urls = nodeService?.URLs || {};
+    const version = nodeService?.Version ?? "Unknown";
+
+    return (
+        <StatusCell
+            serviceName={serviceName}
+            healthLevel={status}
+            title={statusMsg}
+            titleLink={urls.Status}
+            subTitle={version}
+            subTitleLink={urls.Version}
+            tooltip={nodeService?.StatusToolTip ?? ""}
+            statusLink={urls.Status}
+            logsLink={urls.Logs}
+            metricsLink={urls.Metrics}
+            statusSpec={nodeService?.StatusSpec}
+        />
+    );
 });
