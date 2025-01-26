@@ -88,7 +88,12 @@ export const ServicesGistCell = React.memo<IProps>((props) => {
         return nodeServices.map((nodeService, index) => {
             const serviceStatusOK = nodeService.Status === HealthLevel.Green;
             const serviceStatusUnknown = nodeService.Status === HealthLevel.Gray;
-            const serviceName = serviceNames[index]; // TODO : O.L : Merge data objects
+            let serviceName;
+            try {
+                serviceName = serviceNames[index]; // TODO : O.L : Merge data objects
+            } catch (e) {
+                serviceName = "Unknown";
+            }
             let tooltipText = nodeService.StatusToolTip;
 
             // Clear tooltipText only for the matching nodeService

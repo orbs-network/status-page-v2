@@ -67,6 +67,7 @@ export const StatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
   const {serviceName, healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, metricsLink, statusLink, statusSpec } = props;
   const backgroundColor = backgroundColorFromHealthLevel(healthLevel, !serviceName || !serviceName.startsWith('vm-'));
+
   const titleComponent = useMemo(() => {
     let baseComponent = <Typography variant={'caption'}>{newlineCommas(title)}</Typography>;
     let finalComponent;
@@ -119,17 +120,6 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
   }, [classes.link, statusLink]);
 
-  if (title=="N/A" || title=="offline") {
-    return (
-      <TableCell
-        className={classes.cell}
-        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
-      >
-        <Typography variant={'caption'}>{title}</Typography>
-      </TableCell>
-    );
-  }
-
   const renderStatusSpec = useMemo(() => {
     if (!statusSpec || typeof statusSpec !== 'object') {
       return null;
@@ -178,6 +168,17 @@ export const StatusCell = React.memo<IProps>((props) => {
       return null;
     }
   }, [classes.link, metricsLink]);
+
+  if (title=="N/A" || title=="offline") {
+    return (
+      <TableCell
+        className={classes.cell}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
+      >
+        <Typography variant={'caption'}>{title}</Typography>
+      </TableCell>
+    );
+  }
 
   // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (

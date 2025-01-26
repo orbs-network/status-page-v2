@@ -1,6 +1,7 @@
 import React from 'react';
 import { NodeService } from '../../../../../model/model';
 import { StatusCell } from './StatusCell';
+import {MyErrorBoundary} from "../../../MyErrorBoundary";
 
 interface IProps {
   nodeService: NodeService;

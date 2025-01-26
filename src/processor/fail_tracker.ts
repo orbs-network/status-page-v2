@@ -60,6 +60,9 @@ export class FailedAttemptsTracker {
         this.failedAttempts.delete(url);
         return {res : false, err : null};
       }
+    } else {
+        // No last attempt recorded, proceed with checking
+        return {res : false, err : null};
     }
 
     // Failures reached max threshold and not enough time has passed
