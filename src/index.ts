@@ -20,7 +20,7 @@ import cloneDeep from 'lodash/cloneDeep';
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import cors from "cors";
-import {Guardian, HealthLevel} from "./model/model";
+import {Guardian, HealthLevel, Model} from "./model/model";
 
 export function serve(config: Configuration) {
   const processor = new Processor(config);
@@ -39,6 +39,11 @@ export function serve(config: Configuration) {
 
   app.get('/json', cors(), (_request, response) => {
 
+    if (!processor.finishedAtLeastOnce()) {
+        response.status(200).json(new Model ());
+        return
+    }
+
     const model = processor.getModel();
 
     const body = cloneDeep( model);
@@ -49,16 +54,16 @@ export function serve(config: Configuration) {
 
     if (config.PatchZeus) {
       for (const node of Object.values(body.AllRegisteredNodes)) {
-        if (node.Name === 'Zeus') {
+        if (node.Name === 'Zeus' && node.NodeServices['Controller']) {
           node.NodeServices['Controller'].Status = HealthLevel.Blue;
-          node.NodeServices['Controller'].StatusToolTip = Date.now() / 1000 + 60 * 60 * 2;
+          node.NodeServices['Controller'].StatusToolTip = (Date.now() / 1000 + 60 * 60 * 2).toString();
         }
       }
 
       for (const node of Object.values(body.StandByNodes)) {
-        if (node.Name === 'Zeus') {
+        if (node.Name === 'Zeus' && node.NodeServices['Controller']) {
           node.NodeServices['Controller'].Status = HealthLevel.Blue;
-          node.NodeServices['Controller'].StatusToolTip = Date.now() / 1000 + 60 * 60 * 2;
+          node.NodeServices['Controller'].StatusToolTip = (Date.now() / 1000 + 60 * 60 * 2).toString();
         }
       }
     }
@@ -148,6 +153,8 @@ export function serve(config: Configuration) {
 
   const processorTask = new TaskLoop(() => processor.run(), config.ProcessorPollTimeSeconds * 1000);
   processorTask.start();
+  const processorTaskFrequentFlyer = new TaskLoop(() => processor.runFrequent(), config.ProcessorPollTimeSeconds * 1000);
+  processorTaskFrequentFlyer.start();
 
   const port = config.Port
   const server = app.listen(port, '0.0.0.0', () =>
@@ -155,6 +162,7 @@ export function serve(config: Configuration) {
   );
   server.on('close', () => {
     processorTask.stop();
+    processorTaskFrequentFlyer.stop();
   });
   return server;
 }

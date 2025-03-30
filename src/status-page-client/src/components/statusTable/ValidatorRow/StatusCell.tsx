@@ -67,6 +67,7 @@ export const StatusCell = React.memo<IProps>((props) => {
   const classes = useStyles();
   const {serviceName, healthLevel, title, subTitle, tooltip, titleLink, subTitleLink, logsLink, metricsLink, statusLink, statusSpec } = props;
   const backgroundColor = backgroundColorFromHealthLevel(healthLevel, !serviceName || !serviceName.startsWith('vm-'));
+
   const titleComponent = useMemo(() => {
     let baseComponent = <Typography variant={'caption'}>{newlineCommas(title)}</Typography>;
     let finalComponent;
@@ -119,34 +120,26 @@ export const StatusCell = React.memo<IProps>((props) => {
     }
   }, [classes.link, statusLink]);
 
-  if (title=="N/A" || title=="offline") {
-    return (
-      <TableCell
-        className={classes.cell}
-        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
-      >
-        <Typography variant={'caption'}>{title}</Typography>
-      </TableCell>
-    );
-  }
-
   const renderStatusSpec = useMemo(() => {
-    if (statusSpec) {
-      return (
-        <ul className={classes.spec}>
-          {Object.keys(statusSpec).map(function (key) {
-            return (
-              <li key={key} className={classes.specItem}>
-                 <Typography className={classes.specItemName}>{key}:</Typography>
-                    <Typography className={classes.specItemValue}>{statusSpec[key]}</Typography>
-              </li>
-            );
-          })}
-        </ul>
-      );
+    if (!statusSpec || typeof statusSpec !== 'object') {
+      return null;
     }
-    return null;
-  }, [statusSpec, classes.spec, classes.specItem, classes.specItemName, classes.specItemValue]);
+    if (!classes || !classes.spec || !classes.specItem || !classes.specItemName || !classes.specItemValue) {
+      console.error('Classes object is missing required properties.');
+      return null;
+    }
+
+    return (
+        <ul className={classes.spec}>
+          {Object.keys(statusSpec).map((key) => (
+              <li key={key} className={classes.specItem}>
+                <Typography className={classes.specItemName}>{key}:</Typography>
+                <Typography className={classes.specItemValue}>{statusSpec[key]}</Typography>
+              </li>
+          ))}
+        </ul>
+    );
+  }, [statusSpec, classes]);
 
   const logsIcon = useMemo(() => {
     if (logsLink) {
@@ -175,6 +168,17 @@ export const StatusCell = React.memo<IProps>((props) => {
       return null;
     }
   }, [classes.link, metricsLink]);
+
+  if (title=="N/A" || title=="offline") {
+    return (
+      <TableCell
+        className={classes.cell}
+        style={{ backgroundColor, maxWidth: isLongCell(title) ? '180px' : '50px', minWidth: isLongCell(title) ? '180px' : '50px' }}
+      >
+        <Typography variant={'caption'}>{title}</Typography>
+      </TableCell>
+    );
+  }
 
   // DEV_NOTE : O.L : maxWidth: 0 causes the cell to not expand over the width of the header cell (and so, allowing the ttuncation to work).
   return (

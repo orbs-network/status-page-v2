@@ -70,3 +70,4 @@ typings/
 .idea
 /jordan.env
 *.run.xml
+/prod.env

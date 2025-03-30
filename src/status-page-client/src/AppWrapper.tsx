@@ -11,17 +11,22 @@ configureMobx();
 export const AppWrapper = React.memo(() => {
     const stores = getStores();
 
-    const refreshStores = () => {
-        stores.statusStore.fetchAndSetStatus();
-    };
-
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            refreshStores();
-        }, 10000);
+        // Define the interval function
+        const fetchStatus = () => {
+            if (stores?.statusStore?.fetchAndSetStatus) {
+                stores.statusStore.fetchAndSetStatus();
+            } else {
+                console.warn('fetchAndSetStatus is not available');
+            }
+        };
 
-        return () => clearInterval(intervalId);
-    }, []);
+        // Set up the interval
+        const interval = setInterval(fetchStatus, 5000); // Run every 5 seconds
+
+        // Cleanup the interval on component unmount
+        return () => clearInterval(interval);
+    }, [stores]); // Recreate the interval if `stores` changes
 
     return (
         <Router>
