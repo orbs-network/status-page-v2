@@ -23,6 +23,7 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
   const committeeNodes = statusStore?.statusModel?.CommitteeNodes;
   const standByNodes = statusStore?.statusModel?.StandByNodes;
   const allRegisteredNodes = statusStore?.statusModel?.AllRegisteredNodes;
+  const isDevMode = new URLSearchParams(window.location.search).has('dev');
   
   return (
     <Page>
@@ -39,18 +40,27 @@ export const StatusPage = observer<React.FunctionComponent<IProps>>((props) => {
         expandedServices={expandedServices || []}
         committeeValidators={
           !showAllRegistered ?
-            (committeeNodes ? Object.values(committeeNodes) : []) : // regular view
-            ([]) // in 'Show All Registered' the committee is always empty
+                (committeeNodes ? Object.values(committeeNodes).filter(node => {
+                    const services = Object.values(node.NodeServices);
+                    return !services.every(service => service.Status === "Yellow");})  : []) : // regular view
+                        ([]) // in 'Show All Registered' the committee is always empty
         }
         standByValidators={
           !showAllRegistered ?
-            (standByNodes ? Object.values(standByNodes) : []) : // regular view
-            (allRegisteredNodes ? Object.values(allRegisteredNodes) : []) // in 'Show All Registered' everybody is standby
+                (standByNodes ? Object.values(standByNodes).filter(node => {
+                    const services = Object.values(node.NodeServices);
+                    return !services.every(service => service.Status === "Yellow");
+                }) : []) : // regular view
+                (allRegisteredNodes ? (
+                    isDevMode
+                        ? Object.values(allRegisteredNodes)
+                        : Object.values(allRegisteredNodes).filter(node => node.EffectiveStake > 0)
+                ) : [])
         }
         isShowAllRegistered={showAllRegistered}
       />
       <br/>
-      <Button variant="outlined" onClick={onClick}>{showAllRegistered ? 'Show Current Validators' : 'Show All Registered'}</Button>
+      <Button variant="outlined" onClick={onClick}>{showAllRegistered ? 'Show Live Validators' : 'Show All Validators'}</Button>
     </Page>
   );
 });
