@@ -232,46 +232,27 @@ export class Processor {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
 
       if ((err.message.includes("404") && service.Name === "Controller")) {
-
         // Check if the sibling Boyar is yellow, make this one yellow as well so the whole node is yellow.
-        if (node.NodeServices["Boyar"]?.Status === HealthLevel.Yellow) {
+        if (node.NodeServices["Boyar"]?.StatusMsg === "N/A") {
             console.log (`Controller is down, but Boyar is yellow. Setting Controller to yellow as well , for node ${node.Name} (${node.Ip})`);
 
-            return nodeServiceBuilder(
-                urls,
-                `N/A`,
-                HealthLevel.Yellow,
-                `N/A`
-            );
+            return nodeServiceBuilder(urls,`N/A`,HealthLevel.Yellow,`N/A`);
         }
 
-        return nodeServiceBuilder(
-          urls,
-          `N/A`,
-          HealthLevel.Green,
-          `N/A`
-        );
+        return nodeServiceBuilder(urls,`N/A`,HealthLevel.Green,`N/A`);
       }
 
       if ((err.message.includes("404") && service.Name === "Boyar")) {
         // Check if the sibling Controller is green, make this one green as well since it's a new node which has a controller instead of boyar.
-        if (node.NodeServices["Controller"]?.Status === HealthLevel.Green) {
+        if (node.NodeServices["Controller"]?.StatusMsg === "N/A") {
             console.log (`Controller is green, setting Boyar to green as well for node ${node.Name} (${node.Ip})`);
 
-            return nodeServiceBuilder(
-                urls,
-                `N/A`,
-                HealthLevel.Green,
-                `N/A`
-            );
+            return nodeServiceBuilder(urls,`N/A`,HealthLevel.Yellow,`N/A`);
+        } else {
+            return nodeServiceBuilder(urls,`N/A`,HealthLevel.Green,`N/A`);
         }
 
-        return nodeServiceBuilder(
-          urls,
-          `N/A`,
-          HealthLevel.Yellow,
-          `N/A`
-        );
+         return nodeServiceBuilder(urls,`N/A`,HealthLevel.Yellow,`N/A`);
       }
 
       return nodeServiceBuilder(
