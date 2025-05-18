@@ -17,7 +17,7 @@ process.on('uncaughtException', function (err) {
 });
 
 try {
-  Logger.log('Status service started.');
+  Logger.log('Status service started ...');
   const config = parseArgs(process.argv);
   Logger.log(`Input config: '${JSON.stringify(config)}'.`);
   const server = serve(config);
