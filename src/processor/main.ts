@@ -231,11 +231,40 @@ export class Processor {
     } catch (err) {
       Logger.error(`Error while attempting to fetch status of Node Service ${service.Name} of ${node.Name}(${node.Ip}): ${err}`);
 
-      if ((err.message.includes("404") && service.Name === "Controller") || (err.message.includes("404") && service.Name === "Boyar")) {
+      if ((err.message.includes("404") && service.Name === "Controller")) {
+        // Check if the sibling Boyar is yellow, make this one yellow as well so the whole node is yellow.
+        if (node.NodeServices["Boyar"]?.Status === HealthLevel.Yellow) {
+            return nodeServiceBuilder(
+                urls,
+                `N/A`,
+                HealthLevel.Yellow,
+                `N/A`
+            );
+        }
+
         return nodeServiceBuilder(
           urls,
           `N/A`,
           HealthLevel.Green,
+          `N/A`
+        );
+      }
+
+      if ((err.message.includes("404") && service.Name === "Boyar")) {
+        // Check if the sibling Controller is green, make this one green as well since it's a new node which has a controller instead of boyar.
+        if (node.NodeServices["Controller"]?.Status === HealthLevel.Green) {
+            return nodeServiceBuilder(
+                urls,
+                `N/A`,
+                HealthLevel.Green,
+                `N/A`
+            );
+        }
+
+        return nodeServiceBuilder(
+          urls,
+          `N/A`,
+          HealthLevel.Yellow,
           `N/A`
         );
       }
