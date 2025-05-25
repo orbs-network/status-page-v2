@@ -53,18 +53,46 @@ export async function updateModel(model: Model, config: Configuration) {
   // throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
 }
 
+function deepMergeWithArrayReplace<T>(target: T, source: Partial<T>): T {
+  if (Array.isArray(source)) {
+    return [...source] as any;
+  }
+
+  if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
+    const result: any = {...target};
+    for (const key of Object.keys(source) as (keyof T)[]) {
+      const sourceVal = source[key];
+
+      // If sourceVal is undefined, skip
+      if (sourceVal === undefined) continue;
+
+      const targetVal = target[key];
+
+      if (Array.isArray(sourceVal)) {
+        result[key] = [...sourceVal];
+      } else if (typeof sourceVal === 'object' && sourceVal !== null && typeof targetVal === 'object' && targetVal !== null) {
+        result[key] = deepMergeWithArrayReplace(targetVal, sourceVal as Partial<any>);
+      } else {
+        result[key] = sourceVal;
+      }
+    }
+    return result;
+  }
+
+  return source as T;
+}
+
 function mergeGuardians(newGuardians: Guardians, oldGuardians: Guardians) {
   for (const key in newGuardians) {
     if (newGuardians.hasOwnProperty(key)) {
       const newGuardian = newGuardians[key];
-      const existingGuardian = oldGuardians[newGuardian.EthAddress];
+      const ethAddress = newGuardian.EthAddress;
+      const existingGuardian = oldGuardians[ethAddress];
+
       if (existingGuardian) {
-        oldGuardians[newGuardian.EthAddress] = {
-          ...newGuardian,
-          ...existingGuardian
-        };
+        oldGuardians[ethAddress] = deepMergeWithArrayReplace(existingGuardian, newGuardian);
       } else {
-        oldGuardians[newGuardian.EthAddress] = newGuardian;
+        oldGuardians[ethAddress] = newGuardian;
       }
     }
   }
