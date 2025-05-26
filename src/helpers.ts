@@ -75,7 +75,7 @@ export async function fetchJson(url: string): Promise<JsonResponse> {
 
             let response = null;
             try {
-                response = await fetch(url, {timeout: 5000});
+                response = await fetch(url, {timeout: 10000}); // long response time for far east nodes
             } catch (e) {
                 if (attempt == 3) {
                     tracker.recordAttempt(url, false, e);
