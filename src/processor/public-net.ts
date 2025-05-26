@@ -53,25 +53,33 @@ export async function updateModel(model: Model, config: Configuration) {
   // throw new Error(`Error while creating Status Page, readData failed for all network nodes.`);
 }
 
-function deepMergeWithArrayReplace<T>(target: T, source: Partial<T>): T {
-  if (Array.isArray(source)) {
-    return [...source] as any;
-  }
-
-  if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
-    const result: any = {...target};
+function deepMergeWithNetworkSet<T>(target: T, source: Partial<T>): T {
+  if (
+    typeof source === 'object' &&
+    source !== null &&
+    typeof target === 'object' &&
+    target !== null
+  ) {
+    const result: any = { ...target };
     for (const key of Object.keys(source) as (keyof T)[]) {
       const sourceVal = source[key];
-
-      // If sourceVal is undefined, skip
       if (sourceVal === undefined) continue;
 
       const targetVal = target[key];
 
-      if (Array.isArray(sourceVal)) {
-        result[key] = [...sourceVal];
-      } else if (typeof sourceVal === 'object' && sourceVal !== null && typeof targetVal === 'object' && targetVal !== null) {
-        result[key] = deepMergeWithArrayReplace(targetVal, sourceVal as Partial<any>);
+      if (key === "Network" && Array.isArray(sourceVal)) {
+        const existing = Array.isArray(targetVal) ? targetVal : [];
+        const combined = Array.from(new Set([...existing, ...sourceVal]));
+        result[key] = combined;
+      } else if (
+        typeof sourceVal === 'object' &&
+        sourceVal !== null &&
+        typeof targetVal === 'object' &&
+        targetVal !== null &&
+        !Array.isArray(sourceVal) &&
+        !Array.isArray(targetVal)
+      ) {
+        result[key] = deepMergeWithNetworkSet(targetVal, sourceVal as Partial<any>);
       } else {
         result[key] = sourceVal;
       }
@@ -90,7 +98,7 @@ function mergeGuardians(newGuardians: Guardians, oldGuardians: Guardians) {
       const existingGuardian = oldGuardians[ethAddress];
 
       if (existingGuardian) {
-        oldGuardians[ethAddress] = deepMergeWithArrayReplace(existingGuardian, newGuardian);
+        oldGuardians[ethAddress] = deepMergeWithNetworkSet(existingGuardian, newGuardian);
       } else {
         oldGuardians[ethAddress] = newGuardian;
       }

@@ -75,7 +75,7 @@ export async function fetchJson(url: string): Promise<JsonResponse> {
 
             let response = null;
             try {
-                response = await fetch(url, {timeout: 15000});
+                response = await fetch(url, {timeout: 5000});
             } catch (e) {
                 if (attempt == 3) {
                     tracker.recordAttempt(url, false, e);
@@ -102,6 +102,6 @@ export async function fetchJson(url: string): Promise<JsonResponse> {
                 throw err;
             }
         },
-        {retries: 3, delay: 300}
+        {retries: 2, delay: 300}
     );
 }
