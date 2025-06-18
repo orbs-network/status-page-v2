@@ -329,3 +329,14 @@ export interface ExchangeEntry {
   provider: string;
   lastUpdatedTimestamp: number;
 }
+
+// function to save model to redis.
+
+export function saveModelToRedis(model: Model): void {
+  let json = JSON.stringify(model);
+
+  const Redis = require('ioredis');
+  const redis = new Redis("redis://localhost:6379");
+
+  redis.set('statusPageModel', json);
+}

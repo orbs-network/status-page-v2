@@ -31,7 +31,10 @@ async function readTotalStakeByChain(web3: any, contracts: Contracts) {
 export async function getEthereumContractsStatus(numOfCertifiedGuardiansInCommittee:number, resources:OrbsEthResrouces, web3:any, config:Configuration, totalWeight: number, rewardsRate: number): Promise<EthereumStatus>  {
     const { block, data } = await read(resources, web3);
 
+    console.log ("before getPastEvents, block:", block, "network:", await web3.eth.getChainId(), "data:", data);
     const events = await resources.stakingContract.getPastEvents('allEvents', {fromBlock: block.number-10000, toBlock: 'latest'});
+    console.log ("after getPastEvents, events.length:", events.length);
+
     let lastEventTime = 0;
     const chainName = await getChainName(web3);
 
