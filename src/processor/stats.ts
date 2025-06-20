@@ -161,15 +161,6 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
 
     console.log ("Done !!!");
 
-    // quit js complete terminate.
-
-    web3.currentProvider.disconnect();
-    console.log("web3 disconnected");
-    await redis.quit();
-    console.log("redis disconnected");
-    console.log("All connections closed, exiting process.");
-    process.exit(0);
-
     return {
         PosData: {
             Header: {

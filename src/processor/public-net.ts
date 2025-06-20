@@ -29,7 +29,7 @@ export async function updateModel(model: Model, config: Configuration) {
 
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
-      //await readData(model, rootNodeEndpoint, config);
+      await readData(model, rootNodeEndpoint, config);
       await readDataMatic(model, rootNodeEndpoint, config);
       const AllRegisteredNodesEth = model.AllRegisteredNodes;
 
