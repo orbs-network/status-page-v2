@@ -24,7 +24,7 @@ const ADVISORS = "0x574d48b2ec0a5e968adb77636656672327402634";
 const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUNDING_PARTNERS, ADVISORS];
 
 //const maxPace = 16_000_000;
-const maxPace = 2000000;
+const maxPace = 300000;
 //const maxPace = 400000;
 //const maxPace = 10000;// working
 //const maxPace = 360000;
