@@ -419,6 +419,7 @@ export async function readEventsWithPersistence(filter: (string[] | string | und
     const guardianAddress = extractGuardianAddress(filter);
     console.log('Redis key:', key);
     console.log('Guardian address:', guardianAddress);
+    console.log("Filter topics:", filter);
 
     // Try to get cached data from Redis
     const cachedData = await getEventsFromRedis(key);
@@ -441,6 +442,7 @@ export async function readEventsWithPersistence(filter: (string[] | string | und
                 guardianAddress,
                 startBlock,
                 endBlock,
+                filter
             });
 
             return mergedEvents;
@@ -460,6 +462,7 @@ export async function readEventsWithPersistence(filter: (string[] | string | und
         guardianAddress,
         startBlock,
         endBlock,
+        filter
     });
 
     return events;
@@ -468,6 +471,7 @@ export async function readEventsWithPersistence(filter: (string[] | string | und
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function readEvents(filter: (string[] | string | undefined)[], contract: any, web3: any, startBlock: number, endBlock: number, pace: number) {
     try {
+        //startBlock = endBlock;
         console.log('\x1b[36m%s\x1b[0m', `read events for network id: ${await web3.eth.getChainId()} from block ${startBlock} to ${endBlock} pace: ${pace}`);
         const options = { topics: filter, fromBlock: startBlock, toBlock: endBlock };
         return await contract.getPastEvents('allEvents', options);
