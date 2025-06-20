@@ -110,7 +110,7 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
     const startBlock = await getBlockInfo(block.number - THIRTY_DAYS_IN_BLOCKS, web3);
     const timePeriodSeconds = block.time - startBlock.time;
 
-    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, maxPace);
+    const transferEvents = await readEventsWithPersistence([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, maxPace);
     const dailyNumberOfTransfers = (transferEvents.length * 86400) / (timePeriodSeconds);
     let totalTransfers = new BigNumber(0);
     for (const event of transferEvents) {
@@ -119,7 +119,7 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
     const dailyAmountOfTransfers = totalTransfers.times(new BigNumber(86400)).dividedToIntegerBy(new BigNumber(timePeriodSeconds))
 
     // Staked
-    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, maxPace);
+    const stakeEvents = await readEventsWithPersistence([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, maxPace);
     const stakers: { [key: string]: BigNumber } = {};
     for (const event of stakeEvents) {
         const address = String(event.returnValues.stakeOwner).toLowerCase();
@@ -128,7 +128,7 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
     }
 
     // Rewards
-    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, maxPace);
+    const rewardsAllocEvents = await readEventsWithPersistence([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, maxPace);
     let totalAllocatedRewards = new BigNumber(0);
     for (const event of rewardsAllocEvents) {
         totalAllocatedRewards = totalAllocatedRewards.plus(new BigNumber(event.returnValues.allocatedRewards));
