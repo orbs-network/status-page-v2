@@ -425,7 +425,7 @@ export async function readEventsWithPersistence(filter: (string[] | string | und
     const cachedData = await getEventsFromRedis(key);
 
     if (cachedData) {
-        console.log('Found cached data in Redis');
+        console.log('Found cached data in Redis, total events:', cachedData.events.length);
         // If the cached end block is less than current end block, fetch new events
         if (cachedData.endBlock < endBlock) {
             console.log('Fetching new events from block', cachedData.endBlock + 1);
