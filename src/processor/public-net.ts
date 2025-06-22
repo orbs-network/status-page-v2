@@ -30,6 +30,7 @@ export async function updateModel(model: Model, config: Configuration) {
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
       await readData(model, rootNodeEndpoint, config);
+      await readDataMatic(model, rootNodeEndpoint, config);
       const AllRegisteredNodesEth = model.AllRegisteredNodes;
 
       Logger.log(`Successfully readData from ${rootNodeEndpoint}`);
@@ -106,6 +107,7 @@ function mergeGuardians(newGuardians: Guardians, oldGuardians: Guardians) {
   }
 }
 
+// @ts-ignore
 async function readData(model: Model, rootNodeEndpoint: string, config: Configuration) {
   let rootNodeData;
 
@@ -274,6 +276,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
 
   if (web3) {
     const resources = await getResources(rootNodeData, web3);
+    Logger.log(`Reading PoS status for Matic network id: ${await web3.eth.getChainId()}`);
     const pos = await getPoSStatus(model, resources, web3);
     model.PoSDataMatic = pos.PosData;
 
@@ -287,6 +290,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
       const rewardsRate = parseInt(await resources.stakingRewardsContract.methods.getCurrentStakingRewardsRatePercentMille().call()) / 100000;
 
       const numberOfCertifiedInCommittee = _.size(_.pickBy(committeeMembers, g => g.IsCertified));
+
       model.Statuses[StatusName.MaticContracts] = await getEthereumContractsStatus(
         numberOfCertifiedInCommittee,
         resources,
@@ -295,6 +299,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
         totalWeight,
         rewardsRate
       );
+
     } catch (e) {
       model.Statuses[StatusName.MaticContracts] = generateErrorEthereumContractsStatus(`Error while attempting to fetch Matic status data: ${e.stack}`);
       Logger.error(model.Statuses[StatusName.MaticContracts].StatusToolTip);

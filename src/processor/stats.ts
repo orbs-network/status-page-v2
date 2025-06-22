@@ -9,8 +9,12 @@
 import _ from 'lodash';
 import BigNumber from 'bignumber.js';
 import { aggregate } from '@makerdao/multicall';
-import {Guardians, Model} from '../model/model';
-import {BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstMaticPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic} from './eth-helper';
+import { Guardians, Model } from '../model/model';
+import { BlockTimestamp, CHAIN_ID, FirstPoSv2BlockNumber, FirstMaticPoSv2BlockNumber, FirstRewardsBlockNumber, getBlockInfo, multicallToBlockInfo, OrbsEthResrouces, Topics, addressToTopic } from './eth-helper';
+import Redis from 'ioredis';
+import crypto from 'crypto';
+import zlib from 'zlib';
+import { promisify } from 'util';
 
 const THIRTY_DAYS_IN_BLOCKS = 45000;
 
@@ -21,23 +25,154 @@ const TEAM_AND_FOUNDING_PARTNERS = "0xc200f98f3c088b868d80d8eb0aeb9d7ee18d604b";
 const ADVISORS = "0x574d48b2ec0a5e968adb77636656672327402634";
 const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUNDING_PARTNERS, ADVISORS];
 
-const maxPace = 4000000;
+//const maxPace = 16_000_000;
+const maxPace = 300000;
+//const maxPace = 400000;
+//const maxPace = 10000;// working
+//const maxPace = 360000;
+//const maxPace = 10000;
+// const maxPace = 80000;
 
-async function sumUnlocked(wallets: string[], resources:OrbsEthResrouces)  {
+// Redis configuration options
+const REDIS_ENABLED = process.env.REDIS_ENABLED !== 'false'; // Default to true unless explicitly set to 'false'
+const REDIS_COMPRESSION_ENABLED = process.env.REDIS_COMPRESSION_ENABLED !== 'false'; // Default to true unless explicitly set to 'false'
+
+// Promisify zlib functions for async/await usage
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
+
+// Helper function to parse REDIS_URL
+function parseRedisUrl(redisUrl: string) {
+    try {
+        const url = new URL(redisUrl);
+        return {
+            host: url.hostname,
+            port: parseInt(url.port) || 6379,
+            password: url.password || undefined,
+            tls: url.protocol === 'rediss:' ? { rejectUnauthorized: false } : undefined
+        };
+    } catch (error) {
+        console.error('Error parsing REDIS_URL:', error);
+        return null;
+    }
+}
+
+// Initialize Redis client only if Redis is enabled
+let redis: Redis.Redis | null = null;
+if (REDIS_ENABLED) {
+    let redisConfig;
+
+    // Check if REDIS_URL is provided (Heroku format)
+    if (process.env.REDIS_URL) {
+        console.log('Using REDIS_URL configuration');
+        const parsedConfig = parseRedisUrl(process.env.REDIS_URL);
+        if (parsedConfig) {
+            redisConfig = parsedConfig;
+        } else {
+            console.error('Failed to parse REDIS_URL, falling back to individual config');
+            redisConfig = {
+                host: process.env.REDIS_HOST || 'localhost',
+                port: 6379,
+                password: process.env.REDIS_PWD || 'your_redis_password_here',
+                tls: {
+                    rejectUnauthorized: false // Ignore certificate verification
+                }
+            };
+        }
+    } else {
+        console.log('Using individual Redis configuration');
+        redisConfig = {
+            host: process.env.REDIS_HOST || 'localhost',
+            port: 6379,
+            password: process.env.REDIS_PWD || 'your_redis_password_here',
+            tls: {
+                rejectUnauthorized: false // Ignore certificate verification
+            }
+        };
+    }
+
+    redis = new Redis(redisConfig);
+    console.log(`Redis enabled: ${REDIS_ENABLED}, Compression enabled: ${REDIS_COMPRESSION_ENABLED}`);
+} else {
+    console.log('Redis disabled - caching will be skipped');
+}
+
+// Helper function to compress data with gzip and encode as base64
+async function compressData(data: any): Promise<string> {
+    if (!REDIS_COMPRESSION_ENABLED) {
+        return JSON.stringify(data);
+    }
+
+    const jsonString = JSON.stringify(data);
+    const compressed = await gzip(jsonString);
+    return compressed.toString('base64');
+}
+
+// Helper function to decompress data from base64 gzip
+async function decompressData(compressedData: string): Promise<any> {
+    if (!REDIS_COMPRESSION_ENABLED) {
+        return JSON.parse(compressedData);
+    }
+
+    const compressed = Buffer.from(compressedData, 'base64');
+    const decompressed = await gunzip(compressed);
+    return JSON.parse(decompressed.toString());
+}
+
+// Helper function to calculate hash key
+function calculateHashKey(contractAddress: string, web3Host: string, filter: (string[] | string | undefined)[]): string {
+    const dataToHash = JSON.stringify({
+        contractAddress,
+        web3Host,
+        filter
+    });
+    return crypto.createHash('sha256').update(dataToHash).digest('hex');
+}
+
+// Helper function to store events data in Redis
+async function storeEventsInRedis(key: string, data: any) {
+    if (!REDIS_ENABLED || !redis) {
+        console.log('Redis is disabled, skipping storage');
+        return;
+    }
+
+    const compressedData = await compressData(data);
+    await redis.set(key, compressedData);
+}
+
+// Helper function to get events data from Redis
+async function getEventsFromRedis(key: string): Promise<any | null> {
+    if (!REDIS_ENABLED || !redis) {
+        console.log('Redis is disabled, returning null');
+        return null;
+    }
+
+    const compressedData = await redis.get(key);
+    if (!compressedData) return null;
+
+    try {
+        return await decompressData(compressedData);
+    } catch (error) {
+        console.error('Error decompressing data from Redis:', error);
+        return null;
+    }
+}
+
+async function sumUnlocked(wallets: string[], resources: OrbsEthResrouces) {
     let sum = new BigNumber(0)
 
-    for (const w of wallets){
-        try{            
+    for (const w of wallets) {
+        try {
             const status = await resources.stakingContract.methods.getUnstakeStatus(w).call()
             sum = sum.plus(status.cooldownAmount)
-        }catch(e){
+        } catch (e) {
             console.error(`fail to call getUnstakeStatus on ${w}`, e)
         }
     }
     return sum;
-    
+
 }
-export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3:any) {
+export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, web3: any) {
     const { block, data } = await read(resources, web3);
 
     const chainId = await web3.eth.getChainId();
@@ -48,8 +183,10 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     for (let guardian of Object.keys(model.AllRegisteredNodes)) {
         guardian = "0x" + guardian;
         const leftDelegators = [];
-        const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, maxPace)
-        delegationEvents.sort((a: any, b: any) => {return b.blockNumber - a.blockNumber})
+        console.log(`\x1b[36m%s\x1b[0m`, `read delegation events for guardian: ${guardian} on network id: ${chainId}`);
+        //const delegationEvents = await readEvents([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, maxPace);
+        const delegationEvents = await readEventsWithPersistence([[Topics.DelegateStakeChanged], addressToTopic(guardian)], resources.delegationContract, web3, firstPosBlock, block.number, maxPace);
+        delegationEvents.sort((a: any, b: any) => { return b.blockNumber - a.blockNumber })
         for (const event of delegationEvents) {
             const delegatorAddress = event.returnValues.delegator;
             const stake = new BigNumber(event.returnValues.delegatorContributedStake).dividedBy('1e18').toNumber();
@@ -62,7 +199,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     // calc total UNLOCKED of NON_CIRCULATING_WALLETS
     const unlockedNonCirculating = await sumUnlocked(NON_CIRCULATING_WALLETS, resources);
     console.log(`chainId: ${chainId}`)
-    console.log(`stakingContract Address: ${resources.stakingAddress}`)    
+    console.log(`stakingContract Address: ${resources.stakingAddress}`)
     console.log("total ORBS non circulating wallets unlocked in cooldown: ", unlockedNonCirculating.dividedBy('1e18').toNumber())
 
     // Token
@@ -73,7 +210,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     const startBlock = await getBlockInfo(block.number - THIRTY_DAYS_IN_BLOCKS, web3);
     const timePeriodSeconds = block.time - startBlock.time;
 
-    const transferEvents = await readEvents([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, maxPace);
+    const transferEvents = await readEventsWithPersistence([Topics.Transfer], resources.erc20Contract, web3, startBlock.number, block.number, maxPace);
     const dailyNumberOfTransfers = (transferEvents.length * 86400) / (timePeriodSeconds);
     let totalTransfers = new BigNumber(0);
     for (const event of transferEvents) {
@@ -82,8 +219,8 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     const dailyAmountOfTransfers = totalTransfers.times(new BigNumber(86400)).dividedToIntegerBy(new BigNumber(timePeriodSeconds))
 
     // Staked
-    const stakeEvents = await readEvents([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, maxPace);
-    const stakers: {[key:string]: BigNumber} = {};
+    const stakeEvents = await readEventsWithPersistence([[Topics.Staked, Topics.Restaked, Topics.Unstaked, Topics.MigratedStake]], resources.stakingContract, web3, FirstPoSv2BlockNumber, block.number, maxPace);
+    const stakers: { [key: string]: BigNumber } = {};
     for (const event of stakeEvents) {
         const address = String(event.returnValues.stakeOwner).toLowerCase();
         const amount = new BigNumber(event.returnValues.totalStakedAmount);
@@ -91,18 +228,18 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     }
 
     // Rewards
-    const rewardsAllocEvents = await readEvents([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, maxPace);
+    const rewardsAllocEvents = await readEventsWithPersistence([[Topics.StakingRewardsAllocated]], resources.stakingRewardsContract, web3, FirstRewardsBlockNumber, block.number, maxPace);
     let totalAllocatedRewards = new BigNumber(0);
     for (const event of rewardsAllocEvents) {
         totalAllocatedRewards = totalAllocatedRewards.plus(new BigNumber(event.returnValues.allocatedRewards));
     }
 
     // committee
-    const committeeAddresses:string[] = [];
-    const committeeWeights:number[] = [];
-    const committeeCerts:boolean[] = [];
-    const committeeOrbsAddresses:string[] = [];
-    const committeeIps:string[] = [];
+    const committeeAddresses: string[] = [];
+    const committeeWeights: number[] = [];
+    const committeeCerts: boolean[] = [];
+    const committeeOrbsAddresses: string[] = [];
+    const committeeIps: string[] = [];
     let totalWeight = 0;
     let totalCertWeight = 0;
     let nCert = 0;
@@ -121,6 +258,8 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
     });
     const standbyAddresses = _.map(model.StandByNodes, standByGuardian => '0x' + standByGuardian.EthAddress)
     const allAddresses = _.map(model.AllRegisteredNodes, guardian => '0x' + guardian.EthAddress)
+
+    console.log("Done !!!");
 
     return {
         PosData: {
@@ -143,7 +282,7 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
                 StakedTokens: data[TotalStaked].minus(data[UncappedStaked]).toFixed(),
                 UnstakedTokens: data[Erc20Staked].minus(data[TotalStaked]).toFixed(),
                 NumberOfAllPastStakers: _.size(stakers),
-                NumberOfActiveStakers: _.size(_.map(_.pickBy(stakers, (d) => {return !d.isZero()}), v => v))
+                NumberOfActiveStakers: _.size(_.map(_.pickBy(stakers, (d) => { return !d.isZero() }), v => v))
             },
             RewardsAndFeeData: {
                 CurrentStakingRewardPrecentMille: data[StakeingRewardRate].toNumber(),
@@ -159,11 +298,11 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
             DelegationData: delegatorMap,
             CommitteeData: {
                 CommitteeMembersData: {
-                  Committee: committeeAddresses,
-                  Weights: committeeWeights,
-                  Certification: committeeCerts,
-                  OrbsAddresses: committeeOrbsAddresses,
-                  Ips: committeeIps,
+                    Committee: committeeAddresses,
+                    Weights: committeeWeights,
+                    Certification: committeeCerts,
+                    OrbsAddresses: committeeOrbsAddresses,
+                    Ips: committeeIps,
                 },
                 CommitteeSize: _.size(model.CommitteeNodes),
                 CertifiedComitteeSize: nCert,
@@ -183,9 +322,9 @@ export async function getPoSStatus(model:Model, resources:OrbsEthResrouces, web3
             supplyInCirculation: supplyInCirculation.toFixed(),
             totalSupply: data[Erc20TotalSupply].toFixed(),
             decimals: "18",
-            block : block.number,
+            block: block.number,
             blockTimestamp: block.time,
-            updatedAt : new Date(block.time * 1000).toISOString()
+            updatedAt: new Date(block.time * 1000).toISOString()
         }
     }
 }
@@ -230,14 +369,14 @@ const DelegationStakeTotal = 'DelegationStakeTotal';
 const MulticallContractAddress = '0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441'
 const MaticMulticallContractAddress = '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507'
 
-export async function read(resources:OrbsEthResrouces, web3:any) {
-	let config;
-	const chainId = await web3.eth.getChainId()
+export async function read(resources: OrbsEthResrouces, web3: any) {
+    let config;
+    const chainId = await web3.eth.getChainId()
 
-	if (chainId === CHAIN_ID.ETHEREUM)
-    	config = { web3, multicallAddress: MulticallContractAddress};
-	else if (chainId === CHAIN_ID.MATIC)
-    	config = { web3, multicallAddress: MaticMulticallContractAddress};
+    if (chainId === CHAIN_ID.ETHEREUM)
+        config = { web3, multicallAddress: MulticallContractAddress };
+    else if (chainId === CHAIN_ID.MATIC)
+        config = { web3, multicallAddress: MaticMulticallContractAddress };
 
     const nowTime = Math.floor(Date.now() / 1000) + 13; // time component needs to be "not in past"
 
@@ -261,7 +400,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             target: resources.erc20Address,
             call: ['balanceOf(address)(uint256)', TEAM_AND_FOUNDING_PARTNERS],
             returns: [[Erc20TeamAndFounding, (v: BigNumber.Value) => new BigNumber(v)]]
-        },        {
+        }, {
             target: resources.erc20Address,
             call: ['balanceOf(address)(uint256)', ADVISORS],
             returns: [[Erc20Advisors, (v: BigNumber.Value) => new BigNumber(v)]]
@@ -280,7 +419,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             target: resources.stakingAddress,
             call: ['getStakeBalanceOf(address)(uint256)', TEAM_AND_FOUNDING_PARTNERS],
             returns: [[StakingTeamAndFounding, (v: BigNumber.Value) => new BigNumber(v)]]
-        },        {
+        }, {
             target: resources.stakingAddress,
             call: ['getStakeBalanceOf(address)(uint256)', ADVISORS],
             returns: [[StakingAdvisors, (v: BigNumber.Value) => new BigNumber(v)]]
@@ -294,11 +433,11 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
             target: resources.delegationsAddress,
             call: ['uncappedDelegatedStake(address)(uint256)', VOID_ADDR],
             returns: [[UncappedStaked, (v: BigNumber.Value) => new BigNumber(v)]]
-        },        {
+        }, {
             target: resources.erc20Address,
             call: ['balanceOf(address)(uint256)', resources.stakingAddress],
             returns: [[Erc20Staked, (v: BigNumber.Value) => new BigNumber(v)]]
-        },        {
+        }, {
             target: resources.stakingRewardsAddress,
             call: ['getCurrentStakingRewardsRatePercentMille()(uint256)'],
             returns: [[StakeingRewardRate, (v: BigNumber.Value) => new BigNumber(v)]]
@@ -346,7 +485,7 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
         {
             target: resources.stakingRewardsAddress,
             call: ['getStakingRewardsState()(uint96,uint96)'],
-            returns: [[StakeingRewardPerWeight, (v: BigNumber.Value) => new BigNumber(v)],[StakeingRewardUnclaimed, (v: BigNumber.Value) => new BigNumber(v)]]
+            returns: [[StakeingRewardPerWeight, (v: BigNumber.Value) => new BigNumber(v)], [StakeingRewardUnclaimed, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
             target: resources.delegationsAddress,
@@ -360,28 +499,98 @@ export async function read(resources:OrbsEthResrouces, web3:any) {
     ];
 
     const r = await aggregate(calls, config);
-    return { block: multicallToBlockInfo(r), data: r.results.transformed};
+    return { block: multicallToBlockInfo(r), data: r.results.transformed };
+}
+
+// Helper function to extract guardian address from filter
+function extractGuardianAddress(filter: (string[] | string | undefined)[]): string | undefined {
+    // The guardian address is passed as the second element in the filter array
+    // and it's converted to a topic using addressToTopic
+    const guardianTopic = filter[1];
+    if (typeof guardianTopic === 'string' && guardianTopic.length === 66) { // Topic length is 66 (0x + 64 chars)
+        // Convert back from topic format by taking the last 40 characters and adding 0x prefix
+        return '0x' + guardianTopic.slice(26);
+    }
+    return undefined;
+}
+
+export async function readEventsWithPersistence(filter: (string[] | string | undefined)[], contract: any, web3: any, startBlock: number, endBlock: number, pace: number) {
+    const key = calculateHashKey(contract._address, web3._provider.host, filter);
+    const guardianAddress = extractGuardianAddress(filter);
+    console.log('Redis key:', key, 'Guardian address:', guardianAddress, 'filter:', JSON.stringify(filter));
+
+    // Try to get cached data from Redis
+    const cachedData = await getEventsFromRedis(key);
+
+    if (cachedData) {
+        console.log('Found cached data in Redis, total events:', cachedData.events.length);
+        // If the cached end block is less than current end block, fetch new events
+        if (cachedData.endBlock < endBlock) {
+            console.log('Fetching new events from block', cachedData.endBlock + 1, 'to', endBlock);
+            const newEvents = await readEvents(filter, contract, web3, cachedData.endBlock + 1, endBlock, pace);
+
+            // Merge cached and new events
+            const mergedEvents = [...cachedData.events, ...newEvents];
+
+            // Always store updated data in Redis
+            console.log(`Storing updated data in Redis: ${mergedEvents.length} events, key: ${key}`);
+            await storeEventsInRedis(key, {
+                events: mergedEvents,
+                contractAddress: contract._address,
+                web3ProviderUrl: web3._provider.host,
+                guardianAddress,
+                startBlock,
+                endBlock,
+                filter
+            });
+
+            return mergedEvents;
+        }
+
+        return cachedData.events;
+    }
+
+    // If no cached data, fetch all events and store in Redis
+    console.log('No cached data found, fetching all events');
+    const events = await readEvents(filter, contract, web3, startBlock, endBlock, pace);
+
+    // Always store data in Redis
+    console.log(`Storing data in Redis: ${events.length} events`);
+    await storeEventsInRedis(key, {
+        events,
+        contractAddress: contract._address,
+        web3ProviderUrl: web3._provider.host,
+        guardianAddress,
+        startBlock,
+        endBlock,
+        filter
+    });
+
+    return events;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function readEvents(filter: (string[] | string | undefined)[], contract:any, web3:any, startBlock: number, endBlock: number, pace: number) {
+export async function readEvents(filter: (string[] | string | undefined)[], contract: any, web3: any, startBlock: number, endBlock: number, pace: number) {
     try {
-        const options = {topics: filter, fromBlock: startBlock, toBlock: endBlock};
+        //startBlock = endBlock;
+        console.log('\x1b[36m%s\x1b[0m', `read events for network id: ${await web3.eth.getChainId()} from block ${startBlock} to ${endBlock} pace: ${pace}`);
+        const options = { topics: filter, fromBlock: startBlock, toBlock: endBlock };
         return await contract.getPastEvents('allEvents', options);
     } catch (e) {
-        pace = Math.round(pace*0.9);
+        pace = Math.round(pace * 0.9);
         if (pace <= 100) {
             throw new Error(`looking for events slowed down below ${pace} - fail`)
         }
-        //console.log('\x1b[36m%s\x1b[0m', `read events slowing down to ${pace}`);
+        console.log('\x1b[36m%s\x1b[0m', `read events slowing down to ${pace} , for network id: ${await web3.eth.getChainId()} from block ${startBlock} to ${endBlock}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const results:any = [];
-        for(let i = startBlock; i < endBlock; i+=pace) {
-            const currentEnd = i+pace > endBlock ? endBlock : i+pace;
-            results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace/10));
+        const results: any = [];
+        for (let i = startBlock; i < endBlock; i += pace) {
+            const currentEnd = i + pace > endBlock ? endBlock : i + pace;
+            // results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace/10));
+            results.push(...await readEvents(filter, contract, web3, i, currentEnd, pace));
             pace = maxPace;
         }
-        //console.log('\x1b[36m%s\x1b[0m', `read events slowing down ended`);
+        console.log('\x1b[36m%s\x1b[0m', `read events slowing end ${pace} , for network id: ${await web3.eth.getChainId()} from block ${startBlock} to ${endBlock}`);
         return results;
     }
 }
