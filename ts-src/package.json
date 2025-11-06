@@ -1,0 +1,31 @@
+{
+  "name": "cmc-circulation",
+  "version": "1.0.0",
+  "description": "sums CB bal + team share bal for circulation testing",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Josh-Kohn123/CMC-In-Circulation.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Josh-Kohn123/CMC-In-Circulation/issues"
+  },
+  "homepage": "https://github.com/Josh-Kohn123/CMC-In-Circulation#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@coinbase-sample/prime-sdk-ts": "^0.7.1",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "web3": "^4.16.0",
+    "web3-utils": "^4.3.3"
+  }
+}
