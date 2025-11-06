@@ -1,36 +1,44 @@
 import 'dotenv/config';
 import { CoinbasePrimeClientWithServices } from '@coinbase-sample/prime-sdk-ts';
 
-async function getOrbsBalance(): Promise<number | undefined> {
-  // Load the portfolio ID from environment
+type Balance = { symbol?: string; amount?: string | number };
+
+export async function getOrbsBalance(): Promise<number> {
   const portId = process.env.PRIME_PORTFOLIO_ID;
-  if (!portId) {
-    throw new Error("Missing environment variable: PRIME_PORTFOLIO_ID");
-  }
+  if (!portId) throw new Error("Missing env var PRIME_PORTFOLIO_ID");
 
-  // Initialize the Coinbase Prime client using credentials from the environment
-  const client = CoinbasePrimeClientWithServices.fromEnv("PRIME_CREDENTIALS");
-
-  // Fetch portfolio balances
+  const client = CoinbasePrimeClientWithServices.fromEnv();
   const resp = await client.balances.listPortfolioBalances({ portfolioId: portId });
 
-  // Find ORBS balance
-  for (const b of resp.balances) {
-    if (b.symbol?.toLowerCase() === "orbs") {
-      return parseFloat(b.amount);
-    }
+  const balances: Balance[] = Array.isArray((resp as any)?.balances)
+    ? (resp as any).balances
+    : [];
+
+  const orbs = balances.find(b => (b.symbol ?? '').toLowerCase() === 'orbs');
+  if (!orbs) throw new Error("ORBS balance not found in Coinbase response");
+
+  const amount =
+    typeof orbs.amount === 'string'
+      ? parseFloat(orbs.amount)
+      : typeof orbs.amount === 'number'
+      ? orbs.amount
+      : NaN;
+
+  if (!Number.isFinite(amount)) {
+    throw new Error("Invalid ORBS balance value");
   }
 
-  // Return undefined if ORBS not found
-  return undefined;
+  return amount;
 }
 
-// Example usage
+
+// run file directly
 (async () => {
   try {
-    const balance = await getOrbsBalance();
-    console.log("ORBS balance:", balance);
-  } catch (err) {
-    console.error("Error fetching balance:", err);
+    const v = await getOrbsBalance();
+    console.log('ORBS balance:', v);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
   }
 })();

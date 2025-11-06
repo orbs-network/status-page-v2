@@ -1,5 +1,6 @@
-import { getCbOrbsBalance } from './get_cb_orbs_balance';
-import { getTeamBalanceInStaking } from './contract_parser';
+import { getOrbsBalance } from './get_cb_orbs_balance';
+import { getTeamBalanceInStaking, getWalletOrbsBalance} from './contract_parser';
+
 
 /**
  * Calculates the non-circulating supply of ORBS tokens by summing:
@@ -8,11 +9,12 @@ import { getTeamBalanceInStaking } from './contract_parser';
  */
 
 export async function calcNoncirculatingSupply(): Promise<number> {
-  const [coinbaseBalance, teamStakingTotal] = await Promise.all([
-    getCbOrbsBalance(),
+  const [coinbaseBalance, teamStakingTotal, stakingWalletBalance] = await Promise.all([
+    getOrbsBalance(),
     getTeamBalanceInStaking(),
+    getWalletOrbsBalance()
   ]);
-  const nonCirculating = coinbaseBalance + teamStakingTotal;
+  const nonCirculating = coinbaseBalance + teamStakingTotal + stakingWalletBalance;
   return nonCirculating;
 }
 
