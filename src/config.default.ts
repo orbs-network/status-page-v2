@@ -35,7 +35,7 @@ export const defaultConfiguration: Configuration = {
   MaticRootNodeEndpoint: process.env.MaticRootNodeEndpoint || '',
   EthereumEndpoints: [String(process.env.ETHEREUM_ENDPOINT)],
   MaticEndpoints: [String(process.env.MATIC_ENDPOINT)],
-  MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400,
+  MaxTimeSinceLastEvent: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*2,
   MaxTimeSinceLastEventMatic: Number(process.env.MAX_TIME_SECONDS_SINCE_LAST_EVENT) || 86400*3,
   xCoreUrl:"http://0xcore.orbs.com/services/management-service/status",
   PatchZeus: process.env.PATCH_ZEUS === "true" || false,
