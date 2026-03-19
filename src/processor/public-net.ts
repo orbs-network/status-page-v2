@@ -30,15 +30,14 @@ export async function updateModel(model: Model, config: Configuration) {
   for (const rootNodeEndpoint of rootNodeEndpoints) {
     try {
       await readData(model, rootNodeEndpoint, config);
-      await readDataMatic(model, rootNodeEndpoint, config);
-      const AllRegisteredNodesEth = model.AllRegisteredNodes;
+      const allRegisteredNodesEthIsCertified = _.mapValues(model.AllRegisteredNodes, node => node.IsCertified);
 
       Logger.log(`Successfully readData from ${rootNodeEndpoint}`);
 
       await readDataMatic(model, rootNodeEndpoint, config);
       // override IsCertified with ETH IsCertified (always false in Polygon)
       for (const node in model.AllRegisteredNodes) {
-        const isCertifiedEth = AllRegisteredNodesEth[node].IsCertified;
+        const isCertifiedEth = allRegisteredNodesEthIsCertified[node] || false;
         model.AllRegisteredNodes[node].IsCertified = model.AllRegisteredNodes[node].IsCertified || isCertifiedEth;
         if (model.CommitteeNodes[node]) model.CommitteeNodes[node].IsCertified = model.CommitteeNodes[node].IsCertified || isCertifiedEth;
         if (model.StandByNodes[node]) model.StandByNodes[node].IsCertified = model.StandByNodes[node].IsCertified || isCertifiedEth;
@@ -244,11 +243,14 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
   );
   standByMembers = _.pick(guardians, standbyMembersAddresses);
 
+  const mergeNetworks = (existing: string[], incoming: string[]) =>
+    Array.from(new Set([...(existing || []), ...(incoming || [])]));
+
   committeeMembersAddresses.forEach(addr => {
     if (!(addr in model.CommitteeNodes)) {
       model.CommitteeNodes[addr] = committeeMembers[addr];
     } else if (model.CommitteeNodes[addr].OrbsAddress === committeeMembers[addr].OrbsAddress) {
-      model.CommitteeNodes[addr].Network = model.CommitteeNodes[addr].Network.concat(committeeMembers[addr].Network);
+      model.CommitteeNodes[addr].Network = mergeNetworks(model.CommitteeNodes[addr].Network, committeeMembers[addr].Network);
     }
   });
 
@@ -256,7 +258,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
     if (!(addr in model.StandByNodes)) {
       model.StandByNodes[addr] = standByMembers[addr];
     } else if (model.StandByNodes[addr].OrbsAddress === standByMembers[addr].OrbsAddress) {
-      model.StandByNodes[addr].Network = model.StandByNodes[addr].Network.concat(standByMembers[addr].Network);
+      model.StandByNodes[addr].Network = mergeNetworks(model.StandByNodes[addr].Network, standByMembers[addr].Network);
     }
   });
 
@@ -268,7 +270,7 @@ async function readDataMatic(model: Model, rootNodeEndpoint: string, config: Con
     if (!(addr in model.AllRegisteredNodes)) {
       model.AllRegisteredNodes[addr] = allRegisteredNodes[addr];
     } else if (model.AllRegisteredNodes[addr].OrbsAddress === allRegisteredNodes[addr].OrbsAddress) {
-      model.AllRegisteredNodes[addr].Network = model.AllRegisteredNodes[addr].Network.concat(allRegisteredNodes[addr].Network);
+      model.AllRegisteredNodes[addr].Network = mergeNetworks(model.AllRegisteredNodes[addr].Network, allRegisteredNodes[addr].Network);
     }
   });
 
