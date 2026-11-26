@@ -24,6 +24,10 @@ const PRIVATE_SALE = "0x1bef7f8798256e033eaa42f005d2b53079b90ffe";
 const TEAM_AND_FOUNDING_PARTNERS = "0xc200f98f3c088b868d80d8eb0aeb9d7ee18d604b";
 const ADVISORS = "0x574d48b2ec0a5e968adb77636656672327402634";
 const NON_CIRCULATING_WALLETS = [LONG_TERM_RESERVES, PRIVATE_SALE, TEAM_AND_FOUNDING_PARTNERS, ADVISORS];
+// Burn program: tokens are first collected in BURN_STAGING_WALLET, then sent to BURN_ADDRESS to be burned.
+// Staging balance is non-circulating; BURN_ADDRESS balance is removed from total supply (and therefore from circulation).
+const BURN_STAGING_WALLET = "0x189a5caf060b94961f0d4f3e56ad0d678ebb6c12";
+const BURN_ADDRESS = "0x000000000000000000000000000000000000dead";
 
 //const maxPace = 16_000_000;
 const maxPace = 300000;
@@ -203,7 +207,11 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
     console.log("total ORBS non circulating wallets unlocked in cooldown: ", unlockedNonCirculating.dividedBy('1e18').toNumber())
 
     // Token
-    const supplyInCirculation = data[Erc20TotalSupply]
+    // Burned tokens (held by BURN_ADDRESS) no longer count toward total supply.
+    const burnedSupply: BigNumber = data[Erc20BurnAddress];
+    const totalSupply = data[Erc20TotalSupply].minus(burnedSupply);
+    const supplyInCirculation = totalSupply
+        .minus(data[Erc20BurnStaging])
         .minus(data[Erc20LongTerm]).minus(data[Erc20PrivateSale]).minus(data[Erc20TeamAndFounding]).minus(data[Erc20Advisors])
         .minus(data[StakingLongTerm]).minus(data[StakingPrivateSale]).minus(data[StakingTeamAndFounding]).minus(data[StakingAdvisors]).minus(unlockedNonCirculating);
 
@@ -315,12 +323,14 @@ export async function getPoSStatus(model: Model, resources: OrbsEthResrouces, we
                 TotalDelegatedStake: data[DelegationStakeTotal].toFixed(),
             }
         },
+        // internal only (not part of any endpoint response): used to compute maxSupply for /exchanges/data
+        BurnedSupply: burnedSupply.toFixed(),
         SupplyData: {
             contract: resources.erc20Address,
             stakingContract: resources.stakingAddress,
-            nonCirculatingWallets: NON_CIRCULATING_WALLETS,
+            nonCirculatingWallets: [...NON_CIRCULATING_WALLETS, BURN_STAGING_WALLET, BURN_ADDRESS],
             supplyInCirculation: supplyInCirculation.toFixed(),
-            totalSupply: data[Erc20TotalSupply].toFixed(),
+            totalSupply: totalSupply.toFixed(),
             decimals: "18",
             block: block.number,
             blockTimestamp: block.time,
@@ -345,6 +355,8 @@ const Erc20LongTerm = 'Erc20LongTerm';
 const Erc20PrivateSale = 'Erc20PrivateSale';
 const Erc20TeamAndFounding = 'Erc20TeamAndFounding';
 const Erc20Advisors = 'Erc20Advisors';
+const Erc20BurnStaging = 'Erc20BurnStaging';
+const Erc20BurnAddress = 'Erc20BurnAddress';
 const StakingLongTerm = 'StakingLongTerm';
 const StakingPrivateSale = 'StakingPrivateSale';
 const StakingTeamAndFounding = 'StakingTeamAndFounding';
@@ -404,6 +416,16 @@ export async function read(resources: OrbsEthResrouces, web3: any) {
             target: resources.erc20Address,
             call: ['balanceOf(address)(uint256)', ADVISORS],
             returns: [[Erc20Advisors, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.erc20Address,
+            call: ['balanceOf(address)(uint256)', BURN_STAGING_WALLET],
+            returns: [[Erc20BurnStaging, (v: BigNumber.Value) => new BigNumber(v)]]
+        },
+        {
+            target: resources.erc20Address,
+            call: ['balanceOf(address)(uint256)', BURN_ADDRESS],
+            returns: [[Erc20BurnAddress, (v: BigNumber.Value) => new BigNumber(v)]]
         },
         {
             target: resources.stakingAddress,

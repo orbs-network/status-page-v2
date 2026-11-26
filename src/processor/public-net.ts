@@ -23,6 +23,7 @@ const EthWriterStatusSuffix = '/services/ethereum-writer/status';
 const MaticReaderStatusSuffix = '/services/matic-reader/status';
 
 let validSupplyInCirculation = '';
+let validBurnedSupply = '0';
 
 export async function updateModel(model: Model, config: Configuration) {
   const rootNodeEndpoints = config.RootNodeEndpoints;
@@ -180,6 +181,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
       pos = await getPoSStatus(model, resources, web3);
       model.SupplyData = pos.SupplyData;
       validSupplyInCirculation = model.SupplyData.supplyInCirculation;
+      validBurnedSupply = pos.BurnedSupply;
       model.PoSData = pos.PosData;
 
       model.EthDelegators = _.mapValues(pos.PosData.DelegationData, delegators => {
@@ -214,7 +216,7 @@ async function readData(model: Model, rootNodeEndpoint: string, config: Configur
   // calc exchange data regardless if contract fetch was successful
     if (validSupplyInCirculation.length) {
       try {
-        model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation);
+        model.Exchanges.Upbit = await getUpbitInfo(validSupplyInCirculation, validBurnedSupply);
       } catch (e) {
         Logger.error('Failed to fetch Upbit data')
         model.Exchanges.Upbit = {error: 'Failed to fetch Upbit data'};
@@ -490,7 +492,9 @@ async function calcReputation(url: string, committeeMembers: Guardians) {
   });
 }
 
-async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]> {
+const MAX_SUPPLY = new BigNumber(10_000_000_000);
+
+async function getUpbitInfo(circulatingSupply: string, burnedSupply: string): Promise<ExchangeEntry[]> {
   // TODO: first draft
   const url = 'https://api.upbit.com/v1/ticker?markets=KRW-ORBS%2CUSDT-BTC%2CBTC-ORBS';
   const idrUrl = 'https://id-api.upbit.com/v1/ticker?markets=IDR-BTC';
@@ -508,6 +512,8 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
   const sgdOrbs = new BigNumber(sgdBtc).multipliedBy(btcOrbs).toNumber();
   const thbOrbs = new BigNumber(thbBtc).multipliedBy(btcOrbs).toNumber();
   const normCirculatingSupply = new BigNumber(circulatingSupply).dividedBy(1e18);
+  // max supply shrinks by every token sent to the burn address
+  const maxSupply = MAX_SUPPLY.minus(new BigNumber(burnedSupply).dividedBy(1e18)).toNumber();
 
   return [
     {
@@ -517,7 +523,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       marketCap: normCirculatingSupply.multipliedBy(krwOrbs).toNumber(),
       accTradePrice24h: null,
       circulatingSupply: Number(normCirculatingSupply),
-      maxSupply: 10000000000,
+      maxSupply,
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     },
@@ -528,7 +534,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       marketCap: normCirculatingSupply.multipliedBy(usdtOrbs).toNumber(),
       accTradePrice24h: null,
       circulatingSupply: Number(normCirculatingSupply),
-      maxSupply: 10000000000,
+      maxSupply,
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     },
@@ -539,7 +545,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       marketCap: normCirculatingSupply.multipliedBy(isdrOrbs).toNumber(),
       accTradePrice24h: null,
       circulatingSupply: Number(normCirculatingSupply),
-      maxSupply: 10000000000,
+      maxSupply,
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     },
@@ -550,7 +556,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       marketCap: normCirculatingSupply.multipliedBy(sgdOrbs).toNumber(),
       accTradePrice24h: null,
       circulatingSupply: Number(normCirculatingSupply),
-      maxSupply: 10000000000,
+      maxSupply,
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     },
@@ -561,7 +567,7 @@ async function getUpbitInfo(circulatingSupply: string): Promise<ExchangeEntry[]>
       marketCap: normCirculatingSupply.multipliedBy(thbOrbs).toNumber(),
       accTradePrice24h: null,
       circulatingSupply: Number(normCirculatingSupply),
-      maxSupply: 10000000000,
+      maxSupply,
       provider: 'ORBS Ltd.',
       lastUpdatedTimestamp: Date.now()
     }
